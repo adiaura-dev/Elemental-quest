@@ -267,6 +267,19 @@ function setProfileText(field, value) {
   if (profileFields[field]) profileFields[field].textContent = value;
 }
 
+/* Works out an element's group and period from the table layout */
+function getElementPosition(number) {
+  if (lanthanides.includes(number)) return { group: "f-block", period: 6 };
+  if (actinides.includes(number)) return { group: "f-block", period: 7 };
+
+  for (let row = 0; row < periodicRows.length; row++) {
+    const column = periodicRows[row].indexOf(number);
+    if (column !== -1) return { group: column + 1, period: row + 1 };
+  }
+
+  return { group: "—", period: "—" };
+}
+
 function selectElement(number) {
   const element = byNumber(number);
   if (!element) return;
@@ -274,10 +287,7 @@ function selectElement(number) {
   selectedElement = number;
   const family = getFamily(number);
   const familyName = familyNames[family];
-const position = {
-  group: element.group ?? "—",
-  period: element.period ?? "—"
-};
+  const position = getElementPosition(number);
   const profile = elementProfiles[number];
 
   document.querySelectorAll(".element").forEach(tile => {
@@ -592,97 +602,66 @@ function finishQuiz() {
 if (startQuizButton) startQuizButton.addEventListener("click", startQuiz);
 if (nextQuestionButton) nextQuestionButton.addEventListener("click", nextQuizQuestion);
 /* =========================================
-   8. BOSS FIGHT QUESTION BANK
+   8. BOSS FIGHT QUESTION SETS
+   3 sets of 10 questions. Each battle picks a random set
+   (never the same set twice in a row) and shuffles it.
    ========================================= */
 
-const bossQuestions = [
+const BOSS_SETS = [
   {
-    question: "An element has atomic number 6. Which element is it?",
-    options: ["Oxygen", "Carbon", "Nitrogen", "Boron"],
-    answer: 1,
-    explanation: "Carbon has atomic number 6."
+    name: "Symbols & Numbers",
+    questions: [
+      { question: "An element has atomic number 6. Which element is it?", options: ["Oxygen", "Carbon", "Nitrogen", "Boron"], answer: 1, explanation: "Carbon has atomic number 6." },
+      { question: "Which symbol belongs to Potassium?", options: ["P", "Pt", "K", "Po"], answer: 2, explanation: "Potassium's symbol is K, from its Latin name Kalium." },
+      { question: "Which element has 11 protons?", options: ["Magnesium", "Neon", "Sodium", "Aluminium"], answer: 2, explanation: "An element with 11 protons has atomic number 11: Sodium." },
+      { question: "An element has atomic number 20. Which element is it?", options: ["Potassium", "Calcium", "Scandium", "Argon"], answer: 1, explanation: "Calcium has atomic number 20." },
+      { question: "Which element has the symbol Ag?", options: ["Gold", "Argon", "Silver", "Aluminium"], answer: 2, explanation: "Ag is Silver, from the Latin word Argentum." },
+      { question: "Which element has the symbol Fe?", options: ["Fluorine", "Iron", "Fermium", "Francium"], answer: 1, explanation: "Fe is Iron, from the Latin word Ferrum." },
+      { question: "What is the chemical symbol for Lead?", options: ["Le", "Ld", "Pb", "Pl"], answer: 2, explanation: "Lead's symbol is Pb, from the Latin word Plumbum." },
+      { question: "An atom has 17 protons. What is its atomic number?", options: ["16", "18", "17", "34"], answer: 2, explanation: "Atomic number is the number of protons. Here it is 17." },
+      { question: "Which element has the symbol Au?", options: ["Silver", "Gold", "Argon", "Aluminium"], answer: 1, explanation: "Au is Gold, from the Latin word Aurum." },
+      { question: "Which element has atomic number 1?", options: ["Helium", "Hydrogen", "Lithium", "Oxygen"], answer: 1, explanation: "Hydrogen is element number 1, the lightest element." }
+    ]
   },
   {
-    question: "Which symbol belongs to Potassium?",
-    options: ["P", "Pt", "K", "Po"],
-    answer: 2,
-    explanation: "Potassium's symbol is K."
+    name: "Families & the Table",
+    questions: [
+      { question: "An element is in Group 18. Which family does it belong to?", options: ["Halogens", "Noble gases", "Alkali metals", "Metalloids"], answer: 1, explanation: "Group 18 contains the noble gases." },
+      { question: "Which element is in the same group as Oxygen?", options: ["Sulfur", "Nitrogen", "Fluorine", "Neon"], answer: 0, explanation: "Oxygen and Sulfur are both in Group 16." },
+      { question: "Which of these is an alkali metal?", options: ["Calcium", "Lithium", "Chlorine", "Argon"], answer: 1, explanation: "Lithium belongs to Group 1, the alkali metals." },
+      { question: "Which pair contains two halogens?", options: ["Fluorine and Chlorine", "Sodium and Potassium", "Helium and Neon", "Carbon and Silicon"], answer: 0, explanation: "Fluorine and Chlorine are both Group 17 halogens." },
+      { question: "Which noble gas has atomic number 10?", options: ["Argon", "Helium", "Neon", "Krypton"], answer: 2, explanation: "Neon has atomic number 10 and belongs to Group 18." },
+      { question: "What do elements in the same period have in common?", options: ["The same number of electron shells", "The same number of protons", "Identical chemical properties", "The same family name"], answer: 0, explanation: "Elements in the same period have the same number of occupied electron shells." },
+      { question: "What is Group 2 of the periodic table called?", options: ["Alkali metals", "Alkaline earth metals", "Halogens", "Noble gases"], answer: 1, explanation: "Group 2 elements, like Magnesium and Calcium, are the alkaline earth metals." },
+      { question: "Which of these elements is a metalloid?", options: ["Silicon", "Sodium", "Oxygen", "Neon"], answer: 0, explanation: "Silicon is a metalloid, with properties between metals and non-metals." },
+      { question: "How many periods (rows) does the periodic table have?", options: ["7", "8", "18", "10"], answer: 0, explanation: "The periodic table has 7 periods." },
+      { question: "How many groups (columns) does the periodic table have?", options: ["7", "12", "18", "20"], answer: 2, explanation: "The periodic table has 18 groups." }
+    ]
   },
   {
-    question: "An element is in Group 18. Which family does it belong to?",
-    options: ["Halogens", "Noble gases", "Alkali metals", "Metalloids"],
-    answer: 1,
-    explanation: "Group 18 contains the noble gases."
-  },
-  {
-    question: "Which element has 11 protons?",
-    options: ["Magnesium", "Neon", "Sodium", "Aluminium"],
-    answer: 2,
-    explanation: "An element with 11 protons has atomic number 11: Sodium."
-  },
-  {
-    question: "Which element is in the same group as Oxygen?",
-    options: ["Sulfur", "Nitrogen", "Fluorine", "Neon"],
-    answer: 0,
-    explanation: "Oxygen and Sulfur are both in Group 16."
-  },
-  {
-    question: "Which of these is an alkali metal?",
-    options: ["Calcium", "Lithium", "Chlorine", "Argon"],
-    answer: 1,
-    explanation: "Lithium belongs to Group 1, the alkali metals."
-  },
-  {
-    question: "An atom has 17 protons. What is its atomic number?",
-    options: ["16", "18", "17", "34"],
-    answer: 2,
-    explanation: "Atomic number is the number of protons. Here it is 17."
-  },
-  {
-    question: "Which element is used widely in computer chips?",
-    options: ["Silicon", "Sodium", "Helium", "Calcium"],
-    answer: 0,
-    explanation: "Silicon is a semiconductor widely used in computer chips."
-  },
-  {
-    question: "Which statement about elements in the same period is correct?",
-    options: [
-      "They have the same number of electron shells",
-      "They have the same number of protons",
-      "They have identical chemical properties",
-      "They belong to the same family"
-    ],
-    answer: 0,
-    explanation: "Elements in the same period have the same number of occupied electron shells."
-  },
-  {
-    question: "Which pair contains two halogens?",
-    options: [
-      "Fluorine and Chlorine",
-      "Sodium and Potassium",
-      "Helium and Neon",
-      "Carbon and Silicon"
-    ],
-    answer: 0,
-    explanation: "Fluorine and Chlorine are both Group 17 halogens."
-  },
-  {
-    question: "An element has atomic number 20. Which element is it?",
-    options: ["Potassium", "Calcium", "Scandium", "Argon"],
-    answer: 1,
-    explanation: "Calcium has atomic number 20."
-  },
-  {
-    question: "Which element is a noble gas with atomic number 10?",
-    options: ["Argon", "Helium", "Neon", "Krypton"],
-    answer: 2,
-    explanation: "Neon has atomic number 10 and belongs to Group 18."
+    name: "Chemistry in Real Life",
+    questions: [
+      { question: "Which element is used widely in computer chips?", options: ["Silicon", "Sodium", "Helium", "Calcium"], answer: 0, explanation: "Silicon is a semiconductor used in computer chips." },
+      { question: "Which metal is a liquid at room temperature?", options: ["Gold", "Iron", "Mercury", "Copper"], answer: 2, explanation: "Mercury is a metal that is liquid at room temperature." },
+      { question: "Which gas makes up about 78% of Earth's air?", options: ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"], answer: 1, explanation: "Nitrogen makes up about 78% of the air we breathe." },
+      { question: "Which gas do our bodies need for breathing (respiration)?", options: ["Helium", "Nitrogen", "Oxygen", "Neon"], answer: 2, explanation: "Our cells use oxygen to release energy from food." },
+      { question: "Table salt is made of sodium and which other element?", options: ["Chlorine", "Calcium", "Carbon", "Copper"], answer: 0, explanation: "Table salt is sodium chloride, made of sodium and chlorine." },
+      { question: "Which light gas makes party balloons float?", options: ["Neon", "Helium", "Argon", "Chlorine"], answer: 1, explanation: "Helium is lighter than air, so helium balloons float." },
+      { question: "Which metal is the key ingredient in phone and laptop batteries?", options: ["Lead", "Lithium", "Gold", "Zinc"], answer: 1, explanation: "Most phones and laptops use lithium-ion batteries." },
+      { question: "Which metal is used in most electric wires?", options: ["Copper", "Iron", "Mercury", "Tin"], answer: 0, explanation: "Copper conducts electricity very well and costs less than silver." },
+      { question: "Diamonds and pencil 'lead' (graphite) are both made of which element?", options: ["Lead", "Silicon", "Carbon", "Sulfur"], answer: 2, explanation: "Diamond and graphite are both pure carbon, arranged differently." },
+      { question: "Which gas glows red-orange in bright advertising signs?", options: ["Neon", "Oxygen", "Hydrogen", "Nitrogen"], answer: 0, explanation: "Neon glows red-orange when electricity passes through it." }
+    ]
   }
 ];
 
 /* =========================================
    9. BOSS FIGHT ENGINE
+   10 questions, 3 lives. Each correct answer deals 12.5% damage,
+   so 8 correct answers defeat the boss. 3 wrong answers = game over.
    ========================================= */
+
+const BOSS_DAMAGE = 12.5;
 
 const startBossButton = document.getElementById("start-boss");
 const bossGame = document.getElementById("boss-game");
@@ -697,12 +676,134 @@ const bossHealthText = document.getElementById("boss-health-text");
 const bossLives = document.getElementById("boss-lives");
 const bossQuestionCount = document.getElementById("boss-question-count");
 
+/* =========================================
+   BOSS PIXEL MONSTER 👾
+   An original pixel-art "Element Guardian" drawn with code.
+   It flashes when hit, laughs when you miss, gets angry
+   when its health is low, and spins away when defeated.
+   ========================================= */
+
+const BOSS_PIXELS_LEFT = [
+  "...G.....",
+  "....B....",
+  ".....B...",
+  "....LLBBB",
+  "...LBBBBB",
+  "..LBBWWWB",
+  "..BBBWPPB",
+  "..BBBWPPB",
+  "BBBBBBBBB",
+  "BB.BBBMMM",
+  "BB.BBBMTM",
+  "B..BBBBBB",
+  "...BBBDDB",
+  "...DD..DD"
+];
+
+const BOSS_COLORS = {
+  B: "#8b5cf6", // body
+  L: "#c4b5fd", // shine
+  D: "#5b2fc9", // shadow / feet
+  W: "#ffffff", // eye white
+  P: "#1a1033", // pupil
+  M: "#2b1650", // mouth
+  T: "#ffffff", // teeth
+  G: "#55cfff"  // glowing antenna tips
+};
+
+function bossSpriteSVG() {
+  const rows = BOSS_PIXELS_LEFT.map(left => {
+    const right = left.split("").reverse().join("").replace(/L/g, "B");
+    return left + right;
+  });
+  let rects = "";
+  rows.forEach((row, y) => {
+    row.split("").forEach((ch, x) => {
+      if (BOSS_COLORS[ch]) rects += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${BOSS_COLORS[ch]}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+}
+
+(function addBossSpriteStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .boss-sprite { display: inline-block; width: 150px; filter: drop-shadow(0 0 18px rgba(139, 92, 246, .55)); animation: bossBob 1.2s steps(2) infinite; transition: filter .3s; }
+    .boss-sprite svg { display: block; width: 100%; height: auto; }
+    .boss-icon .boss-sprite { width: 120px; }
+    .boss-arena { position: relative; text-align: center; margin: 4px 0 18px; padding-top: 26px; }
+    .boss-sprite.angry { filter: drop-shadow(0 0 22px rgba(139, 92, 246, .75)) hue-rotate(95deg) saturate(1.6); }
+    .boss-sprite.hit { animation: bossHit .45s steps(6); }
+    .boss-sprite.laugh { animation: bossLaugh .7s steps(4); }
+    .boss-sprite.defeated { animation: bossDefeat 1.1s ease-in forwards; }
+    .boss-pop { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font: 900 26px Arial, sans-serif; color: #ffd166; text-shadow: 2px 2px 0 #120f24; pointer-events: none; animation: bossPop .9s ease-out forwards; }
+    @keyframes bossBob { 50% { transform: translateY(-6px); } }
+    @keyframes bossHit { 0%,100% { transform: translateX(0); filter: brightness(1); } 20% { transform: translateX(-10px); filter: brightness(3); } 40% { transform: translateX(10px); } 60% { transform: translateX(-6px); filter: brightness(3); } 80% { transform: translateX(6px); } }
+    @keyframes bossLaugh { 0%,100% { transform: translateY(0) scale(1); } 25% { transform: translateY(-14px) scale(1.08) rotate(-6deg); } 50% { transform: translateY(0) scale(1); } 75% { transform: translateY(-10px) scale(1.06) rotate(6deg); } }
+    @keyframes bossDefeat { 0% { transform: rotate(0) scale(1); opacity: 1; } 100% { transform: rotate(540deg) scale(0); opacity: 0; } }
+    @keyframes bossPop { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -40px); } }
+  `;
+  document.head.appendChild(style);
+})();
+
+// Monster on the intro screen (replaces the ☄ icon)
+const bossIntroIcon = document.querySelector("#boss-intro .boss-icon");
+if (bossIntroIcon) bossIntroIcon.innerHTML = `<span class="boss-sprite">${bossSpriteSVG()}</span>`;
+
+// Monster inside the battle
+const bossArena = document.createElement("div");
+bossArena.className = "boss-arena";
+bossArena.innerHTML = `<span class="boss-sprite" id="boss-sprite">${bossSpriteSVG()}</span>`;
+if (bossGame) bossGame.insertBefore(bossArena, bossGame.firstChild);
+const bossSprite = document.getElementById("boss-sprite");
+
+function bossSpriteAnimate(className, popText) {
+  if (!bossSprite) return;
+  bossSprite.classList.remove("hit", "laugh", "defeated");
+  void bossSprite.offsetWidth; // restart the animation
+  bossSprite.classList.add(className);
+  if (popText) {
+    const pop = document.createElement("span");
+    pop.className = "boss-pop";
+    pop.textContent = popText;
+    bossArena.appendChild(pop);
+    setTimeout(() => pop.remove(), 900);
+  }
+}
+
+function bossSpriteReset() {
+  if (!bossSprite) return;
+  bossSprite.classList.remove("hit", "laugh", "defeated", "angry");
+}
+
+function bossSpriteMood() {
+  if (bossSprite) bossSprite.classList.toggle("angry", bossHealth > 0 && bossHealth <= 40);
+}
+
 let currentBossQuestions = [];
+let currentBossSet = null;
+let lastBossSetIndex = -1;
 let bossIndex = 0;
 let bossHealth = 100;
 let bossLifeCount = 3;
 let bossAnswered = false;
 let bossCorrectAnswers = 0;
+let bossQuestionsAnswered = 0;
+
+// Update the intro text for the new rules
+const bossIntroText = document.querySelector("#boss-intro p");
+if (bossIntroText) {
+  bossIntroText.textContent = "Ten questions. Three lives. Answer 8 correctly to defeat the boss! New questions every battle.";
+}
+
+function pickBossSet() {
+  let index = Math.floor(Math.random() * BOSS_SETS.length);
+  if (BOSS_SETS.length > 1 && index === lastBossSetIndex) {
+    index = (index + 1 + Math.floor(Math.random() * (BOSS_SETS.length - 1))) % BOSS_SETS.length;
+  }
+  lastBossSetIndex = index;
+  return BOSS_SETS[index];
+}
 
 function startBossFight() {
   const bossIntro = document.getElementById("boss-intro");
@@ -710,25 +811,29 @@ function startBossFight() {
   if (bossResult) bossResult.hidden = true;
   if (bossGame) bossGame.hidden = false;
 
-  currentBossQuestions = shuffle(bossQuestions).slice(0, 5);
+  currentBossSet = pickBossSet();
+  currentBossQuestions = shuffle(currentBossSet.questions);
 
   bossIndex = 0;
   bossHealth = 100;
   bossLifeCount = 3;
   bossAnswered = false;
   bossCorrectAnswers = 0;
+  bossQuestionsAnswered = 0;
 
   if (startBossButton) startBossButton.hidden = true;
   if (bossGame) bossGame.style.display = "block";
   if (bossResult) bossResult.textContent = "";
 
+  bossSpriteReset();
   updateBossStats();
   showBossQuestion();
 }
 
 function updateBossStats() {
-  bossHealthBar.style.width = `${bossHealth}%`;
-  bossHealthText.textContent = `${bossHealth}%`;
+  const shown = Math.max(0, Math.round(bossHealth));
+  bossHealthBar.style.width = `${shown}%`;
+  bossHealthText.textContent = `${shown}%`;
 
   bossLives.textContent =
     "❤️ ".repeat(bossLifeCount) +
@@ -740,7 +845,7 @@ function showBossQuestion() {
 
   bossAnswered = false;
   bossQuestionCount.textContent =
-    `Question ${bossIndex + 1} / 5`;
+    `${currentBossSet.name.toUpperCase()} · QUESTION ${bossIndex + 1} / ${currentBossQuestions.length}`;
 
   bossQuestion.textContent = question.question;
   bossFeedback.textContent = "";
@@ -749,64 +854,54 @@ function showBossQuestion() {
 
   question.options.forEach((option, index) => {
     const button = document.createElement("button");
-
+    button.type = "button";
     button.className = "answer-option";
     button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-
-    button.addEventListener("click", () => {
-      answerBossQuestion(index, button);
-    });
-
+    button.addEventListener("click", () => answerBossQuestion(index, button));
     bossOptions.appendChild(button);
   });
 }
 
 function answerBossQuestion(selectedIndex, selectedButton) {
   if (bossAnswered) return;
-    bossAnswered = true;
+  bossAnswered = true;
+  bossQuestionsAnswered++;
 
   const question = currentBossQuestions[bossIndex];
   const buttons = bossOptions.querySelectorAll("button");
-
-  buttons.forEach(button => {
-    button.disabled = true;
-  });
+  buttons.forEach(button => { button.disabled = true; });
 
   if (selectedIndex === question.answer) {
     bossCorrectAnswers++;
-    bossHealth = Math.max(0, bossHealth - 20);
-
+    bossHealth = Math.max(0, bossHealth - BOSS_DAMAGE);
     selectedButton.classList.add("correct");
-    bossFeedback.textContent =
-      `✓ Direct hit! ${question.explanation}`;
+    bossFeedback.textContent = `✓ Direct hit! ${question.explanation}`;
+    bossSpriteAnimate(bossHealth <= 0 ? "defeated" : "hit", "💥 HIT!");
   } else {
     bossLifeCount--;
-
     selectedButton.classList.add("wrong");
     buttons[question.answer].classList.add("correct");
-
-    bossFeedback.textContent =
-      `The boss got you! ${question.explanation}`;
+    bossFeedback.textContent = `The boss got you! ${question.explanation}`;
+    bossSpriteAnimate("laugh", "HA HA!");
   }
 
   updateBossStats();
+  bossSpriteMood();
+  bossNextButton.hidden = false;
 
-  if (bossLifeCount <= 0) {
-    bossNextButton.hidden = false;
+  if (bossHealth <= 0) {
+    bossNextButton.textContent = "Claim Victory 🏆";
+    bossNextButton.onclick = finishBossFight;
+  } else if (bossLifeCount <= 0) {
     bossNextButton.textContent = "See Result";
     bossNextButton.onclick = finishBossFight;
-    return;
-  }
-
-  if (bossIndex === currentBossQuestions.length - 1) {
+  } else if (bossIndex === currentBossQuestions.length - 1) {
     bossNextButton.textContent = "Finish Battle";
     bossNextButton.onclick = finishBossFight;
   } else {
     bossNextButton.textContent = "Next Challenge →";
     bossNextButton.onclick = nextBossQuestion;
   }
-
-  bossNextButton.hidden = false;
 }
 
 function nextBossQuestion() {
@@ -827,19 +922,19 @@ function finishBossFight() {
   bossFeedback.textContent = "";
   bossNextButton.hidden = true;
 
-  const won = bossHealth === 0 && bossLifeCount > 0;
+  const won = bossHealth <= 0 && bossLifeCount > 0;
 
   if (won) {
     bossResult.innerHTML = `
       <h2>🏆 YOU DEFEATED THE BOSS!</h2>
-      <p>You answered ${bossCorrectAnswers} out of 5 correctly.</p>
+      <p>You answered ${bossCorrectAnswers} out of ${bossQuestionsAnswered} correctly in the "${currentBossSet.name}" battle.</p>
       <p>You have mastered this challenge!</p>
     `;
   } else {
     bossResult.innerHTML = `
       <h2>⚔ BATTLE OVER</h2>
-      <p>You answered ${bossCorrectAnswers} out of 5 correctly.</p>
-      <p>Review the elements you learned and try again.</p>
+      <p>You answered ${bossCorrectAnswers} out of ${bossQuestionsAnswered} correctly in the "${currentBossSet.name}" battle.</p>
+      <p>You need 8 correct answers to win. Review the elements and try again!</p>
     `;
   }
 
@@ -852,8 +947,8 @@ startBossButton.addEventListener("click", startBossFight);
 
 /* =========================================
    10. VERITY AI CHATBOT
-   Calls a Netlify Function. Keep the API key
-   in Netlify environment variables, never here.
+   Calls our Vercel server function. The AI key is kept
+   in Vercel environment variables, never here.
    ========================================= */
 
 const chatbotToggle = document.getElementById("chatbot-toggle");
@@ -910,9 +1005,9 @@ function addVerityTyping() {
 }
 
 // On the live site use the normal address. If index.html is opened from your computer,
-// talk to the live Netlify site instead (it must be deployed first).
+// talk to the live Vercel site instead.
 const VERITY_URL = window.location.protocol === "file:"
-  ? "https://elementalquest-123.netlify.app/.netlify/functions/verity"
+  ? "https://elemental-quest-one.vercel.app/api/verity"
   : "/.netlify/functions/verity";
 
 async function askVerity(message) {
@@ -973,8 +1068,7 @@ async function askVerity(message) {
         "I couldn't connect to the internet or the server. Please check your connection and try again.";
     } else {
       explanation =
-        `I couldn't reach my AI service. ${error.message} ` +
-        "Check the Netlify function deployment, the OPENAI_API_KEY environment variable, and your OpenAI billing/limits.";
+        `Hmm, something went wrong: ${error.message} Please try again in a moment.`;
     }
 
     addChatMessage(explanation, "bot");
