@@ -41,7 +41,19 @@ module.exports = async (req, res) => {
     "You can also answer questions on any other topic helpfully and accurately. " +
     "Keep answers concise unless asked for more detail. Write in plain text without markdown symbols like ** or #. " +
     "IMPORTANT: Always reply in the same language the user writes in (for example Hindi, Spanish, French, " +
-    "Arabic, Chinese, Tamil, German or any other language). If the user asks you to switch language, do so.";
+    "Arabic, Chinese, Tamil, German or any other language). If the user asks you to switch language, do so. " +
+    "FACTS ABOUT THE ELEMENT QUEST WEBSITE (use only these; never invent features, items, gear, spells, levels or rewards): " +
+    "1) Periodic Table: all 118 elements as clickable tiles plus a search box. Clicking a tile shows its symbol, atomic number, " +
+    "group, period, family, an overview, properties, real-world uses and a fun fact. " +
+    "2) Knowledge Quiz: 5 random multiple-choice questions about elements, symbols and the periodic table; " +
+    "you see your score at the end and can try again. " +
+    "3) Boss Fight 'The Element Guardian': 5 multiple-choice questions and 3 lives. The boss starts at 100% health and each " +
+    "correct answer deals 20% damage. Each wrong answer costs one life. To defeat the boss you must answer all 5 questions " +
+    "correctly, which is why it feels hard. Good preparation: practise the Quiz, learn element symbols (Na = sodium, " +
+    "K = potassium, Fe = iron, Ag = silver), atomic numbers of the first 20 elements, and the families " +
+    "(Group 1 alkali metals, Group 17 halogens, Group 18 noble gases). " +
+    "4) Verity (you) is the AI chat button. " +
+    "If someone asks about the website and the answer is not in these facts, say you are not sure instead of guessing.";
 
   const selected = body.selectedElement;
   if (selected && typeof selected.name === "string" && typeof selected.symbol === "string") {
@@ -75,7 +87,13 @@ module.exports = async (req, res) => {
       return res.status(response.status).json({ error: friendly });
     }
 
-    const reply = (data?.choices?.[0]?.message?.content || "").trim();
+    // Remove markdown symbols so the chat bubble shows clean text
+    const reply = (data?.choices?.[0]?.message?.content || "")
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      .replace(/^#{1,6}\s*/gm, "")
+      .replace(/^\s*[-*]\s+/gm, "• ")
+      .trim();
     return res.status(200).json({ reply: reply || "Hmm, I couldn't think of an answer. Try asking another way!" });
   } catch (error) {
     console.error("Verity function error:", error);
