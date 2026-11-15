@@ -1,5 +1,5 @@
-// api/verity.js — Verity's AI brain on Vercel.
-// The OpenAI key comes from Vercel's Environment Variables, never from your code.
+// api/verity.js — Verity's AI brain on Vercel, using Groq's FREE plan.
+// The key comes from Vercel's Environment Variables (GROQ_API_KEY), never from your code.
 
 module.exports = async (req, res) => {
   // Allow the chat to work when index.html is opened from your computer
@@ -11,9 +11,9 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Please use POST." });
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "OPENAI_API_KEY is not set in Vercel environment variables." });
+    return res.status(500).json({ error: "GROQ_API_KEY is not set in Vercel environment variables." });
   }
 
   let body = req.body;
@@ -50,36 +50,32 @@ module.exports = async (req, res) => {
       "on the periodic table, so questions like 'this element' refer to it.";
   }
 
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const request = {
+    model,
+    messages: [{ role: "system", content: instructions }, ...history, { role: "user", content: message }],
+    max_completion_tokens: 1000
+  };
+  if (model.startsWith("openai/gpt-oss")) request.reasoning_effort = "low"; // keeps replies fast
+
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-5",
-        instructions,
-        input: [...history, { role: "user", content: message }],
-        reasoning: { effort: "minimal" },
-        text: { verbosity: "low" },
-        max_output_tokens: 1000
-      })
+      body: JSON.stringify(request)
     });
 
     const data = await response.json();
     if (!response.ok) {
-      console.error("OpenAI error:", data);
-      return res.status(response.status).json({ error: data?.error?.message || "OpenAI request failed." });
+      console.error("Groq error:", data);
+      const msg = data?.error?.message || "AI request failed.";
+      const friendly = response.status === 429
+        ? "I'm getting lots of questions right now! Please wait a minute and try again."
+        : msg;
+      return res.status(response.status).json({ error: friendly });
     }
 
-    const reply =
-      data.output_text ||
-      (data.output || [])
-        .filter(item => item.type === "message")
-        .flatMap(item => item.content || [])
-        .filter(part => part.type === "output_text")
-        .map(part => part.text)
-        .join("\n")
-        .trim();
-
+    const reply = (data?.choices?.[0]?.message?.content || "").trim();
     return res.status(200).json({ reply: reply || "Hmm, I couldn't think of an answer. Try asking another way!" });
   } catch (error) {
     console.error("Verity function error:", error);
