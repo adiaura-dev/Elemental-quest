@@ -3242,3 +3242,28 @@ body::after,
         transform: scale(1.15) rotate(20deg);
     }
 }
+/* =========================================
+   QUIZ ANSWER BUTTONS (fix: readable answers)
+   ========================================= */
+#quiz-options .quiz-option {
+  width: 100%;
+  text-align: left;
+  padding: 13px 15px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e7eef8;
+  background: #263449;
+  border: 1px solid #3a4b62;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: border .2s, background .2s, transform .2s;
+}
+#quiz-options .quiz-option:hover:not(:disabled) {
+  border-color: #55cfff;
+  background: #30445f;
+  transform: translateX(3px);
+}
+#quiz-options .quiz-option:disabled { cursor: default; opacity: .95; }
+#quiz-options .quiz-option.correct { background: #145b45; border-color: #25c58a; color: #ffffff; }
+#quiz-options .quiz-option.wrong { background: #71333d; border-color: #f07883; color: #ffffff; }
