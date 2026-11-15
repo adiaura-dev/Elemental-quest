@@ -1,17 +1,18 @@
 /* =========================================
-   VERITY VOICE 🔊
-   Adds a speaker button to every Verity answer.
-   Uses the browser's built-in voice — free, no API key.
+   VERITY VOICE 🔊  (v3 — Fish Audio voice + browser backup)
+   Adds a speaker button to every Verity answer and a voice chooser.
+   1st choice: Fish Audio's natural AI voice (through /api/speak on Vercel).
+   Backup: the browser's built-in voices, so Verity never goes silent.
    ========================================= */
 
 (() => {
   const messages = document.getElementById("chatbot-messages");
   if (!messages || !("speechSynthesis" in window)) return;
+  const synth = window.speechSynthesis;
 
-  /* ---- Styles for the speaker button ---- */
+  /* ---------- Styles ---------- */
   const style = document.createElement("style");
   style.textContent = `
-    .bot-message { position: relative; }
     .verity-speak {
       display: inline-flex; align-items: center; justify-content: center;
       margin-left: 8px; width: 28px; height: 28px; vertical-align: middle;
@@ -22,86 +23,221 @@
     .verity-speak:hover { transform: scale(1.12); background: rgba(85, 207, 255, .3); }
     .verity-speak.speaking { background: #8b5cf6; border-color: #c4b5fd; animation: verityPulseSpeak 1s ease-in-out infinite; }
     @keyframes verityPulseSpeak { 50% { box-shadow: 0 0 0 6px rgba(139, 92, 246, .25); } }
+    .verity-voice-bar {
+      display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+      background: rgba(32, 51, 74, .9); border-bottom: 1px solid rgba(85, 207, 255, .2);
+      font-size: 11px; color: #cfe8f5;
+    }
+    .verity-voice-bar select {
+      flex: 1; min-width: 0; font: inherit; font-size: 11px; color: #fff;
+      background: #0f1a2a; border: 1px solid #40516a; border-radius: 6px; padding: 4px 6px;
+    }
+    .verity-voice-bar button {
+      font: inherit; font-size: 11px; color: #fff; cursor: pointer;
+      background: #168bc4; border: 0; border-radius: 6px; padding: 4px 8px;
+    }
   `;
   document.head.appendChild(style);
 
-  /* ---- Pick the right language from the text ---- */
+  /* ---------- Language detection ---------- */
   function detectLang(text) {
-    if (/[ऀ-ॿ]/.test(text)) return "hi-IN";   // Hindi / Marathi
-    if (/[ಀ-೿]/.test(text)) return "kn-IN";   // Kannada
-    if (/[஀-௿]/.test(text)) return "ta-IN";   // Tamil
-    if (/[ఀ-౿]/.test(text)) return "te-IN";   // Telugu
-    if (/[ঀ-৿]/.test(text)) return "bn-IN";   // Bengali
-    if (/[ഀ-ൿ]/.test(text)) return "ml-IN";   // Malayalam
-    if (/[઀-૿]/.test(text)) return "gu-IN";   // Gujarati
-    if (/[؀-ۿ]/.test(text)) return "ar-SA";   // Arabic / Urdu
-    if (/[一-鿿]/.test(text)) return "zh-CN";   // Chinese
-    if (/[぀-ヿ]/.test(text)) return "ja-JP";   // Japanese
-    if (/[가-힯]/.test(text)) return "ko-KR";   // Korean
-    if (/[Ѐ-ӿ]/.test(text)) return "ru-RU";   // Russian
-    return "en-IN";
+    if (/[\u0900-\u097F]/.test(text)) return "hi-IN";
+    if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN";
+    if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN";
+    if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN";
+    if (/[\u0980-\u09FF]/.test(text)) return "bn-IN";
+    if (/[\u0D00-\u0D7F]/.test(text)) return "ml-IN";
+    if (/[\u0A80-\u0AFF]/.test(text)) return "gu-IN";
+    if (/[\u0600-\u06FF]/.test(text)) return "ar-SA";
+    if (/[\u4E00-\u9FFF]/.test(text)) return "zh-CN";
+    if (/[\u3040-\u30FF]/.test(text)) return "ja-JP";
+    if (/[\uAC00-\uD7AF]/.test(text)) return "ko-KR";
+    if (/[\u0400-\u04FF]/.test(text)) return "ru-RU";
+    return "en";
   }
 
-  function pickVoice(lang) {
-    const voices = speechSynthesis.getVoices();
+  /* ---------- Choosing the nicest voice ---------- */
+  const SAVED_KEY = "verityVoiceName";
+  function savedVoiceName() { try { return localStorage.getItem(SAVED_KEY) || ""; } catch { return ""; } }
+  function saveVoiceName(name) { try { localStorage.setItem(SAVED_KEY, name); } catch { /* ignore */ } }
+
+  // Higher score = sounds more human
+  function scoreVoice(v, lang) {
     const base = lang.split("-")[0];
-    return voices.find(v => v.lang === lang) ||
-           voices.find(v => v.lang && v.lang.startsWith(base)) ||
-           (base === "en" ? voices.find(v => v.lang && v.lang.startsWith("en")) : null) ||
-           null;
+    const vlang = (v.lang || "").replace("_", "-");
+    let s = 0;
+    if (vlang.toLowerCase() === lang.toLowerCase()) s += 60;
+    else if (vlang.toLowerCase().startsWith(base)) s += 40;
+    else return -1;
+    if (base === "en" && /en-(IN|GB|US|AU)/i.test(vlang)) s += 5;
+    if (base === "en" && /en-IN/i.test(vlang)) s += 3;
+    if (/natural|neural/i.test(v.name)) s += 50;
+    if (/online/i.test(v.name)) s += 15;
+    if (/google/i.test(v.name)) s += 30;
+    if (/premium|enhanced|siri/i.test(v.name)) s += 25;
+    if (/neerja|swara|aria|jenny|sonia|libby|natasha|samantha|karen|moira|female/i.test(v.name)) s += 6;
+    if (/espeak|robot|novelty|whisper|zarvox|bad news|bells|bubbles|cellos|trinoids|albert|boing/i.test(v.name)) s -= 80;
+    return s;
   }
 
-  // Remove emojis and symbols so the voice doesn't read them out
+  function bestVoice(lang) {
+    const voices = synth.getVoices();
+    const base = lang.split("-")[0];
+    const chosen = savedVoiceName();
+    if (chosen) {
+      const v = voices.find(x => x.name === chosen);
+      if (v && (v.lang || "").toLowerCase().startsWith(base)) return v;
+    }
+    let best = null, bestScore = -1;
+    voices.forEach(v => {
+      const sc = scoreVoice(v, lang === "en" ? "en-IN" : lang);
+      if (sc > bestScore) { best = v; bestScore = sc; }
+    });
+    return best;
+  }
+
+  /* ---------- Making the text sound natural ---------- */
+  const SUBSCRIPTS = { "₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9" };
+
   function cleanForSpeech(text) {
     return text
       .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "")
+      .replace(/[₀-₉]/g, d => SUBSCRIPTS[d])
+      .replace(/°C/g, " degrees Celsius")
+      .replace(/°F/g, " degrees Fahrenheit")
+      .replace(/\s*[–—]\s*/g, ", ")
       .replace(/[•*#_]/g, " ")
-      .replace(/\s+/g, " ")
+      .replace(/\(([^)]{1,25})\)/g, ", $1,")
+      .replace(/\s+,/g, ",")
+      .replace(/,\s*,/g, ",")
+      .replace(/[ \t]+/g, " ")
       .trim();
   }
 
+  // Split into sentences so the voice can breathe between them
+  function toChunks(text) {
+    const parts = [];
+    text.split(/\n+/).forEach(para => {
+      const sentences = para.match(/[^.!?।？！]+[.!?।？！]*\s*/g) || [para];
+      sentences.forEach((s, si) => {
+        const t = s.trim();
+        if (!t) return;
+        if (parts.length && t.length < 18 && si > 0) parts[parts.length - 1].text += " " + t;
+        else parts.push({ text: t, pauseAfter: si === sentences.length - 1 ? 450 : 220 });
+      });
+    });
+    return parts;
+  }
+
+  /* ---------- Speaking ---------- */
   let currentButton = null;
+  let queue = [];
+  let pauseTimer = null;
+  let session = 0;
+  let currentAudio = null;
 
   function stopSpeaking() {
-    speechSynthesis.cancel();
+    session++;
+    queue = [];
+    clearTimeout(pauseTimer);
+    synth.cancel();
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     if (currentButton) {
       currentButton.classList.remove("speaking");
-      currentButton.textContent = "🔊";
+      currentButton.textContent = currentButton.dataset.label || "🔊";
       currentButton = null;
     }
   }
 
-  function speak(text, button) {
-    // Clicking the same button again stops the voice
-    if (currentButton === button) { stopSpeaking(); return; }
-    stopSpeaking();
-
-    const clean = cleanForSpeech(text);
-    if (!clean) return;
-
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = detectLang(clean);
-    const voice = pickVoice(utterance.lang);
-    if (voice) utterance.voice = voice;
-    utterance.rate = 0.95;
-    utterance.pitch = 1.05;
-
-    utterance.onend = stopSpeaking;
-    utterance.onerror = stopSpeaking;
-
-    currentButton = button;
-    button.classList.add("speaking");
-    button.textContent = "⏹";
-    speechSynthesis.speak(utterance);
+  function speakNext(mySession, lang, voice) {
+    if (mySession !== session) return;
+    const part = queue.shift();
+    if (!part) { stopSpeaking(); return; }
+    const u = new SpeechSynthesisUtterance(part.text);
+    u.lang = voice ? voice.lang : (lang === "en" ? "en-IN" : lang);
+    if (voice) u.voice = voice;
+    u.rate = /natural|neural|google/i.test(voice ? voice.name : "") ? 0.98 : 0.9;
+    u.pitch = 1;
+    u.volume = 1;
+    u.onend = () => {
+      if (mySession !== session) return;
+      pauseTimer = setTimeout(() => speakNext(mySession, lang, voice), part.pauseAfter);
+    };
+    u.onerror = () => { if (mySession === session) stopSpeaking(); };
+    synth.speak(u);
   }
 
-  /* ---- Add a 🔊 button to a Verity message ---- */
+  /* ---------- Fish Audio voice (super natural) ---------- */
+  const SPEAK_URL = window.location.protocol === "file:"
+    ? "https://elemental-quest-one.vercel.app/api/speak"
+    : "/api/speak";
+  const audioCache = new Map();
+  let fishBroken = false;
+
+  function wantsFish() {
+    return !fishBroken && savedVoiceName() === "";
+  }
+
+  async function fishAudioUrl(text) {
+    if (audioCache.has(text)) return audioCache.get(text);
+    const res = await fetch(SPEAK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok || !(res.headers.get("Content-Type") || "").includes("audio")) {
+      throw new Error("Fish voice not available (" + res.status + ")");
+    }
+    const url = URL.createObjectURL(await res.blob());
+    audioCache.set(text, url);
+    return url;
+  }
+
+  async function speakWithFish(text, button, mySession) {
+    button.textContent = "⏳";
+    const url = await fishAudioUrl(text);
+    if (mySession !== session) return;
+    const audio = new Audio(url);
+    currentAudio = audio;
+    button.textContent = "⏹";
+    audio.onended = () => { if (mySession === session) stopSpeaking(); };
+    await audio.play();
+  }
+
+  function speak(text, button) {
+    if (currentButton === button) { stopSpeaking(); return; }
+    stopSpeaking();
+    const clean = cleanForSpeech(text);
+    if (!clean) return;
+    const lang = detectLang(clean);
+    const voice = bestVoice(lang);
+    currentButton = button;
+    button.classList.add("speaking");
+    const mySession = session;
+
+    const browserSpeak = () => {
+      if (mySession !== session) return;
+      queue = toChunks(clean);
+      button.textContent = "⏹";
+      speakNext(mySession, lang, voice);
+    };
+
+    if (wantsFish()) {
+      speakWithFish(clean, button, mySession).catch(err => {
+        console.warn("Verity voice: using browser voice instead.", err.message);
+        fishBroken = true;
+        browserSpeak();
+      });
+    } else {
+      browserSpeak();
+    }
+  }
+
+  /* ---------- Speaker buttons on Verity's answers ---------- */
   function addSpeaker(bubble) {
     if (!bubble || bubble.querySelector(".verity-speak")) return;
     const text = bubble.textContent.trim();
-    // Skip the "thinking..." placeholder
-    if (!text || /thinking/i.test(text) && text.length < 30) return;
-
+    if (!text || (/thinking/i.test(text) && text.length < 30)) return;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "verity-speak";
@@ -110,30 +246,59 @@
     button.setAttribute("aria-label", "Read this answer aloud");
     button.addEventListener("click", e => {
       e.stopPropagation();
-      const words = bubble.cloneNode(true);
-      words.querySelectorAll(".verity-speak").forEach(b => b.remove());
-      speak(words.textContent, button);
+      const copy = bubble.cloneNode(true);
+      copy.querySelectorAll(".verity-speak").forEach(b => b.remove());
+      speak(copy.textContent, button);
     });
     bubble.appendChild(button);
   }
 
-  /* ---- Watch the chat for new answers ---- */
-  function scan() {
-    messages.querySelectorAll(".bot-message").forEach(addSpeaker);
-  }
+  function scan() { messages.querySelectorAll(".bot-message").forEach(addSpeaker); }
 
   const observer = new MutationObserver(() => {
-    observer.disconnect();          // don't react to our own buttons
+    observer.disconnect();
     scan();
     observer.observe(messages, { childList: true, subtree: true, characterData: true });
   });
   observer.observe(messages, { childList: true, subtree: true, characterData: true });
-
-  // Voices load a moment after the page opens in some browsers
-  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
   scan();
 
-  // Stop talking when the chat window is closed
+  /* ---------- Voice chooser bar ---------- */
+  const bar = document.createElement("div");
+  bar.className = "verity-voice-bar";
+  bar.innerHTML = `<span>🎙️ Voice</span><select aria-label="Choose Verity's voice"></select><button type="button">Test</button>`;
+  const select = bar.querySelector("select");
+  const testBtn = bar.querySelector("button");
+  testBtn.dataset.label = "Test";
+  messages.parentNode.insertBefore(bar, messages);
+
+  function fillVoices() {
+    const voices = synth.getVoices();
+    const saved = savedVoiceName();
+    const sorted = voices
+      .map(v => ({ v, s: Math.max(scoreVoice(v, "en-IN"), scoreVoice(v, "hi-IN")) }))
+      .sort((a, b) => b.s - a.s || a.v.name.localeCompare(b.v.name));
+    select.innerHTML = `<option value="">🐟 Fish Audio voice (most natural)</option>` +
+      sorted.map(({ v }) => {
+        const nice = /natural|neural|google|premium|enhanced/i.test(v.name) ? "⭐ " : "";
+        const name = v.name.replace(/</g, "&lt;");
+        return `<option value="${name}"${v.name === saved ? " selected" : ""}>${nice}${name} (${v.lang})</option>`;
+      }).join("");
+  }
+
+  select.addEventListener("change", () => { saveVoiceName(select.value); stopSpeaking(); });
+  testBtn.addEventListener("click", () => {
+    const v = savedVoiceName();
+    const voice = synth.getVoices().find(x => x.name === v);
+    const sample = voice && /^hi/i.test(voice.lang)
+      ? "नमस्ते! मैं वेरिटी हूँ, आपकी केमिस्ट्री गाइड।"
+      : "Hi! I'm Verity, your chemistry guide. Ask me anything about the elements!";
+    speak(sample, testBtn);
+  });
+
+  fillVoices();
+  synth.onvoiceschanged = fillVoices;
+
   const closeBtn = document.getElementById("chatbot-close");
   if (closeBtn) closeBtn.addEventListener("click", stopSpeaking);
 })();
