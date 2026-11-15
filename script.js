@@ -1110,3 +1110,270 @@ if (document.getElementById("periodic-section")) {
 
 console.log("ELEMENT QUEST loaded successfully.");
 console.log(`${elements.length} elements available.`);
+/* =========================================
+   12. BOSS FX UPGRADE 💥😂
+   Better HIT and LAUGH animations:
+   - HIT: X-eyes face, white flash, knockback, screen shake,
+     pixel explosion, damage number and combo counter
+   - LAUGH: laughing face, bouncy laugh, floating "HA"s,
+     red flash and shaking hearts
+   ========================================= */
+
+const BOSS_FACES = {
+  normal: BOSS_PIXELS_LEFT,
+  laugh: [
+    "...G.....",
+    "....B....",
+    ".....B...",
+    "....LLBBB",
+    "...LBBBBB",
+    "..LBBBPBB",
+    "..BBBPBPB",
+    "..BBBBBBB",
+    "BBBBBBBBB",
+    "BB.BBMTTT",
+    "BB.BBMMMM",
+    "B..BBBMRR",
+    "...BBBDDB",
+    "...DD..DD"
+  ],
+  hurt: [
+    "...G.....",
+    "....B....",
+    ".....B...",
+    "....LLBBB",
+    "...LBBBBB",
+    "..LBBPBPB",
+    "..BBBBPBB",
+    "..BBBPBPB",
+    "BBBBBBBBB",
+    "BB.BBBBBB",
+    "BB.BBBTMT",
+    "B..BBBBBB",
+    "...BBBDDB",
+    "...DD..DD"
+  ]
+};
+
+BOSS_COLORS.R = "#ff7aa8"; // tongue
+
+function bossFaceSVG(face) {
+  const rows = BOSS_FACES[face].map(left => {
+    const right = left.split("").reverse().join("").replace(/L/g, "B");
+    return left + right;
+  });
+  let rects = "";
+  rows.forEach((row, y) => {
+    row.split("").forEach((ch, x) => {
+      if (BOSS_COLORS[ch]) rects += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${BOSS_COLORS[ch]}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+}
+
+(function addBossFxStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .boss-sprite.hit { animation: fxHit .65s ease-out; }
+    .boss-sprite.laugh { animation: fxLaugh 1.3s ease-in-out; }
+    .boss-arena.shake { animation: fxShake .45s linear; }
+    .boss-arena::before { content: ""; position: absolute; inset: -10px 0 -10px 0; background: radial-gradient(ellipse closest-side at 50% 55%, rgba(255, 70, 90, .55), transparent); opacity: 0; pointer-events: none; }
+    .boss-arena.ouch::before { animation: fxOuch .8s ease-out; }
+    #boss-lives.lost { display: inline-block; animation: fxLives .6s ease-out; }
+    #boss-health-bar.flash { animation: fxBar .5s ease-out; }
+
+    .fx-ring { position: absolute; left: 50%; top: 84px; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 4px solid #ffd166; border-radius: 50%; pointer-events: none; animation: fxRing .5s ease-out forwards; }
+    .fx-pixel { position: absolute; left: 50%; top: 84px; width: 9px; height: 9px; pointer-events: none; animation: fxPixel .75s cubic-bezier(.2,.7,.4,1) forwards; }
+    .fx-damage { position: absolute; left: 75%; top: 60px; font: 900 30px Arial, sans-serif; color: #ff5d73; text-shadow: 3px 3px 0 #120f24; pointer-events: none; animation: fxDamage 1s ease-out forwards; }
+    .fx-combo { position: absolute; left: 25%; top: 70px; font: 900 20px Arial, sans-serif; color: #55cfff; text-shadow: 2px 2px 0 #120f24; pointer-events: none; white-space: nowrap; animation: fxCombo 1.1s ease-out forwards; }
+    .fx-ha { position: absolute; top: 60px; font: 900 26px Arial, sans-serif; color: #c4b5fd; text-shadow: 3px 3px 0 #2b1650; pointer-events: none; opacity: 0; animation: fxHa 1.1s ease-out forwards; }
+    .boss-pop { animation: fxPop .9s ease-out forwards; }
+
+    @keyframes fxHit {
+      0%   { transform: translateX(0) scale(1); filter: brightness(1); }
+      8%   { transform: translateX(22px) rotate(10deg) scale(1.15, .85); filter: brightness(5) saturate(0); }
+      20%  { transform: translateX(-14px) rotate(-7deg) scale(.9, 1.1); filter: brightness(1); }
+      32%  { transform: translateX(10px) rotate(5deg); filter: brightness(4) saturate(0); }
+      46%  { transform: translateX(-6px) rotate(-3deg); filter: brightness(1); }
+      62%  { transform: translateX(3px) rotate(1deg); }
+      100% { transform: translateX(0) rotate(0) scale(1); }
+    }
+    @keyframes fxLaugh {
+      0%   { transform: translateY(0) scale(1); }
+      8%   { transform: translateY(4px) scale(1.15, .85); }
+      18%  { transform: translateY(-26px) scale(.9, 1.12) rotate(-8deg); }
+      28%  { transform: translateY(2px) scale(1.12, .88); }
+      38%  { transform: translateY(-20px) scale(.92, 1.1) rotate(8deg); }
+      48%  { transform: translateY(2px) scale(1.1, .9); }
+      58%  { transform: translateY(-14px) rotate(-6deg); }
+      68%  { transform: translateY(1px) scale(1.06, .94); }
+      78%  { transform: translateY(-8px) rotate(4deg); }
+      90%  { transform: translateY(0) scale(1.03, .97); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    @keyframes fxShake {
+      0%, 100% { transform: translate(0, 0); }
+      15% { transform: translate(-8px, 4px); }
+      30% { transform: translate(7px, -5px); }
+      45% { transform: translate(-6px, -3px); }
+      60% { transform: translate(5px, 4px); }
+      75% { transform: translate(-3px, 2px); }
+    }
+    @keyframes fxOuch {
+      0%   { opacity: 0; }
+      25%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @keyframes fxLives {
+      0%, 100% { transform: scale(1) rotate(0); }
+      20% { transform: scale(1.4) rotate(-10deg); }
+      40% { transform: scale(1.2) rotate(10deg); }
+      60% { transform: scale(1.3) rotate(-6deg); }
+      80% { transform: scale(1.1) rotate(4deg); }
+    }
+    @keyframes fxBar {
+      0%   { filter: brightness(1); }
+      30%  { filter: brightness(2.5); }
+      100% { filter: brightness(1); }
+    }
+    @keyframes fxRing {
+      from { transform: scale(.4); opacity: 1; }
+      to   { transform: scale(6); opacity: 0; border-width: 1px; }
+    }
+    @keyframes fxPixel {
+      0%   { transform: translate(-50%, -50%) rotate(0); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--spin)); opacity: 0; }
+    }
+    @keyframes fxDamage {
+      0%   { transform: translate(-50%, 10px) scale(.4); opacity: 0; }
+      20%  { transform: translate(-50%, -10px) scale(1.4); opacity: 1; }
+      40%  { transform: translate(-50%, -16px) scale(1); }
+      100% { transform: translate(-50%, -60px) scale(1); opacity: 0; }
+    }
+    @keyframes fxCombo {
+      0%   { transform: translateX(-50%) scale(0) rotate(-10deg); opacity: 0; }
+      25%  { transform: translateX(-50%) scale(1.3) rotate(4deg); opacity: 1; }
+      45%  { transform: translateX(-50%) scale(1) rotate(0); }
+      100% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+    }
+    @keyframes fxHa {
+      0%   { transform: translateY(0) scale(.3) rotate(var(--tilt)); opacity: 0; }
+      25%  { transform: translateY(-10px) scale(1.25) rotate(var(--tilt)); opacity: 1; }
+      100% { transform: translateY(-55px) scale(1) rotate(var(--tilt)); opacity: 0; }
+    }
+    @keyframes fxPop {
+      0%   { transform: translate(-50%, 0) scale(.3); opacity: 0; }
+      20%  { transform: translate(-50%, -6px) scale(1.3); opacity: 1; }
+      40%  { transform: translate(-50%, -10px) scale(1); }
+      100% { transform: translate(-50%, -40px) scale(1); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+let bossHitStreak = 0;
+let bossFaceTimer = null;
+let bossAnimTimer = null;
+
+function setBossFace(face) {
+  if (bossSprite) bossSprite.innerHTML = bossFaceSVG(face);
+}
+
+function replayClass(el, className, time) {
+  if (!el) return;
+  el.classList.remove(className);
+  void el.offsetWidth; // restart the animation
+  el.classList.add(className);
+  setTimeout(() => el.classList.remove(className), time);
+}
+
+function fxAdd(className, text, styles, life) {
+  const el = document.createElement("span");
+  el.className = className;
+  if (text) el.textContent = text;
+  Object.entries(styles || {}).forEach(([key, value]) => el.style.setProperty(key, value));
+  bossArena.appendChild(el);
+  setTimeout(() => el.remove(), life);
+  return el;
+}
+
+function fxPixelBurst() {
+  const colors = ["#8b5cf6", "#c4b5fd", "#ffd166", "#55cfff", "#ffffff"];
+  for (let i = 0; i < 16; i++) {
+    const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
+    const distance = 60 + Math.random() * 60;
+    fxAdd("fx-pixel", "", {
+      "--dx": `${Math.cos(angle) * distance}px`,
+      "--dy": `${Math.sin(angle) * distance}px`,
+      "--spin": `${Math.round(Math.random() * 360)}deg`,
+      "background": colors[i % colors.length]
+    }, 800);
+  }
+}
+
+function fxPlayHit(defeated) {
+  bossHitStreak++;
+  setBossFace("hurt");
+
+  replayClass(bossArena, "shake", 450);
+  replayClass(bossHealthBar, "flash", 500);
+  fxAdd("fx-ring", "", {}, 520);
+  fxPixelBurst();
+  fxAdd("fx-damage", `-${BOSS_DAMAGE}%`, {}, 1000);
+  fxAdd("boss-pop", "💥 HIT!", {}, 900);
+  if (bossHitStreak >= 2) fxAdd("fx-combo", `🔥 COMBO x${bossHitStreak}!`, {}, 1100);
+
+  if (defeated) {
+    bossSprite.classList.add("defeated");
+    return;
+  }
+
+  bossSprite.classList.add("hit");
+  bossAnimTimer = setTimeout(() => bossSprite.classList.remove("hit"), 650);
+  bossFaceTimer = setTimeout(() => setBossFace("normal"), 900);
+}
+
+function fxPlayLaugh() {
+  bossHitStreak = 0;
+  setBossFace("laugh");
+
+  bossSprite.classList.add("laugh");
+  bossAnimTimer = setTimeout(() => bossSprite.classList.remove("laugh"), 1300);
+  bossFaceTimer = setTimeout(() => setBossFace("normal"), 1400);
+
+  replayClass(bossArena, "ouch", 800);
+  replayClass(bossLives, "lost", 600);
+
+  const spots = [
+    { left: "18%", tilt: "-14deg", delay: 0 },
+    { left: "70%", tilt: "12deg", delay: 220 },
+    { left: "30%", tilt: "8deg", delay: 440 },
+    { left: "60%", tilt: "-10deg", delay: 660 }
+  ];
+  spots.forEach(spot => {
+    setTimeout(() => {
+      fxAdd("fx-ha", "HA!", { "left": spot.left, "--tilt": spot.tilt }, 1100);
+    }, spot.delay);
+  });
+}
+
+// Replace the old simple animations with the new ones
+bossSpriteAnimate = function (className) {
+  if (!bossSprite || !bossArena) return;
+  clearTimeout(bossFaceTimer);
+  clearTimeout(bossAnimTimer);
+  bossSprite.classList.remove("hit", "laugh", "defeated");
+  void bossSprite.offsetWidth; // restart the animation
+
+  if (className === "laugh") fxPlayLaugh();
+  else fxPlayHit(className === "defeated");
+};
+
+bossSpriteReset = function () {
+  if (!bossSprite) return;
+  clearTimeout(bossFaceTimer);
+  clearTimeout(bossAnimTimer);
+  bossHitStreak = 0;
+  bossSprite.classList.remove("hit", "laugh", "defeated", "angry");
+  setBossFace("normal");
+};
