@@ -1377,3 +1377,8 @@ bossSpriteReset = function () {
   bossSprite.classList.remove("hit", "laugh", "defeated", "angry");
   setBossFace("normal");
 };
+
+/* Load the 3D Atom Lab */
+const atomLabScript = document.createElement("script");
+atomLabScript.src = "atom-lab.js";
+document.body.appendChild(atomLabScript);
