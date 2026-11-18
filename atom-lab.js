@@ -158,10 +158,50 @@
     .al-col-chip { padding: 5px 9px; border-radius: 8px; font-size: 12px; font-weight: 800; border: 1px solid #2c3d53; color: #50627a; background: #151f2e; }
     .al-col-chip.got { color: #6ee7b7; border-color: #25c58a; background: #10392e; }
     .al-section-title { font-size: 11px; color: #8195ad; font-weight: 800; letter-spacing: 1.3px; margin: 4px 0 8px; }
+    /* --- tidier layout --- */
+    .al-left, .al-right { display: grid; gap: 18px; align-content: start; }
+    .al-wrap { position: relative; }
+    .al-wrap.shake { animation: alShake .45s linear; }
+    .al-wrap::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; border-radius: 17px; }
+    .al-wrap.flash::after { animation: alFlash .35s ease-out; }
+    .al-canvas { border-radius: 17px; }
+    .al-panel .al-section-title:first-child { margin-top: 0; }
+    .al-parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .al-part { background: #172337; border: 1px solid #2c3d53; border-top: 3px solid var(--c); border-radius: 12px; padding: 10px 8px 12px; text-align: center; }
+    .al-part-head { color: #dbe7f3; font-weight: 800; font-size: 12px; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .al-part-head small { color: #8195ad; font-weight: 700; }
+    .al-part-head .al-dot { background: var(--c); color: var(--c); width: 11px; height: 11px; }
+    .al-part-ctrl { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .al-part .al-count { font-size: 22px; min-width: 32px; }
+    .al-missions { display: grid; gap: 5px; }
+    .al-mission { display: flex; align-items: center; gap: 10px; background: #172337; border: 1px solid #2c3d53; border-radius: 9px; padding: 6px 10px; color: #c8d5e5; font-size: 12.5px; font-weight: 700; transition: all .3s; }
+    .al-mission .al-check { width: 19px; height: 19px; border-radius: 6px; border: 2px solid #3a4b62; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+    .al-mission.done { border-color: #25c58a; background: #10392e; color: #6ee7b7; }
+    .al-mission.done .al-check { background: #25c58a; border-color: #25c58a; color: #0b1a14; }
+    .al-mission.just-done { animation: alMission .7s cubic-bezier(.2,1.5,.4,1); }
+    .al-card-title { display: flex; justify-content: space-between; align-items: center; margin: 0 0 10px; color: #fff; font-size: 15px; font-weight: 800; }
+    .al-card-title span { color: #55cfff; font-size: 12px; }
+
+    /* --- boss-style effects --- */
+    .al-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 17px; }
+    .al-pop { position: absolute; transform: translate(-50%, -50%); font: 900 22px Arial, sans-serif; text-shadow: 3px 3px 0 #0b1220; white-space: nowrap; opacity: 0; animation: alFloat 1.1s ease-out forwards; }
+    .al-pop.big { font-size: 40px; letter-spacing: 2px; animation-duration: 1.4s; }
+    .al-ring { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border: 4px solid var(--c, #55cfff); border-radius: 50%; animation: alRing .6s ease-out forwards; }
+    @keyframes alFloat {
+      0%   { opacity: 0; transform: translate(-50%, -30%) scale(.4); }
+      18%  { opacity: 1; transform: translate(-50%, -60%) scale(1.3); }
+      35%  { transform: translate(-50%, -70%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -190%) scale(1); }
+    }
+    @keyframes alRing { from { transform: scale(.4); opacity: 1; } to { transform: scale(9); opacity: 0; border-width: 1px; } }
+    @keyframes alShake { 0%, 100% { transform: translate(0, 0); } 15% { transform: translate(-7px, 3px); } 30% { transform: translate(6px, -4px); } 45% { transform: translate(-5px, -2px); } 60% { transform: translate(4px, 3px); } 75% { transform: translate(-2px, 1px); } }
+    @keyframes alFlash { 0% { opacity: .35; } 100% { opacity: 0; } }
+    @keyframes alMission { 0% { transform: scale(1); } 40% { transform: scale(1.06); box-shadow: 0 0 22px #25c58a88; } 100% { transform: scale(1); } }
     @keyframes alPop { 0% { transform: scale(.5); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
     @keyframes alBump { 0% { transform: scale(1); } 40% { transform: scale(1.45); color: #55cfff; } 100% { transform: scale(1); } }
     @keyframes alGlow { 50% { box-shadow: 0 0 14px #facc1566; } }
     @media (max-width: 900px) { .al-layout { grid-template-columns: 1fr; } .al-canvas { height: 360px; } }
+    @media (max-width: 520px) { .al-parts { gap: 6px; } .al-part { padding: 8px 4px 10px; } .al-part-head { font-size: 10px; } .al-step { width: 32px; height: 32px; font-size: 17px; } .al-part .al-count { font-size: 18px; min-width: 24px; } .al-pop.big { font-size: 30px; } }
   `;
   document.head.appendChild(style);
 
@@ -192,32 +232,46 @@
     </div>
 
     <div class="al-layout">
-      <div class="al-card al-stage">
-        <canvas class="al-canvas" id="al-canvas" aria-label="3D model"></canvas>
-        <div class="al-hint">🖱 DRAG TO SPIN</div>
-        <div class="al-toast" id="al-toast"></div>
+      <div class="al-left">
+        <div class="al-card al-stage">
+          <div class="al-wrap" id="al-wrap">
+            <canvas class="al-canvas" id="al-canvas" aria-label="3D model"></canvas>
+            <div class="al-fx" id="al-fx"></div>
+            <div class="al-hint">🖱 DRAG TO SPIN</div>
+            <div class="al-toast" id="al-toast"></div>
+          </div>
+        </div>
 
-        <div class="al-controls" id="al-atom-controls">
-          <div class="al-row">
-            <span class="al-row-label"><span class="al-dot" style="background:#ff5d73;color:#ff5d73"></span>Protons (+)</span>
-            <button type="button" class="al-step" data-part="p" data-step="-1" aria-label="Remove proton">−</button>
-            <span class="al-count" id="al-count-p">6</span>
-            <button type="button" class="al-step" data-part="p" data-step="1" aria-label="Add proton">+</button>
+        <div class="al-card al-panel" id="al-atom-controls">
+          <div class="al-section-title">BUILD YOUR ATOM</div>
+          <div class="al-parts">
+            <div class="al-part" style="--c:#ff5d73">
+              <div class="al-part-head"><span class="al-dot"></span>PROTONS <small>+</small></div>
+              <div class="al-part-ctrl">
+                <button type="button" class="al-step" data-part="p" data-step="-1" aria-label="Remove proton">−</button>
+                <span class="al-count" id="al-count-p">6</span>
+                <button type="button" class="al-step" data-part="p" data-step="1" aria-label="Add proton">+</button>
+              </div>
+            </div>
+            <div class="al-part" style="--c:#94a3b8">
+              <div class="al-part-head"><span class="al-dot"></span>NEUTRONS <small>0</small></div>
+              <div class="al-part-ctrl">
+                <button type="button" class="al-step" data-part="n" data-step="-1" aria-label="Remove neutron">−</button>
+                <span class="al-count" id="al-count-n">6</span>
+                <button type="button" class="al-step" data-part="n" data-step="1" aria-label="Add neutron">+</button>
+              </div>
+            </div>
+            <div class="al-part" style="--c:#55cfff">
+              <div class="al-part-head"><span class="al-dot"></span>ELECTRONS <small>−</small></div>
+              <div class="al-part-ctrl">
+                <button type="button" class="al-step" data-part="e" data-step="-1" aria-label="Remove electron">−</button>
+                <span class="al-count" id="al-count-e">6</span>
+                <button type="button" class="al-step" data-part="e" data-step="1" aria-label="Add electron">+</button>
+              </div>
+            </div>
           </div>
-          <div class="al-row">
-            <span class="al-row-label"><span class="al-dot" style="background:#94a3b8;color:#94a3b8"></span>Neutrons (0)</span>
-            <button type="button" class="al-step" data-part="n" data-step="-1" aria-label="Remove neutron">−</button>
-            <span class="al-count" id="al-count-n">6</span>
-            <button type="button" class="al-step" data-part="n" data-step="1" aria-label="Add neutron">+</button>
-          </div>
-          <div class="al-row">
-            <span class="al-row-label"><span class="al-dot" style="background:#55cfff;color:#55cfff"></span>Electrons (−)</span>
-            <button type="button" class="al-step" data-part="e" data-step="-1" aria-label="Remove electron">−</button>
-            <span class="al-count" id="al-count-e">6</span>
-            <button type="button" class="al-step" data-part="e" data-step="1" aria-label="Add electron">+</button>
-          </div>
+          <div class="al-section-title">QUICK BUILD</div>
           <div class="al-quick">
-            <span>QUICK BUILD</span>
             <button type="button" class="al-chip-btn" data-quick="1">H</button>
             <button type="button" class="al-chip-btn" data-quick="2">He</button>
             <button type="button" class="al-chip-btn" data-quick="6">C</button>
@@ -229,44 +283,54 @@
           </div>
         </div>
 
-        <div class="al-controls" id="al-mol-controls" hidden>
+        <div class="al-card al-panel" id="al-mol-controls" hidden>
           <div class="al-section-title">TAP AN ATOM TO ADD IT</div>
           <div class="al-palette" id="al-palette"></div>
-          <div class="al-section-title">YOUR WORKBENCH</div>
+          <div class="al-section-title" style="margin-top:14px">YOUR WORKBENCH</div>
           <div class="al-bench" id="al-bench"></div>
-          <div class="al-quick"><button type="button" class="al-chip-btn" id="al-clear">🧹 Clear all</button></div>
+          <div class="al-quick" style="margin-top:10px"><button type="button" class="al-chip-btn" id="al-clear">🧹 Clear all</button></div>
         </div>
       </div>
 
-      <div class="al-card al-info" id="al-atom-info">
-        <div style="display:flex;gap:14px;align-items:center">
-          <div class="al-symbol" id="al-symbol"><small id="al-z">6</small><strong id="al-sym">C</strong></div>
-          <div>
-            <h2 id="al-name">Carbon</h2>
-            <p class="al-sub" id="al-iso">Carbon-12</p>
+      <div class="al-right">
+        <div class="al-card al-info" id="al-atom-info">
+          <div style="display:flex;gap:14px;align-items:center">
+            <div class="al-symbol" id="al-symbol"><small id="al-z">6</small><strong id="al-sym">C</strong></div>
+            <div>
+              <h2 id="al-name">Carbon</h2>
+              <p class="al-sub" id="al-iso">Carbon-12</p>
+            </div>
+          </div>
+          <div class="al-stats">
+            <div class="al-stat"><span>MASS NUMBER</span><strong id="al-mass">12</strong></div>
+            <div class="al-stat"><span>CHARGE</span><strong id="al-charge">0</strong></div>
+            <div class="al-stat"><span>ELECTRON SHELLS</span><strong id="al-shells">2, 4</strong></div>
+            <div class="al-stat"><span>OUTER ELECTRONS</span><strong id="al-valence">4</strong></div>
+          </div>
+          <div class="al-badges" id="al-badges"></div>
+          <p class="al-explain" id="al-explain"></p>
+          <div class="al-progress"><span id="al-disc-text">🔓 Elements discovered: 0 / 36</span>
+            <div class="al-bar"><div id="al-disc-bar" style="width:0%"></div></div>
           </div>
         </div>
-        <div class="al-stats">
-          <div class="al-stat"><span>MASS NUMBER</span><strong id="al-mass">12</strong></div>
-          <div class="al-stat"><span>CHARGE</span><strong id="al-charge">0</strong></div>
-          <div class="al-stat"><span>ELECTRON SHELLS</span><strong id="al-shells">2, 4</strong></div>
-          <div class="al-stat"><span>OUTER ELECTRONS</span><strong id="al-valence">4</strong></div>
-        </div>
-        <div class="al-badges" id="al-badges"></div>
-        <p class="al-explain" id="al-explain"></p>
-        <div class="al-progress"><span id="al-disc-text">🔓 Elements discovered: 0 / 36</span>
-          <div class="al-bar"><div id="al-disc-bar" style="width:0%"></div></div>
-        </div>
-      </div>
 
-      <div class="al-card al-info" id="al-mol-info" hidden>
-        <div class="al-challenge"><span id="al-challenge-text">🎯 Challenge</span><button type="button" class="al-chip-btn" id="al-skip">Skip ↻</button></div>
-        <div class="al-formula" id="al-formula">?</div>
-        <h2 id="al-mol-name">Start building!</h2>
-        <p class="al-sub" id="al-mol-shape"></p>
-        <p class="al-explain" id="al-mol-text">Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!</p>
-        <div class="al-progress"><span id="al-col-text">🧪 Molecules collected: 0 / ${MOLECULES.length}</span> · <span id="al-score">⭐ 0</span></div>
-        <div class="al-collection" id="al-collection"></div>
+        <div class="al-card" id="al-missions-card">
+          <div class="al-card-title">🎯 Missions <span id="al-mission-count">0 / 8</span></div>
+          <div class="al-missions" id="al-missions"></div>
+        </div>
+
+        <div class="al-card al-info" id="al-mol-info" hidden>
+          <div class="al-challenge"><span id="al-challenge-text">🎯 Challenge</span><button type="button" class="al-chip-btn" id="al-skip">Skip ↻</button></div>
+          <div class="al-formula" id="al-formula">?</div>
+          <h2 id="al-mol-name">Start building!</h2>
+          <p class="al-sub" id="al-mol-shape"></p>
+          <p class="al-explain" id="al-mol-text">Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!</p>
+        </div>
+
+        <div class="al-card" id="al-col-card" hidden>
+          <div class="al-card-title">🧪 Collection <span><span id="al-col-text">0 / ${MOLECULES.length}</span> · <span id="al-score">⭐ 0</span></span></div>
+          <div class="al-collection" id="al-collection"></div>
+        </div>
       </div>
     </div>
   `;
@@ -328,6 +392,29 @@
   function save(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* ignore */ }
   }
+
+  /* Boss-style effects: floating text, shockwave ring, shake, flash */
+  function fxPop(text, color, x, y, big, delay) {
+    setTimeout(() => {
+      const el = document.createElement("span");
+      el.className = "al-pop" + (big ? " big" : "");
+      el.textContent = text;
+      el.style.color = color;
+      el.style.left = x + "%";
+      el.style.top = y + "%";
+      $("al-fx").appendChild(el);
+      setTimeout(() => el.remove(), big ? 1500 : 1200);
+    }, delay || 0);
+  }
+  function fxRing(color) {
+    const el = document.createElement("span");
+    el.className = "al-ring";
+    el.style.setProperty("--c", color);
+    $("al-fx").appendChild(el);
+    setTimeout(() => el.remove(), 650);
+  }
+  function fxShake() { popClass($("al-wrap"), "shake"); setTimeout(() => $("al-wrap").classList.remove("shake"), 460); }
+  function fxFlash() { popClass($("al-wrap"), "flash"); setTimeout(() => $("al-wrap").classList.remove("flash"), 360); }
 
   /* ---------- 5. 3D CAMERA ---------- */
 
@@ -471,6 +558,7 @@
       if (!quiet) toast(part === "e" && value > hi ? "⚡ That's too many extra electrons!" : "🚫 Can't go further!");
       return;
     }
+    const before = snapshot();
     const old = atom[part];
     atom[part] = v;
     if (part === "p" && atom.e > atom.p + 4) atom.e = atom.p + 4;
@@ -484,6 +572,74 @@
     popClass($("al-count-" + part), "bump");
     layoutNucleus();
     updateAtomInfo();
+    atomFx(before, true);
+  }
+
+  function snapshot() {
+    return {
+      p: atom.p, n: atom.n, e: atom.e,
+      stable: (STABLE[atom.p] || []).includes(atom.n),
+      charge: atom.p - atom.e,
+      full: atom.p === atom.e && NOBLE.includes(atom.p)
+    };
+  }
+
+  function atomFx(before, single) {
+    const now = snapshot();
+    let d = 0;
+    if (single) {
+      [["p", "PROTON", "#ff5d73", 25], ["n", "NEUTRON", "#cbd5e1", 50], ["e", "ELECTRON", "#7fe0ff", 75]].forEach(([k, label, color, x]) => {
+        const diff = now[k] - before[k];
+        if (diff) fxPop(`${diff > 0 ? "+" : "−"}${Math.abs(diff)} ${label}${Math.abs(diff) > 1 ? "S" : ""}`, color, x, 82);
+      });
+    }
+    if (now.p !== before.p) {
+      fxRing("#55cfff");
+      fxFlash();
+      fxPop(NAMES[now.p].toUpperCase() + "!", "#55cfff", 50, 48, true, 60);
+      d = 300;
+    }
+    if (before.stable && !now.stable) { fxShake(); fxPop("☢ UNSTABLE!", "#facc15", 50, 22, false, d); }
+    else if (!before.stable && now.stable) fxPop("✓ STABLE!", "#4ade80", 50, 22, false, d);
+    if (before.charge === 0 && now.charge !== 0) fxPop("⚡ ION!", now.charge > 0 ? "#fda4af" : "#c4b5fd", 22, 34, false, d + 150);
+    else if (before.charge !== 0 && now.charge === 0) fxPop("⚖ NEUTRAL!", "#6ee7b7", 78, 34, false, d + 150);
+    if (!before.full && now.full) { fxRing("#fde68a"); fxPop("✨ FULL SHELL!", "#fde68a", 50, 64, false, d + 300); }
+    checkMissions();
+  }
+
+  /* Mini missions */
+  const MISSIONS = [
+    { id: "o", text: "Build an Oxygen atom", test: s => s.p === 8 },
+    { id: "neg", text: "Make a negative ion (extra electrons)", test: s => s.charge < 0 },
+    { id: "pos", text: "Make a positive ion (missing electrons)", test: s => s.charge > 0 },
+    { id: "rad", text: "Find a radioactive isotope ☢", test: s => !s.stable },
+    { id: "noble", text: "Build a noble gas with a full shell", test: s => s.full },
+    { id: "c14", text: "Build Carbon-14 (used to date fossils)", test: s => s.p === 6 && s.n === 8 },
+    { id: "fe56", text: "Build a neutral Iron-56 atom", test: s => s.p === 26 && s.n === 30 && s.charge === 0 },
+    { id: "ten", text: "Discover 10 elements", test: () => discovered.size >= 10 }
+  ];
+  const missionsDone = new Set(load("atomLabMissions", []));
+
+  function renderMissions(justDone) {
+    $("al-missions").innerHTML = MISSIONS.map(m => {
+      const done = missionsDone.has(m.id);
+      return `<div class="al-mission ${done ? "done" : ""} ${justDone.includes(m.id) ? "just-done" : ""}"><span class="al-check">${done ? "✓" : ""}</span>${m.text}</div>`;
+    }).join("");
+    $("al-mission-count").textContent = `${missionsDone.size} / ${MISSIONS.length}`;
+  }
+
+  function checkMissions() {
+    const s = snapshot();
+    const newly = MISSIONS.filter(m => !missionsDone.has(m.id) && m.test(s)).map(m => m.id);
+    if (newly.length) {
+      newly.forEach(id => missionsDone.add(id));
+      save("atomLabMissions", [...missionsDone]);
+      burstConfetti(70);
+      const first = MISSIONS.find(m => m.id === newly[0]);
+      setTimeout(() => toast(`🎯 Mission complete: ${first.text.split(" (")[0]}!`), 400);
+      if (missionsDone.size === MISSIONS.length) setTimeout(() => { burstConfetti(150); fxPop("🏆 ALL MISSIONS DONE!", "#facc15", 50, 50, true); }, 900);
+    }
+    renderMissions(newly);
   }
 
   section.querySelectorAll(".al-step").forEach(btn => {
@@ -492,11 +648,13 @@
   section.querySelectorAll("[data-quick]").forEach(btn => {
     btn.addEventListener("click", () => {
       const z = Number(btn.dataset.quick);
+      const before = snapshot();
       const oldE = atom.e;
       atom.p = z; atom.n = COMMON[z]; atom.e = z;
       for (let k = oldE; k < z; k++) electronBorn[k] = performance.now();
       layoutNucleus();
       updateAtomInfo();
+      atomFx(before, false);
     });
   });
   $("al-neutral").addEventListener("click", () => {
@@ -665,8 +823,9 @@
   });
 
   function addMolAtom(sym) {
-    if (molAtoms.length >= MAX_ATOMS) { toast("🧪 Workbench full! Remove some atoms."); return; }
+    if (molAtoms.length >= MAX_ATOMS) { fxShake(); toast("🧪 Workbench full! Remove some atoms."); return; }
     molAtoms.push({ sym, ...spawnFar(), seed: atomSeed++ });
+    fxPop(`+${sym}`, sym === "C" ? "#d4d4d8" : ATOM_STYLE[sym].color, 25 + Math.random() * 50, 72);
     checkMolecule();
   }
   function removeMolAtom(sym) {
@@ -728,6 +887,11 @@
       molAtoms.sort((a, b) => a.slot - b.slot);
       bondGrow = 0;
       burstConfetti(60);
+      const shortName = match.name.split(" (")[0].toUpperCase();
+      fxRing("#4ade80");
+      fxFlash();
+      fxPop("💥 BONDED!", "#facc15", 50, 26);
+      fxPop(shortName + "!", "#4ade80", 50, 50, shortName.length <= 14, 250);
       const isNew = !collected.has(match.id);
       collected.add(match.id);
       save("atomLabMolecules", [...collected]);
@@ -736,6 +900,7 @@
         save("atomLabScore", score);
         burstConfetti(90);
         toast(`🎯 Challenge complete! +1 ⭐`);
+        fxPop("⭐ +1", "#facc15", 50, 74, true, 650);
         setTimeout(newChallenge, 1800);
       } else {
         toast(`🎉 You built ${match.name.split(" (")[0]}!${isNew ? " (new!)" : ""}`);
@@ -756,7 +921,7 @@
       $("al-mol-text").textContent = molAtoms.length ? hintFor(c) : "Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!";
     }
 
-    $("al-col-text").textContent = `🧪 Molecules collected: ${collected.size} / ${MOLECULES.length}`;
+    $("al-col-text").textContent = `${collected.size} / ${MOLECULES.length}`;
     $("al-score").textContent = `⭐ ${score}`;
     $("al-collection").innerHTML = MOLECULES.map(m => `<span class="al-col-chip ${collected.has(m.id) ? "got" : ""}" title="${collected.has(m.id) ? m.name : "Not built yet"}">${collected.has(m.id) ? m.formula : "???"}</span>`).join("");
   }
@@ -896,6 +1061,8 @@
       $("al-atom-info").hidden = mode !== "atom";
       $("al-mol-controls").hidden = mode !== "molecule";
       $("al-mol-info").hidden = mode !== "molecule";
+      $("al-missions-card").hidden = mode !== "atom";
+      $("al-col-card").hidden = mode !== "molecule";
       leaving = [];
       if (mode === "molecule" && !challenge) newChallenge();
     });
@@ -937,6 +1104,7 @@
   layoutNucleus();
   nucleons.forEach(o => { o.x = o.tx; o.y = o.ty; o.z = o.tz; });
   updateAtomInfo();
+  renderMissions([]);
   checkMolecule();
   requestAnimationFrame(frame);
 })();
