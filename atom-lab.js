@@ -14,24 +14,36 @@
 
   /* ---------- 1. DATA ---------- */
 
-  const SYMBOLS = ["", "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr"];
-  const NAMES = ["", "Hydrogen","Helium","Lithium","Beryllium","Boron","Carbon","Nitrogen","Oxygen","Fluorine","Neon","Sodium","Magnesium","Aluminium","Silicon","Phosphorus","Sulfur","Chlorine","Argon","Potassium","Calcium","Scandium","Titanium","Vanadium","Chromium","Manganese","Iron","Cobalt","Nickel","Copper","Zinc","Gallium","Germanium","Arsenic","Selenium","Bromine","Krypton"];
-  const MAX_P = 36;
+  const SYMBOLS = ["", "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
+  const NAMES = ["", "Hydrogen","Helium","Lithium","Beryllium","Boron","Carbon","Nitrogen","Oxygen","Fluorine","Neon","Sodium","Magnesium","Aluminium","Silicon","Phosphorus","Sulfur","Chlorine","Argon","Potassium","Calcium","Scandium","Titanium","Vanadium","Chromium","Manganese","Iron","Cobalt","Nickel","Copper","Zinc","Gallium","Germanium","Arsenic","Selenium","Bromine","Krypton","Rubidium","Strontium","Yttrium","Zirconium","Niobium","Molybdenum","Technetium","Ruthenium","Rhodium","Palladium","Silver","Cadmium","Indium","Tin","Antimony","Tellurium","Iodine","Xenon","Caesium","Barium","Lanthanum","Cerium","Praseodymium","Neodymium","Promethium","Samarium","Europium","Gadolinium","Terbium","Dysprosium","Holmium","Erbium","Thulium","Ytterbium","Lutetium","Hafnium","Tantalum","Tungsten","Rhenium","Osmium","Iridium","Platinum","Gold","Mercury","Thallium","Lead","Bismuth","Polonium","Astatine","Radon","Francium","Radium","Actinium","Thorium","Protactinium","Uranium","Neptunium","Plutonium","Americium","Curium","Berkelium","Californium","Einsteinium","Fermium","Mendelevium","Nobelium","Lawrencium","Rutherfordium","Dubnium","Seaborgium","Bohrium","Hassium","Meitnerium","Darmstadtium","Roentgenium","Copernicium","Nihonium","Flerovium","Moscovium","Livermorium","Tennessine","Oganesson"];
+  const MAX_P = 118;
 
-  // Neutron numbers of the stable isotopes of elements 1–36
-  const STABLE = {1:[0,1],2:[1,2],3:[3,4],4:[5],5:[5,6],6:[6,7],7:[7,8],8:[8,9,10],9:[10],10:[10,11,12],11:[12],12:[12,13,14],13:[14],14:[14,15,16],15:[16],16:[16,17,18,20],17:[18,20],18:[18,20,22],19:[20,22],20:[20,22,23,24,26],21:[24],22:[24,25,26,27,28],23:[28],24:[26,28,29,30],25:[30],26:[28,30,31,32],27:[32],28:[30,32,33,34,36],29:[34,36],30:[34,36,37,38,40],31:[38,40],32:[38,40,41,42],33:[42],34:[40,42,43,44,46],35:[44,46],36:[44,46,47,48,50]};
-  // Neutron number of the most common isotope
-  const COMMON = {1:0,2:2,3:4,4:5,5:6,6:6,7:7,8:8,9:10,10:10,11:12,12:12,13:14,14:14,15:16,16:16,17:18,18:22,19:20,20:20,21:24,22:26,23:28,24:28,25:30,26:30,27:32,28:30,29:34,30:34,31:38,32:42,33:42,34:46,35:44,36:48};
-  const NOBLE = [2, 10, 18, 36];
+  // Neutron numbers of the stable isotopes (elements 43, 61 and 83+ have none)
+  const STABLE = {1:[0,1],2:[1,2],3:[3,4],4:[5],5:[5,6],6:[6,7],7:[7,8],8:[8,9,10],9:[10],10:[10,11,12],11:[12],12:[12,13,14],13:[14],14:[14,15,16],15:[16],16:[16,17,18,20],17:[18,20],18:[18,20,22],19:[20,22],20:[20,22,23,24,26],21:[24],22:[24,25,26,27,28],23:[28],24:[26,28,29,30],25:[30],26:[28,30,31,32],27:[32],28:[30,32,33,34,36],29:[34,36],30:[34,36,37,38,40],31:[38,40],32:[38,40,41,42],33:[42],34:[40,42,43,44,46],35:[44,46],36:[44,46,47,48,50],37:[48],38:[46,48,49,50],39:[50],40:[50,51,52,54],41:[52],42:[50,52,53,54,55,56],43:[],44:[52,54,55,56,57,58,60],45:[58],46:[56,58,59,60,62,64],47:[60,62],48:[58,60,62,63,64,66],49:[64],50:[62,64,65,66,67,68,69,70,72,74],51:[70,72],52:[68,70,71,72,73,74],53:[74],54:[72,74,75,76,77,78,80],55:[78],56:[76,78,79,80,81,82],57:[82],58:[78,80,82,84],59:[82],60:[82,83,85,86,88],61:[],62:[82,87,88,90,92],63:[90],64:[90,91,92,93,94,96],65:[94],66:[90,92,94,95,96,97,98],67:[98],68:[94,96,98,99,100,102],69:[100],70:[98,100,101,102,103,104,106],71:[104],72:[104,105,106,107,108],73:[108],74:[108,109,110,112],75:[110],76:[111,112,113,114,116],77:[114,116],78:[114,116,117,118,120],79:[118],80:[116,118,119,120,121,122,124],81:[122,124],82:[122,124,125,126]};
+  // Neutron number of the most common stable isotope (or the longest-lasting one)
+  const COMMON = {1:0,2:2,3:4,4:5,5:6,6:6,7:7,8:8,9:10,10:10,11:12,12:12,13:14,14:14,15:16,16:16,17:18,18:22,19:20,20:20,21:24,22:26,23:28,24:28,25:30,26:30,27:32,28:30,29:34,30:34,31:38,32:42,33:42,34:46,35:44,36:48,37:48,38:50,39:50,40:50,41:52,42:56,43:55,44:58,45:58,46:60,47:60,48:66,49:64,50:70,51:70,52:74,53:74,54:78,55:78,56:82,57:82,58:82,59:82,60:82,61:84,62:90,63:90,64:94,65:94,66:98,67:98,68:98,69:100,70:104,71:104,72:108,73:108,74:110,75:110,76:116,77:116,78:117,79:118,80:122,81:124,82:126,83:126,84:125,85:125,86:136,87:136,88:138,89:138,90:142,91:140,92:146,93:144,94:150,95:148,96:151,97:150,98:153,99:153,100:157,101:157,102:157,103:163,104:163,105:163,106:163,107:163,108:161,109:169,110:171,111:171,112:173,113:173,114:175,115:175,116:177,117:177,118:176};
+  const NOBLE = [2, 10, 18, 36, 54, 86, 118];
+
+  const ORDER = ["1s","2s","2p","3s","3p","4s","3d","4p","5s","4d","5p","6s","4f","5d","6p","7s","5f","6d","7p"];
+  const CAP = { s: 2, p: 6, d: 10, f: 14 };
+  const EXCEPTIONS = { 24: [["4s","3d",1]], 29: [["4s","3d",1]], 41: [["5s","4d",1]], 42: [["5s","4d",1]], 44: [["5s","4d",1]], 45: [["5s","4d",1]], 46: [["5s","4d",2]], 47: [["5s","4d",1]], 57: [["4f","5d",1]], 58: [["4f","5d",1]], 64: [["4f","5d",1]], 78: [["6s","5d",1]], 79: [["6s","5d",1]], 89: [["5f","6d",1]], 90: [["5f","6d",2]], 91: [["5f","6d",1]], 92: [["5f","6d",1]], 93: [["5f","6d",1]], 96: [["5f","6d",1]], 103: [["6d","7p",1]] };
 
   function neutralShells(z) {
-    if (z <= 2) return [z];
-    if (z <= 10) return [2, z - 2];
-    if (z <= 18) return [2, 8, z - 10];
-    const special = { 19: [2,8,8,1], 20: [2,8,8,2], 24: [2,8,13,1], 29: [2,8,18,1] };
-    if (special[z]) return special[z].slice();
-    if (z <= 30) return [2, 8, 8 + (z - 20), 2];
-    return [2, 8, 18, z - 28];
+    const occ = {};
+    let left = z;
+    for (const sub of ORDER) {
+      if (left <= 0) break;
+      const take = Math.min(CAP[sub[1]], left);
+      occ[sub] = take;
+      left -= take;
+    }
+    (EXCEPTIONS[z] || []).forEach(([from, to, k]) => { occ[from] = (occ[from] || 0) - k; occ[to] = (occ[to] || 0) + k; });
+    const shells = [];
+    Object.keys(occ).forEach(sub => { const n = Number(sub[0]) - 1; shells[n] = (shells[n] || 0) + occ[sub]; });
+    const out = [];
+    for (let i = 0; i < shells.length; i++) out.push(shells[i] || 0);
+    while (out.length && out[out.length - 1] === 0) out.pop();
+    return out;
   }
 
   function shellsFor(z, e) {
@@ -71,7 +83,8 @@
     Na: { color: "#a855f7", r: 32, text: "#ffffff", name: "Sodium" }
   };
   const PALETTE = ["H", "C", "N", "O", "F", "Cl", "S", "Na"];
-  const MAX_ATOMS = 10;
+  const MAX_ATOMS = 12;
+  const ATOMIC_MASS = { H: 1.008, C: 12.011, N: 14.007, O: 15.999, F: 18.998, Cl: 35.45, S: 32.06, Na: 22.99 };
 
   // Molecule recipes. Positions are in ångströms (real shapes).
   const MOLECULES = [
@@ -89,7 +102,18 @@
     { id: "ch4", name: "Methane", formula: "CH₄", atoms: [["C",0,0,0],["H",0.63,0.63,0.63],["H",0.63,-0.63,-0.63],["H",-0.63,0.63,-0.63],["H",-0.63,-0.63,0.63]], bonds: [[0,1,1],[0,2,1],[0,3,1],[0,4,1]], shape: "Tetrahedral (109.5°)", bondText: "4 single covalent bonds", fact: "The main gas in natural gas (CNG), used as fuel." },
     { id: "nh3", name: "Ammonia", formula: "NH₃", atoms: [["N",0,0.3,0],["H",0.94,-0.08,0],["H",-0.47,-0.08,0.81],["H",-0.47,-0.08,-0.81]], bonds: [[0,1,1],[0,2,1],[0,3,1]], shape: "Trigonal pyramid (107°)", bondText: "3 single covalent bonds", fact: "Ammonia is used to make fertilisers that help crops grow." },
     { id: "o3", name: "Ozone", formula: "O₃", atoms: [["O",0,0.25,0],["O",1.09,-0.42,0],["O",-1.09,-0.42,0]], bonds: [[0,1,2],[0,2,1]], shape: "Bent (117°)", bondText: "1 double + 1 single bond", fact: "The ozone layer high in the sky protects us from the Sun's UV rays." },
-    { id: "nacl", name: "Sodium chloride (table salt)", formula: "NaCl", atoms: [["Na",-1.2,0,0],["Cl",1.2,0,0]], bonds: [[0,1,0]], shape: "Ions held by attraction", bondText: "Ionic bond (Na⁺ and Cl⁻)", fact: "Sodium gives one electron to chlorine. The + and − ions then stick together.", ionic: true }
+    { id: "nacl", name: "Sodium chloride (table salt)", formula: "NaCl", atoms: [["Na",-1.2,0,0],["Cl",1.2,0,0]], bonds: [[0,1,0]], charges: { 0: "⁺", 1: "⁻" }, shape: "Ions held by attraction", bondText: "Ionic bond (Na⁺ and Cl⁻)", fact: "Watch the electron jump! Sodium gives one electron to chlorine, and then the + and − ions stick together." },
+    { id: "naoh", name: "Sodium hydroxide", formula: "NaOH", atoms: [["Na",-1.6,0,0],["O",0.4,0,0],["H",1.36,0,0]], bonds: [[0,1,0],[1,2,1]], charges: { 0: "⁺", 1: "⁻" }, shape: "Na⁺ ion + OH⁻ ion", bondText: "1 ionic + 1 covalent bond", fact: "A strong base used to make soap. It has both kinds of bonds: ionic and covalent." },
+    { id: "h2o2", name: "Hydrogen peroxide", formula: "H₂O₂", atoms: [["O",-0.73,0,0],["O",0.73,0,0],["H",-0.81,0.95,0],["H",0.81,-0.34,0.88]], bonds: [[0,1,1],[0,2,1],[1,3,1]], shape: "Open book (twisted)", bondText: "3 single covalent bonds", fact: "Used to clean cuts and bleach hair. It is like water with one extra oxygen." },
+    { id: "hcn", name: "Hydrogen cyanide", formula: "HCN", atoms: [["H",-1.07,0,0],["C",0,0,0],["N",1.16,0,0]], bonds: [[0,1,1],[1,2,3]], shape: "Linear (180°)", bondText: "1 single + 1 triple bond", fact: "A very poisonous gas that smells a little like almonds." },
+    { id: "so2", name: "Sulfur dioxide", formula: "SO₂", atoms: [["S",0,0.25,0],["O",1.24,-0.46,0],["O",-1.24,-0.46,0]], bonds: [[0,1,2],[0,2,2]], shape: "Bent (119°)", bondText: "2 double covalent bonds", fact: "Released by volcanoes. It can cause acid rain." },
+    { id: "ccl4", name: "Carbon tetrachloride", formula: "CCl₄", atoms: [["C",0,0,0],["Cl",1.02,1.02,1.02],["Cl",1.02,-1.02,-1.02],["Cl",-1.02,1.02,-1.02],["Cl",-1.02,-1.02,1.02]], bonds: [[0,1,1],[0,2,1],[0,3,1],[0,4,1]], shape: "Tetrahedral (109.5°)", bondText: "4 single covalent bonds", fact: "Same shape as methane, but with big chlorine atoms instead of hydrogen." },
+    { id: "c2h2", name: "Acetylene (ethyne)", formula: "C₂H₂", atoms: [["C",-0.6,0,0],["C",0.6,0,0],["H",-1.66,0,0],["H",1.66,0,0]], bonds: [[0,1,3],[0,2,1],[1,3,1]], shape: "Linear (180°)", bondText: "1 triple + 2 single bonds", fact: "Burns with an extremely hot flame, used for welding metal." },
+    { id: "c2h4", name: "Ethylene (ethene)", formula: "C₂H₄", atoms: [["C",-0.67,0,0],["C",0.67,0,0],["H",-1.24,0.92,0],["H",-1.24,-0.92,0],["H",1.24,0.92,0],["H",1.24,-0.92,0]], bonds: [[0,1,2],[0,2,1],[0,3,1],[1,4,1],[1,5,1]], shape: "Flat (planar, 120°)", bondText: "1 double + 4 single bonds", fact: "Fruits give off this gas to help them ripen. It is also used to make plastic bags." },
+    { id: "c2h6", name: "Ethane", formula: "C₂H₆", atoms: [["C",0.77,0,0],["C",-0.77,0,0],["H",1.16,0,1.02],["H",1.16,-0.88,-0.51],["H",1.16,0.88,-0.51],["H",-1.16,0.88,0.51],["H",-1.16,-0.88,0.51],["H",-1.16,0,-1.02]], bonds: [[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1],[1,6,1],[1,7,1]], shape: "Tetrahedral around each carbon", bondText: "7 single covalent bonds", fact: "A gas found in natural gas. Two carbons joined by a single bond." },
+    { id: "ch3oh", name: "Methanol", formula: "CH₃OH", atoms: [["C",-0.71,0,0],["O",0.71,0,0],["H",1.04,0.9,0],["H",-1.07,0.52,0.89],["H",-1.07,-1.03,0],["H",-1.07,0.52,-0.89]], bonds: [[0,1,1],[1,2,1],[0,3,1],[0,4,1],[0,5,1]], shape: "Tetrahedral carbon, bent C–O–H", bondText: "5 single covalent bonds", fact: "The simplest alcohol. It is poisonous to drink, but used as a fuel." },
+    { id: "c2h5oh", name: "Ethanol", formula: "C₂H₅OH", atoms: [["C",-1.25,-0.25,0],["C",0,0.6,0],["O",1.2,-0.2,0],["H",1.95,0.4,0],["H",0,1.23,0.89],["H",0,1.23,-0.89],["H",-2.13,0.4,0],["H",-1.26,-0.88,0.89],["H",-1.26,-0.88,-0.89]], bonds: [[0,1,1],[1,2,1],[2,3,1],[1,4,1],[1,5,1],[0,6,1],[0,7,1],[0,8,1]], shape: "Zig-zag chain", bondText: "8 single covalent bonds", fact: "The alcohol in hand sanitiser. It is also used as a fuel for cars." },
+    { id: "c6h6", name: "Benzene", formula: "C₆H₆", atoms: [["C",1.39,0,0],["C",0.695,1.204,0],["C",-0.695,1.204,0],["C",-1.39,0,0],["C",-0.695,-1.204,0],["C",0.695,-1.204,0],["H",2.48,0,0],["H",1.24,2.148,0],["H",-1.24,2.148,0],["H",-2.48,0,0],["H",-1.24,-2.148,0],["H",1.24,-2.148,0]], bonds: [[0,1,2],[1,2,1],[2,3,2],[3,4,1],[4,5,2],[5,0,1],[0,6,1],[1,7,1],[2,8,1],[3,9,1],[4,10,1],[5,11,1]], shape: "Flat hexagon ring", bondText: "Ring of alternating double + single bonds", fact: "A famous ring molecule. The chemist Kekulé said the idea for its ring came to him in a dream about a snake biting its own tail!" }
   ];
 
   /* ---------- 2. STYLES ---------- */
@@ -158,6 +182,11 @@
     .al-col-chip { padding: 5px 9px; border-radius: 8px; font-size: 12px; font-weight: 800; border: 1px solid #2c3d53; color: #50627a; background: #151f2e; }
     .al-col-chip.got { color: #6ee7b7; border-color: #25c58a; background: #10392e; }
     .al-section-title { font-size: 11px; color: #8195ad; font-weight: 800; letter-spacing: 1.3px; margin: 4px 0 8px; }
+    #atomlab-section button { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .al-select { background: #1a2638; color: #cfe3f5; border: 1px solid #3a4b62; border-radius: 8px; padding: 6px 8px; font-weight: 700; font-size: 12px; letter-spacing: 0; max-width: 230px; cursor: pointer; }
+    .al-select:hover { border-color: #55cfff; }
+    .al-mol-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .al-mol-head h2 { margin: 0; }
     /* --- tidier layout --- */
     .al-left, .al-right { display: grid; gap: 18px; align-content: start; }
     .al-wrap { position: relative; }
@@ -270,7 +299,9 @@
               </div>
             </div>
           </div>
-          <div class="al-section-title">QUICK BUILD</div>
+          <div class="al-section-title" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">QUICK BUILD
+            <select class="al-select" id="al-pick" aria-label="Pick any element"><option value="">🔎 Jump to any element…</option></select>
+          </div>
           <div class="al-quick">
             <button type="button" class="al-chip-btn" data-quick="1">H</button>
             <button type="button" class="al-chip-btn" data-quick="2">He</button>
@@ -278,6 +309,8 @@
             <button type="button" class="al-chip-btn" data-quick="8">O</button>
             <button type="button" class="al-chip-btn" data-quick="11">Na</button>
             <button type="button" class="al-chip-btn" data-quick="26">Fe</button>
+            <button type="button" class="al-chip-btn" data-quick="79">Au</button>
+            <button type="button" class="al-chip-btn" data-quick="92">U</button>
             <button type="button" class="al-chip-btn" id="al-neutral">⚖ Make neutral</button>
             <button type="button" class="al-chip-btn" id="al-stable">✓ Most stable</button>
           </div>
@@ -289,6 +322,8 @@
           <div class="al-section-title" style="margin-top:14px">YOUR WORKBENCH</div>
           <div class="al-bench" id="al-bench"></div>
           <div class="al-quick" style="margin-top:10px"><button type="button" class="al-chip-btn" id="al-clear">🧹 Clear all</button></div>
+          <div class="al-section-title" style="margin-top:14px">SHOW ME A MOLECULE</div>
+          <div class="al-quick" id="al-showme"></div>
         </div>
       </div>
 
@@ -321,9 +356,13 @@
 
         <div class="al-card al-info" id="al-mol-info" hidden>
           <div class="al-challenge"><span id="al-challenge-text">🎯 Challenge</span><button type="button" class="al-chip-btn" id="al-skip">Skip ↻</button></div>
-          <div class="al-formula" id="al-formula">?</div>
-          <h2 id="al-mol-name">Start building!</h2>
-          <p class="al-sub" id="al-mol-shape"></p>
+          <div class="al-mol-head"><div class="al-formula" id="al-formula">?</div><h2 id="al-mol-name">Start building!</h2></div>
+          <div class="al-stats" id="al-mol-stats" hidden>
+            <div class="al-stat"><span>MOLAR MASS</span><strong id="al-mol-mass">–</strong></div>
+            <div class="al-stat"><span>ATOMS</span><strong id="al-mol-atoms">–</strong></div>
+            <div class="al-stat"><span>SHAPE</span><strong id="al-mol-shape" style="font-size:14px">–</strong></div>
+            <div class="al-stat"><span>BONDS</span><strong id="al-mol-bonds" style="font-size:14px">–</strong></div>
+          </div>
           <p class="al-explain" id="al-mol-text">Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!</p>
         </div>
 
@@ -537,7 +576,7 @@
   function nucleusRadius() { return 8 * 1.2 * Math.cbrt(Math.max(atom.p + atom.n, 1)) + 8; }
   function shellRadius(i) { return nucleusRadius() + 40 + i * 36; }
 
-  const TILTS = [[0.35, 0.2], [-0.7, 0.55], [1.05, -0.45], [-0.3, -1.0], [0.6, 1.2]];
+  const TILTS = [[0.35, 0.2], [-0.7, 0.55], [1.05, -0.45], [-0.3, -1.0], [0.6, 1.2], [-1.2, -0.3], [0.15, 0.9]];
   function shellBasis(i) {
     const [ax, az] = TILTS[i % TILTS.length];
     const rot = v => {
@@ -550,8 +589,7 @@
   }
 
   function setAtom(part, value, quiet) {
-    const limits = { p: [1, MAX_P], n: [0, 60], e: [0, Math.min(MAX_P + 4, atom.p + 4)] };
-    if (part === "p") limits.p = [1, MAX_P];
+    const limits = { p: [1, MAX_P], n: [0, 180], e: [0, atom.p + 4] };
     const [lo, hi] = limits[part];
     const v = Math.max(lo, Math.min(hi, value));
     if (v === atom[part]) {
@@ -616,7 +654,9 @@
     { id: "noble", text: "Build a noble gas with a full shell", test: s => s.full },
     { id: "c14", text: "Build Carbon-14 (used to date fossils)", test: s => s.p === 6 && s.n === 8 },
     { id: "fe56", text: "Build a neutral Iron-56 atom", test: s => s.p === 26 && s.n === 30 && s.charge === 0 },
-    { id: "ten", text: "Discover 10 elements", test: () => discovered.size >= 10 }
+    { id: "au", text: "Build Gold-197 ✨", test: s => s.p === 79 && s.n === 118 },
+    { id: "u238", text: "Build Uranium-238 ☢", test: s => s.p === 92 && s.n === 146 },
+    { id: "twenty", text: "Discover 20 elements", test: () => discovered.size >= 20 }
   ];
   const missionsDone = new Set(load("atomLabMissions", []));
 
@@ -645,9 +685,7 @@
   section.querySelectorAll(".al-step").forEach(btn => {
     btn.addEventListener("click", () => setAtom(btn.dataset.part, atom[btn.dataset.part] + Number(btn.dataset.step)));
   });
-  section.querySelectorAll("[data-quick]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const z = Number(btn.dataset.quick);
+  function quickBuild(z) {
       const before = snapshot();
       const oldE = atom.e;
       atom.p = z; atom.n = COMMON[z]; atom.e = z;
@@ -655,17 +693,26 @@
       layoutNucleus();
       updateAtomInfo();
       atomFx(before, false);
-    });
-  });
+  }
+  section.querySelectorAll("[data-quick]").forEach(btn => btn.addEventListener("click", () => quickBuild(Number(btn.dataset.quick))));
+  const pick = $("al-pick");
+  for (let z = 1; z <= MAX_P; z++) {
+    const o = document.createElement("option");
+    o.value = z;
+    o.textContent = `${z}. ${NAMES[z]} (${SYMBOLS[z]})`;
+    pick.appendChild(o);
+  }
+  pick.addEventListener("change", () => { if (pick.value) quickBuild(Number(pick.value)); pick.value = ""; });
   $("al-neutral").addEventListener("click", () => {
     if (atom.e === atom.p) { toast("✅ Already neutral!"); return; }
     setAtom("e", atom.p, true);
     toast("⚖ Balanced! Now it's a neutral atom.");
   });
   $("al-stable").addEventListener("click", () => {
-    if (atom.n === COMMON[atom.p]) { toast("✅ Already the most common isotope!"); return; }
+    const noStable = !(STABLE[atom.p] || []).length;
+    if (atom.n === COMMON[atom.p]) { toast(noStable ? "✅ Already the longest-lasting one!" : "✅ Already the most common isotope!"); return; }
     setAtom("n", COMMON[atom.p], true);
-    toast(`✓ ${NAMES[atom.p]}-${atom.p + atom.n}: the most common one!`);
+    toast(`✓ ${NAMES[atom.p]}-${atom.p + atom.n}: the ${noStable ? "longest-lasting" : "most common"} one!`);
   });
 
   const SUP = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
@@ -705,8 +752,15 @@
     else parts.push(`It has ${-charge} extra electron${-charge > 1 ? "s" : ""}, so it is a <b>negative ion</b>. Remove ${-charge} to make it neutral.`);
     if (!stable) {
       const list = STABLE[p] || [];
-      const tooMany = list.length && n > Math.max(...list);
-      parts.push(`☢ ${name}-${mass} would be radioactive: its nucleus has too ${tooMany ? "many" : "few"} neutrons, so it would break apart over time. The most common one is ${name}-${p + COMMON[p]} (${COMMON[p]} neutrons).`);
+      if (p === 83) {
+        parts.push("☢ Bismuth is technically radioactive, but Bismuth-209 decays so slowly that it lasts over a billion times the age of the universe!");
+      } else if (!list.length) {
+        parts.push(`☢ Every isotope of ${name} is radioactive. There is no stable version! The longest-lasting one is ${name}-${p + COMMON[p]}.`);
+        if (p >= 99) parts.push("⚗ It is only made in laboratories, often just a few atoms at a time.");
+      } else {
+        const tooMany = n > Math.max(...list);
+        parts.push(`☢ ${name}-${mass} would be radioactive: its nucleus has too ${tooMany ? "many" : "few"} neutrons, so it would break apart over time. The most common one is ${name}-${p + COMMON[p]} (${COMMON[p]} neutrons).`);
+      }
     }
     if (charge === 0 && NOBLE.includes(p)) parts.push("✨ Its outer shell is full. That's why noble gases hardly react with anything!");
     $("al-explain").innerHTML = parts.join(" ");
@@ -805,6 +859,7 @@
   let molAtoms = [];   // {sym, x,y,z, tx,ty,tz, seed}
   let currentMatch = null;
   let bondGrow = 0;
+  let transfer = 0;
   let collected = new Set(load("atomLabMolecules", []));
   let score = load("atomLabScore", 0);
   let challenge = null;
@@ -820,6 +875,34 @@
     b.innerHTML = `<span class="al-ball" style="background:radial-gradient(circle at 35% 30%, ${mix(st.color, "white", .6)}, ${st.color} 45%, ${mix(st.color, "black", .5)});color:${st.text}">${sym}</span>${st.name}`;
     b.addEventListener("click", () => addMolAtom(sym));
     palette.appendChild(b);
+  });
+
+  let showTimer = null;
+  let showTarget = 0;
+  function showMolecule(id) {
+    const m = MOLECULES.find(x => x.id === id);
+    clearInterval(showTimer);
+    showTarget = 0;
+    molAtoms.forEach(o => leaving.push({ x: o.x, y: o.y, z: o.z, vx: (Math.random() - .5) * 12, vy: -5, vz: (Math.random() - .5) * 12, life: 1, color: ATOM_STYLE[o.sym].color, r: ATOM_STYLE[o.sym].r }));
+    molAtoms = [];
+    checkMolecule();
+    const list = m.atoms.map(a => a[0]);
+    showTarget = list.length;
+    let i = 0;
+    showTimer = setInterval(() => {
+      if (i >= list.length) { clearInterval(showTimer); showTarget = 0; return; }
+      addMolAtom(list[i++]);
+    }, 160);
+  }
+  ["h2o", "co2", "ch4", "nh3", "nacl", "c2h5oh", "c6h6"].forEach(id => {
+    const m = MOLECULES.find(x => x.id === id);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "al-chip-btn";
+    b.textContent = m.formula;
+    b.title = m.name;
+    b.addEventListener("click", () => showMolecule(id));
+    $("al-showme").appendChild(b);
   });
 
   function addMolAtom(sym) {
@@ -839,6 +922,8 @@
     checkMolecule();
   }
   $("al-clear").addEventListener("click", () => {
+    clearInterval(showTimer);
+    showTarget = 0;
     molAtoms.forEach(o => leaving.push({ x: o.x, y: o.y, z: o.z, vx: (Math.random() - .5) * 12, vy: -5 - Math.random() * 4, vz: (Math.random() - .5) * 12, life: 1, color: ATOM_STYLE[o.sym].color, r: ATOM_STYLE[o.sym].r }));
     molAtoms = [];
     checkMolecule();
@@ -866,7 +951,8 @@
 
   function checkMolecule() {
     const c = counts(molAtoms);
-    const match = MOLECULES.find(m => sameCounts(c, counts(m.atoms))) || null;
+    const building = showTarget && molAtoms.length < showTarget;
+    const match = building ? null : (MOLECULES.find(m => sameCounts(c, counts(m.atoms))) || null);
 
     // workbench chips
     const bench = $("al-bench");
@@ -886,6 +972,7 @@
       });
       molAtoms.sort((a, b) => a.slot - b.slot);
       bondGrow = 0;
+      transfer = 0;
       burstConfetti(60);
       const shortName = match.name.split(" (")[0].toUpperCase();
       fxRing("#4ade80");
@@ -912,12 +999,16 @@
     if (match) {
       $("al-formula").textContent = match.formula;
       $("al-mol-name").textContent = match.name;
-      $("al-mol-shape").textContent = `Shape: ${match.shape} · ${match.bondText}`;
+      $("al-mol-stats").hidden = false;
+      $("al-mol-mass").textContent = `${match.atoms.reduce((t, a) => t + ATOMIC_MASS[a[0]], 0).toFixed(1)} g/mol`;
+      $("al-mol-atoms").textContent = match.atoms.length;
+      $("al-mol-shape").textContent = match.shape;
+      $("al-mol-bonds").textContent = match.bondText;
       $("al-mol-text").textContent = match.fact;
     } else {
       $("al-formula").textContent = molAtoms.length ? "?" : "…";
       $("al-mol-name").textContent = molAtoms.length ? "🤔 Not a molecule yet" : "Start building!";
-      $("al-mol-shape").textContent = "";
+      $("al-mol-stats").hidden = true;
       $("al-mol-text").textContent = molAtoms.length ? hintFor(c) : "Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!";
     }
 
@@ -981,10 +1072,16 @@
     const SCALE = 70;
     const n = molAtoms.length;
 
+    let cx = 0, cy = 0, cz = 0;
+    if (currentMatch) {
+      currentMatch.atoms.forEach(m => { cx += m[1]; cy += m[2]; cz += m[3]; });
+      const k = currentMatch.atoms.length;
+      cx /= k; cy /= k; cz /= k;
+    }
     molAtoms.forEach((a, i) => {
       if (currentMatch) {
         const m = currentMatch.atoms[a.slot];
-        a.tx = m[1] * SCALE; a.ty = -m[2] * SCALE; a.tz = m[3] * SCALE;
+        a.tx = (m[1] - cx) * SCALE; a.ty = -(m[2] - cy) * SCALE; a.tz = (m[3] - cz) * SCALE;
       } else {
         const r = 40 + n * 14;
         const u = rand(a.seed * 3) * 2 - 1, th = rand(a.seed * 3 + 1) * Math.PI * 2, s = Math.sqrt(1 - u * u);
@@ -1005,16 +1102,32 @@
     const proj = molAtoms.map(a => project(a.x, a.y, a.z));
     if (currentMatch) {
       bondGrow = Math.min(1, bondGrow + 0.035);
-      currentMatch.bonds.forEach(([i, j, order]) => {
+      currentMatch.bonds.forEach(([i, j, order], bi) => {
         const A = proj[i], B = proj[j];
+        const a3 = molAtoms[i], b3 = molAtoms[j];
         if (!A || !B) return;
-        if (currentMatch.ionic) {
+        if (order === 0) {
           items.push({ z: Math.max(A.z, B.z) + 50, draw: () => drawIonic(A, B, bondGrow) });
+          // the electron jumping from sodium to the other ion
+          if (transfer < 1) {
+            const t = Math.min(1, transfer);
+            const q = project(a3.x + (b3.x - a3.x) * t, a3.y + (b3.y - a3.y) * t - Math.sin(t * Math.PI) * 50, a3.z + (b3.z - a3.z) * t);
+            items.push({ z: q.z - 100, draw: () => { drawGlow(q.x, q.y, 22 * q.f, "85,207,255", 0.9); drawSphere(q.x, q.y, 6 * q.f, "#7fe0ff"); } });
+          }
         } else {
           items.push({ z: A.z + 0.5, draw: () => drawHalfBond(A, B, order, bondGrow) });
           items.push({ z: B.z + 0.5, draw: () => drawHalfBond(B, A, order, bondGrow) });
+          // shared electrons sliding along the bond
+          if (bondGrow >= 1) {
+            for (let k = 0; k < order; k++) {
+              const t = (Math.sin(time / 380 + bi * 1.7 + k * 2.1) + 1) / 2;
+              const q = project(a3.x + (b3.x - a3.x) * t, a3.y + (b3.y - a3.y) * t, a3.z + (b3.z - a3.z) * t);
+              items.push({ z: q.z - 2, draw: () => drawGlow(q.x, q.y, 9 * q.f, "127,224,255", 0.85) });
+            }
+          }
         }
       });
+      transfer = Math.min(1.2, transfer + 0.018);
     }
     molAtoms.forEach((a, i) => {
       const q = proj[i];
@@ -1028,7 +1141,7 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         let label = a.sym;
-        if (currentMatch && currentMatch.ionic) label += a.sym === "Na" ? "⁺" : "⁻";
+        if (currentMatch && currentMatch.charges && currentMatch.charges[a.slot] && transfer >= 1) label += currentMatch.charges[a.slot];
         ctx.fillText(label, q.x, q.y + 1);
       } });
     });
