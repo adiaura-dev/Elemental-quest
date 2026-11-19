@@ -320,7 +320,7 @@ function showScreen(id) { document.querySelectorAll(".screen").forEach(s => s.cl
 function renderHome() {
   const bio = SUBJECT === "biology", g = GRADE();
   $("#h-eyebrow").textContent = bio ? "BIOLOGY · THE SCIENCE OF LIFE" : "PHYSICS · HOW THE UNIVERSE WORKS";
-  $("#h-title").textContent = bio ? "🧬 Explore Biology" : "⚡ Explore Physics";
+  $("#h-title").textContent = bio ? "Biology" : "Physics";
   $("#h-sub").textContent = `Labs and quizzes for Class ${g}. Pick one to start!`;
   $("#tools").innerHTML = TOOLS[SUBJECT].map(t => `<button class="tool" style="--c:${t.color}" data-tool="${t.id}"><span class="ic">${t.icon}</span><h3>${t.name}</h3><p>${t.desc}</p>${g >= t.g ? '<span class="tag rec">✓ FOR YOUR CLASS</span>' : `<span class="tag">CLASS ${t.g}+</span>`}</button>`).join("");
   document.querySelectorAll("[data-tool]").forEach(b => b.addEventListener("click", () => { sfx.click(); location.hash = b.dataset.tool; }));
@@ -330,7 +330,7 @@ function openTool(id) {
   const t = TOOLS[SUBJECT].find(x => x.id === id);
   if (cleanup) { cleanup(); cleanup = null; }
   if (!t) { renderHome(); showScreen("home"); return; }
-  $("#t-title").textContent = `${t.icon} ${t.name}`;
+  $("#t-title").textContent = t.name;
   $("#t-extra").innerHTML = "";
   showScreen("tool");
   ({ cell: cellTool, body: bodyTool, quiz: quizTool, circuit: circuitTool, motion: motionTool })[id]();
