@@ -1,6 +1,30 @@
 // api/verity.js — Verity, the OmniQuest AI tutor, on Vercel using Groq's FREE plan.
 // The key comes from Vercel's Environment Variables (GROQ_API_KEY), never from your code.
 
+const LANGS = ["English", "Hindi", "Bengali", "Marathi", "Telugu", "Tamil", "Gujarati", "Urdu", "Kannada", "Odia", "Malayalam", "Punjabi", "French", "German", "Spanish", "Arabic", "Chinese", "Japanese"];
+const langOf = body => (body && body.profile && LANGS.includes(body.profile.lang) ? body.profile.lang : "English");
+const levelOf = body => {
+  const p = (body && body.profile) || {};
+  const board = ["CBSE", "ICSE", "IGCSE", "State", "Other"].includes(p.board) ? p.board : "CBSE";
+  const grade = Number.isInteger(p.grade) && p.grade >= 1 && p.grade <= 12 ? p.grade : 7;
+  return { board, grade, word: board === "IGCSE" ? "Grade" : "Class" };
+};
+async function askGroq(apiKey, messages, maxTokens, model) {
+  const m = model || process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const request = { model: m, messages, max_completion_tokens: maxTokens };
+  if (m.startsWith("openai/gpt-oss")) request.reasoning_effort = "low";
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` }, body: JSON.stringify(request) });
+  const data = await response.json();
+  if (!response.ok) {
+    const err = new Error(response.status === 429 ? "Lots of students are learning right now! Please wait a minute and try again." : (data?.error?.message || "AI request failed."));
+    err.status = response.status;
+    throw err;
+  }
+  const text = data?.choices?.[0]?.message?.content || "";
+  try { return JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)); } catch { return null; }
+}
+const clip = (v, n) => (typeof v === "string" ? v.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#{1,6}\s*/gm, "").trim().slice(0, n) : "");
+
 module.exports = async (req, res) => {
   // Allow the chat to work when index.html is opened from your computer
   if (req.headers.origin === "null") {
@@ -26,6 +50,9 @@ module.exports = async (req, res) => {
   if (body.mode === "lesson") return writeLesson(body, apiKey, res);
   // ---- Syllabus mode: chapters + subtopics for a board, class and subject ----
   if (body.mode === "syllabus") return writeSyllabus(body, apiKey, res);
+  // ---- Exam mode and homework checking ----
+  if (body.mode === "exam") return writeExam(body, apiKey, res);
+  if (body.mode === "check") return checkHomework(body, apiKey, res);
 
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   if (!message) return res.status(400).json({ error: "Message is empty." });
@@ -78,6 +105,8 @@ module.exports = async (req, res) => {
       `${board && board !== "Other" ? ` following the ${board === "State" ? "State board" : board} syllabus` : ""}. ` +
       "Pitch your explanations at that level and use the terms and methods that syllabus uses.";
   }
+  const lang = langOf(body);
+  if (lang !== "English") instructions += ` The student chose ${lang} as their language, so reply in ${lang} unless they write to you in a different language.`;
   if (typeof body.page === "string" && body.page.trim()) {
     instructions += ` The student is currently on this page of the site: ${body.page.slice(0, 80)}.`;
   }
@@ -148,7 +177,7 @@ async function writeLesson(body, apiKey, res) {
     '"quiz": [{"q": string, "options": [string, string, string, string], "answer": number (index 0-3 of the correct option), "explain": string}]}. ' +
     "Use 3 to 5 sections of 60 to 120 words each in plain text; include a worked example or real-life example where helpful (for maths, show the steps on separate lines). " +
     "Give 4 to 6 short key points and exactly 3 quiz questions with one clearly correct answer each. " +
-    "Write in the same language as the topic text (English if unsure).";
+    `Write the whole lesson (all text values) in ${langOf(body)}. Keep standard scientific symbols and formulas as they are.`;
 
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
   const request = {
@@ -250,5 +279,69 @@ async function writeSyllabus(body, apiKey, res) {
   } catch (error) {
     console.error("Syllabus error:", error);
     return res.status(500).json({ error: "Verity's server had a problem. Please try again." });
+  }
+}
+
+
+/* ---------------- EXAM MODE ---------------- */
+async function writeExam(body, apiKey, res) {
+  const subject = ["Maths", "Physics", "Chemistry", "Biology"].includes(body.subject) ? body.subject : null;
+  if (!subject) return res.status(400).json({ error: "Unknown subject." });
+  const chapters = (Array.isArray(body.chapters) ? body.chapters : []).filter(c => typeof c === "string").slice(0, 30).map(c => c.slice(0, 90));
+  if (!chapters.length) return res.status(400).json({ error: "Pick at least one chapter." });
+  const count = [10, 15, 20].includes(body.count) ? body.count : 10;
+  const { board, grade, word } = levelOf(body);
+  const system =
+    `You are an experienced ${board} examiner. Write a ${count}-question multiple-choice test for a ${word} ${grade} ${subject} student, in the style and difficulty of real ${board} school exams. ` +
+    `Spread the questions fairly across these chapters: ${chapters.join("; ")}. Mix easy, medium and hard questions, including some application and numerical questions. ` +
+    "Every question must have exactly one correct option and three believable wrong options. Double-check every answer and calculation. " +
+    `Write all text in ${langOf(body)} (keep scientific symbols and formulas as they are). ` +
+    'Reply with ONLY a JSON object: {"questions": [{"q": string, "options": [string, string, string, string], "answer": number (0-3), "explain": string (1-2 sentences), "chapter": string (one of the given chapter names)}]}.';
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `${subject} test` }], 6000);
+    const qs = (out && Array.isArray(out.questions) ? out.questions : [])
+      .filter(q => q && typeof q.q === "string" && Array.isArray(q.options) && q.options.length === 4 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer <= 3)
+      .slice(0, count)
+      .map(q => ({ q: clip(q.q, 400), options: q.options.map(o => clip(String(o), 200)), answer: q.answer, explain: clip(q.explain, 400), chapter: chapters.includes(q.chapter) ? q.chapter : chapters[0] }));
+    if (qs.length < Math.min(5, count)) return res.status(502).json({ error: "Verity couldn't build the test. Please try again." });
+    return res.status(200).json({ exam: { questions: qs } });
+  } catch (e) {
+    return res.status(e.status || 500).json({ error: e.status ? e.message : "Verity's server had a problem. Please try again." });
+  }
+}
+
+/* ---------------- HOMEWORK CHECK ---------------- */
+async function checkHomework(body, apiKey, res) {
+  const question = typeof body.question === "string" ? body.question.trim().slice(0, 2000) : "";
+  const working = typeof body.working === "string" ? body.working.trim().slice(0, 4000) : "";
+  const image = typeof body.image === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(body.image) && body.image.length < 4000000 ? body.image : null;
+  if (!question && !working && !image) return res.status(400).json({ error: "Type your question and working, or add a photo." });
+  const subject = ["Maths", "Physics", "Chemistry", "Biology"].includes(body.subject) ? body.subject : "General";
+  const { board, grade, word } = levelOf(body);
+  const lang = langOf(body);
+  const system =
+    `You are Verity, a kind and encouraging ${subject} teacher checking homework for a ${board} ${word} ${grade} student. ` +
+    "Check the student's answer and working carefully, step by step. Find the FIRST step that is wrong (if any) and explain why in simple words. " +
+    "Do not just hand over the answer in the main feedback: give a hint that helps them fix it themselves. Put the complete correct solution only in the 'solution' field. " +
+    "If the photo or text is not school work, say so politely in 'summary' and set verdict to 'unclear'. " +
+    `Write all text in ${lang}. Reply with ONLY a JSON object: ` +
+    '{"verdict": "correct" | "partly" | "incorrect" | "unclear", "summary": string (1-2 friendly sentences), "steps": [{"text": string (the student\'s step, short), "ok": boolean, "comment": string}], "hint": string, "solution": string (full worked solution, steps on separate lines)}.';
+  const userText = `Question: ${question || "(see photo)"}\nStudent's answer and working:\n${working || "(see photo)"}`;
+  const userContent = image ? [{ type: "text", text: userText }, { type: "image_url", image_url: { url: image } }] : userText;
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: userContent }], 3000,
+      image ? (process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct") : undefined);
+    if (!out) return res.status(502).json({ error: "Verity couldn't read that properly. Please try again." });
+    const verdict = ["correct", "partly", "incorrect", "unclear"].includes(out.verdict) ? out.verdict : "unclear";
+    return res.status(200).json({ check: {
+      verdict,
+      summary: clip(out.summary, 600),
+      steps: (Array.isArray(out.steps) ? out.steps : []).slice(0, 12).map(st => ({ text: clip(st && st.text, 300), ok: !!(st && st.ok), comment: clip(st && st.comment, 400) })).filter(st => st.text),
+      hint: clip(out.hint, 600),
+      solution: clip(out.solution, 3000)
+    } });
+  } catch (e) {
+    const msg = image && e.status && e.status !== 429 ? "Photo checking isn't working right now. Please type your question and working instead." : (e.status ? e.message : "Verity's server had a problem. Please try again.");
+    return res.status(e.status || 500).json({ error: msg });
   }
 }
