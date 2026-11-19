@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science | OmniQuest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0e1222; --panel: #1a2136; --panel2: #141a2c; --line: #2e3854; --text: #e8ecf8; --muted: #8f9bbd; --amber: #ffb347; --violet: #7c5cff; --green: #3ddc97; --red: #ff5d73; --blue: #55cfff; --yellow: #ffd84d; --accent: #3ddc97; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { font-family: "Nunito", system-ui, sans-serif; color: var(--text); background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+html.embed body { background: transparent; }
+button { font-family: inherit; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+h1, h2, h3 { font-family: "Fredoka", "Nunito", sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 8px 18px 50px; }
+.screen { display: none; animation: screenIn .4s ease-out; }
+.screen.active { display: block; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.hero { margin: 6px 0 22px; }
+.eyebrow { color: var(--accent); font-weight: 900; letter-spacing: 3px; font-size: 12px; margin: 0 0 6px; }
+.hero h1 { font-size: clamp(28px, 4vw, 42px); margin: 0 0 6px; }
+.sub { color: var(--muted); font-size: 16px; margin: 0; }
+.tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.tool { position: relative; text-align: left; background: linear-gradient(160deg, var(--panel), var(--panel2)); border: 1px solid var(--line); border-radius: 20px; padding: 20px; color: var(--text); overflow: hidden; transition: transform .25s, border-color .25s, box-shadow .25s; }
+.tool::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 85% 10%, var(--c), transparent 55%); opacity: .2; }
+.tool:hover { transform: translateY(-5px); border-color: var(--c); box-shadow: 0 16px 36px #0007; }
+.tool .ic { position: relative; font-size: 40px; display: inline-block; transition: transform .3s; }
+.tool:hover .ic { transform: scale(1.2) rotate(-8deg); }
+.tool h3 { position: relative; margin: 8px 0 6px; font-size: 21px; }
+.tool p { position: relative; margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.tag { position: relative; display: inline-block; font-size: 10.5px; font-weight: 900; letter-spacing: 1px; padding: 4px 9px; border-radius: 20px; background: #2a3352; color: #c3cbe6; margin-right: 6px; }
+.tag.rec { background: var(--accent); color: #062218; }
+.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.top h2 { margin: 0; font-size: 25px; flex: 1; }
+.back { background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 12px; padding: 9px 14px; font-weight: 800; }
+.back:hover { border-color: var(--accent); }
+.seg { display: flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; color: var(--muted); font-weight: 800; padding: 7px 12px; border-radius: 9px; font-size: 13px; }
+.seg button.on { background: var(--accent); color: #062218; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+.card { background: linear-gradient(160deg, var(--panel), var(--panel2)); border: 1px solid var(--line); border-radius: 20px; padding: 20px; box-shadow: 0 18px 44px #0005; }
+.card.shake { animation: shake .45s linear; }
+@keyframes shake { 15% { transform: translateX(-8px); } 30% { transform: translateX(7px); } 45% { transform: translateX(-5px); } 60% { transform: translateX(4px); } }
+.label { color: var(--accent); font-weight: 900; letter-spacing: 2px; font-size: 12px; margin-bottom: 8px; }
+.info h3 { margin: 4px 0 6px; font-size: 24px; }
+.info p { color: #c3cbe6; line-height: 1.6; font-size: 14.5px; margin: 0 0 10px; }
+.box { background: #10162a; border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-size: 14px; color: #c3cbe6; line-height: 1.55; margin-bottom: 9px; }
+.box b { color: var(--amber); }
+.btn { border: 0; border-radius: 12px; padding: 11px 18px; font-weight: 900; font-size: 15px; color: #052016; background: linear-gradient(135deg, #5af0b0, var(--green)); box-shadow: 0 5px 0 #1d8a5c, 0 9px 18px #0006; transition: transform .1s, box-shadow .1s; }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1d8a5c; }
+.btn.ghost { background: #232c45; color: var(--text); box-shadow: 0 5px 0 #151b2e; }
+.btn.alt { background: linear-gradient(135deg, var(--amber), #ff8a3d); color: #2a1600; box-shadow: 0 5px 0 #a3561a; }
+.btn:disabled { opacity: .5; cursor: default; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mission { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #1d2a4a; border: 1px dashed var(--blue); border-radius: 12px; padding: 10px 12px; font-weight: 800; margin-bottom: 12px; }
+.score { color: var(--yellow); font-weight: 900; }
+.hint { color: var(--muted); font-size: 13px; font-weight: 700; margin-top: 8px; text-align: center; }
+
+/* svg diagrams */
+svg.dia { width: 100%; height: auto; display: block; }
+.part { cursor: pointer; transition: filter .2s, opacity .3s; }
+.part:hover { filter: brightness(1.35) drop-shadow(0 0 6px #fff8); }
+.part.sel { filter: brightness(1.45) drop-shadow(0 0 10px #ffd84d); }
+.part.dim { opacity: .25; }
+.part.good { animation: glowG .9s ease-out; }
+.part.bad { animation: glowR .6s ease-out; }
+@keyframes glowG { 40% { filter: brightness(1.6) drop-shadow(0 0 16px #3ddc97); } }
+@keyframes glowR { 30% { filter: brightness(1.3) drop-shadow(0 0 14px #ff5d73); transform: translateX(4px); } }
+
+/* quiz */
+.q { font-size: clamp(19px, 2.4vw, 23px); font-weight: 800; line-height: 1.5; margin: 0 0 14px; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt { text-align: left; background: #222b44; border: 2px solid #313c5c; color: var(--text); border-radius: 14px; padding: 13px 15px; font-size: 16.5px; font-weight: 800; display: flex; gap: 11px; align-items: center; transition: transform .15s, border-color .2s; }
+.opt .l { width: 27px; height: 27px; flex: none; border-radius: 8px; display: grid; place-items: center; background: #313c5c; font-size: 13px; color: var(--muted); }
+.opt:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-2px); }
+.opt:disabled { cursor: default; }
+.opt.right { background: #133d32; border-color: var(--green); }
+.opt.right .l { background: var(--green); color: #062218; }
+.opt.wrong { background: #46202a; border-color: var(--red); animation: shake .4s; }
+.opt.wrong .l { background: var(--red); color: #fff; }
+.opt.dim { opacity: .45; }
+.fb { margin-top: 12px; border-radius: 12px; padding: 0 13px; max-height: 0; overflow: hidden; transition: all .35s; font-weight: 700; line-height: 1.5; }
+.fb.show { max-height: 260px; padding: 11px 13px; }
+.fb.good { background: #133d32; border: 1px solid var(--green); color: #b8f5dc; }
+.fb.bad { background: #3d1c25; border: 1px solid var(--red); color: #ffc7cf; }
+.fb.info { background: #1d2a4a; border: 1px solid var(--blue); color: #c7ecff; }
+.progress { display: flex; gap: 5px; margin-bottom: 14px; }
+.progress i { flex: 1; height: 7px; border-radius: 8px; background: #252e47; }
+.progress i.now { background: var(--blue); }
+.progress i.good { background: var(--green); }
+.progress i.bad { background: var(--red); }
+.results { text-align: center; padding: 16px 0; }
+.stars { font-size: 58px; letter-spacing: 8px; }
+.stars span { display: inline-block; color: #3a4466; opacity: 0; animation: starIn .5s cubic-bezier(.2,1.6,.4,1) forwards; }
+.stars span.on { color: var(--yellow); text-shadow: 0 0 20px #ffd84d; }
+@keyframes starIn { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: none; } }
+
+/* physics */
+input[type=range] { width: 100%; accent-color: var(--amber); }
+.slider { margin-bottom: 12px; }
+.slider .row { justify-content: space-between; font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+.slider b { color: var(--yellow); font-family: "Fredoka", sans-serif; font-size: 18px; }
+.meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.meter { background: #0f1426; border: 1px solid var(--line); border-radius: 12px; padding: 9px; text-align: center; }
+.meter span { display: block; font-size: 10.5px; color: var(--muted); font-weight: 900; letter-spacing: 1px; }
+.meter b { font: 700 22px "Fredoka", sans-serif; color: #fff; }
+.mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mat { background: #222b44; border: 2px solid #313c5c; color: var(--text); border-radius: 12px; padding: 9px 6px; font-weight: 800; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.mat span { font-size: 24px; }
+.mat:hover { border-color: var(--amber); }
+.mat.done-y { border-color: var(--green); }
+.mat.done-n { border-color: var(--red); }
+canvas.road, canvas.graph { width: 100%; display: block; background: #0f1426; border: 1px solid var(--line); border-radius: 14px; }
+.ans { width: 110px; font: 800 22px "Fredoka", sans-serif; text-align: center; background: #0f1426; color: #fff; border: 2px solid #34406a; border-radius: 12px; padding: 7px; outline: none; }
+.ans:focus { border-color: var(--amber); }
+
+.pop { position: fixed; z-index: 60; transform: translate(-50%, -50%); font: 700 23px "Fredoka", sans-serif; text-shadow: 3px 3px 0 #0b0f1c; pointer-events: none; white-space: nowrap; animation: fly 1.2s ease-out forwards; }
+@keyframes fly { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 18% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); } 35% { transform: translate(-50%, -70%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -200%); } }
+.toast { position: fixed; left: 50%; top: 16px; z-index: 70; opacity: 0; transform: translate(-50%, -120px); background: var(--panel); border: 1px solid var(--accent); color: #fff; font-weight: 900; padding: 11px 18px; border-radius: 14px; transition: transform .4s cubic-bezier(.2,1.4,.4,1), opacity .3s; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 65; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { main { padding: 6px 10px 40px; } .opts { grid-template-columns: 1fr; } .card { padding: 15px; } .mats { grid-template-columns: repeat(2, 1fr); } .meters { grid-template-columns: repeat(3, 1fr); } .meter b { font-size: 17px; } }
+</style>
+</head>
+<body>
+<main>
+  <section class="screen active" id="home">
+    <div class="hero"><p class="eyebrow" id="h-eyebrow"></p><h1 id="h-title"></h1><p class="sub" id="h-sub"></p></div>
+    <div class="tools" id="tools"></div>
+  </section>
+  <section class="screen" id="tool">
+    <div class="top"><button class="back" id="back">← All</button><h2 id="t-title"></h2><div id="t-extra"></div></div>
+    <div id="t-body"></div>
+  </section>
+</main>
+<canvas id="confetti"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================
+   OMNIQUEST SCIENCE: Biology + Physics
+   science.html?subject=biology  or  ?subject=physics
+   ===================================================== */
+const $ = s => document.querySelector(s);
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { const r = [...a]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
+const params = new URLSearchParams(location.search);
+const SUBJECT = params.get("subject") === "physics" ? "physics" : "biology";
+const EMBED = params.get("embed") === "1";
+if (EMBED) document.documentElement.classList.add("embed");
+if (SUBJECT === "physics") document.documentElement.style.setProperty("--accent", "#ffb347");
+
+/* ---------- shared progress (same storage as the whole site) ---------- */
+const KEY = "omniQuest";
+const shared = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (_) { return {}; } };
+const GRADE = () => Number(shared().grade) || 7;
+function patch(fn) {
+  try { const d = shared(); fn(d); localStorage.setItem(KEY, JSON.stringify(d)); } catch (_) { /* ignore */ }
+  if (EMBED && parent !== window) parent.postMessage({ oq: "xp" }, "*");
+}
+let streak = 0;
+function addXP(n, el) {
+  patch(d => { d.xp = (d.xp || 0) + n; d.solved = (d.solved || 0) + 1; });
+  pop(`+${n} XP`, "#ffd84d", el);
+}
+function right(el, base = 10) {
+  streak++;
+  patch(d => { d.bestStreak = Math.max(d.bestStreak || 0, streak); });
+  sfx.good();
+  addXP(base + Math.min(10, (streak - 1) * 2), el);
+  if ([3, 5, 10].includes(streak)) setTimeout(() => pop(`🔥 ${streak} IN A ROW!`, "#ff9f43", null, true), 250);
+}
+function wrong(card) { streak = 0; sfx.bad(); if (card) { card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake"); } }
+
+/* ---------- sound + effects ---------- */
+let ac = null;
+function tone(f, d, type = "sine", v = .07, w = 0) {
+  if (shared().sound === false) return;
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const t = ac.currentTime + w, o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .02); } catch (_) { /* no sound */ }
+}
+const sfx = { good() { tone(660, .12, "triangle"); tone(990, .18, "triangle", .07, .1); }, bad() { tone(200, .18, "sawtooth", .04); tone(140, .3, "sawtooth", .04, .12); }, click() { tone(520, .05, "sine", .03); }, win() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .2, "triangle", .07, i * .11)); } };
+function pop(text, color, el, big) {
+  const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 3, width: 0, height: 0 };
+  const p = document.createElement("div"); p.className = "pop"; p.textContent = text; p.style.color = color;
+  if (big) p.style.fontSize = "36px";
+  p.style.left = `${r.left + r.width / 2}px`; p.style.top = `${r.top + r.height / 2}px`;
+  document.body.appendChild(p); setTimeout(() => p.remove(), 1250);
+}
+let tt; function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("show"), 2300); }
+const cv = $("#confetti"), cx = cv.getContext("2d"); let conf = [];
+function burst(n = 90) {
+  const cols = ["#ffb347", "#7c5cff", "#3ddc97", "#ff5d73", "#55cfff", "#ffd84d"];
+  const start = !conf.length;
+  for (let i = 0; i < n; i++) conf.push({ x: innerWidth / 2, y: innerHeight / 3, vx: (Math.random() - .5) * 14, vy: -Math.random() * 12 - 4, s: 5 + Math.random() * 6, c: cols[i % 6], r: Math.random() * 6, vr: (Math.random() - .5) * .3, life: 1 });
+  if (start) requestAnimationFrame(drawConf);
+}
+function drawConf() {
+  cv.width = innerWidth; cv.height = innerHeight; cx.clearRect(0, 0, innerWidth, innerHeight);
+  conf = conf.filter(c => (c.life -= .008) > 0 && c.y < innerHeight + 30);
+  conf.forEach(c => { c.vy += .3; c.x += c.vx; c.y += c.vy; c.r += c.vr; cx.save(); cx.translate(c.x, c.y); cx.rotate(c.r); cx.globalAlpha = Math.min(1, c.life * 2); cx.fillStyle = c.c; cx.fillRect(-c.s / 2, -c.s / 2, c.s, c.s * .6); cx.restore(); });
+  if (conf.length) requestAnimationFrame(drawConf); else cx.clearRect(0, 0, innerWidth, innerHeight);
+}
+
+/* =====================================================
+   QUESTION BANKS  (g = the class it fits from)
+   ===================================================== */
+const BANK = {
+  biology: [
+    { g: 6, q: "What is the basic unit of life?", a: "Cell", o: ["Tissue", "Organ", "Atom"], e: "Every living thing is made of one or more cells." },
+    { g: 6, q: "Which part controls all the activities of a cell?", a: "Nucleus", o: ["Cell membrane", "Cytoplasm", "Vacuole"], e: "The nucleus is the control centre. It holds the cell's DNA." },
+    { g: 6, q: "Which part is found in plant cells but NOT in animal cells?", a: "Cell wall", o: ["Cell membrane", "Nucleus", "Cytoplasm"], e: "Plant cells have a stiff cell wall (and chloroplasts). Animal cells don't." },
+    { g: 6, q: "What is the green pigment in leaves called?", a: "Chlorophyll", o: ["Haemoglobin", "Melanin", "Carotene"], e: "Chlorophyll traps sunlight for photosynthesis." },
+    { g: 6, q: "Which gas do plants take in to make food?", a: "Carbon dioxide", o: ["Oxygen", "Nitrogen", "Hydrogen"], e: "Plants use carbon dioxide, water and sunlight to make glucose." },
+    { g: 6, q: "Which organ pumps blood around the body?", a: "Heart", o: ["Lungs", "Liver", "Kidney"], e: "The heart is a muscular pump that beats all your life." },
+    { g: 6, q: "A lack of vitamin C causes which disease?", a: "Scurvy", o: ["Rickets", "Night blindness", "Beriberi"], e: "Scurvy causes bleeding gums. Citrus fruits are rich in vitamin C." },
+    { g: 6, q: "Animals that eat only plants are called…", a: "Herbivores", o: ["Carnivores", "Omnivores", "Decomposers"], e: "Cows, deer and rabbits are herbivores." },
+    { g: 6, q: "Which part of a plant absorbs water from the soil?", a: "Roots", o: ["Leaves", "Flowers", "Stem"], e: "Root hairs soak up water and minerals." },
+    { g: 7, q: "Organisms that make their own food have which type of nutrition?", a: "Autotrophic", o: ["Heterotrophic", "Parasitic", "Saprotrophic"], e: "'Auto' means self. Green plants are autotrophs." },
+    { g: 7, q: "Where is the digestion of food completed?", a: "Small intestine", o: ["Stomach", "Mouth", "Large intestine"], e: "The small intestine finishes digestion and absorbs the nutrients." },
+    { g: 7, q: "What are the tiny pores on leaves called?", a: "Stomata", o: ["Villi", "Alveoli", "Xylem"], e: "Stomata let gases in and out and let water vapour escape." },
+    { g: 7, q: "Which tissue carries water and minerals up a plant?", a: "Xylem", o: ["Phloem", "Stomata", "Cambium"], e: "Xylem moves water up. Phloem moves food around." },
+    { g: 7, q: "Blood vessels that carry blood AWAY from the heart are…", a: "Arteries", o: ["Veins", "Capillaries", "Nerves"], e: "Arteries carry blood away from the heart. Veins bring it back." },
+    { g: 7, q: "What is the main job of the kidneys?", a: "Filter waste from the blood", o: ["Pump blood", "Digest food", "Make oxygen"], e: "The kidneys filter blood and make urine." },
+    { g: 7, q: "Mushrooms get food from dead and decaying matter. This is…", a: "Saprotrophic nutrition", o: ["Autotrophic nutrition", "Parasitic nutrition", "Photosynthesis"], e: "Saprotrophs break down dead matter to get food." },
+    { g: 7, q: "Potatoes can grow new plants from their 'eyes'. This is called…", a: "Vegetative propagation", o: ["Pollination", "Fertilisation", "Germination from seeds"], e: "New plants grow from parts like stems, roots or leaves." },
+    { g: 8, q: "Which disease is caused by a VIRUS?", a: "Common cold", o: ["Cholera", "Malaria", "Typhoid"], e: "Colds are viral. Cholera and typhoid are bacterial. Malaria is caused by a protozoan." },
+    { g: 8, q: "Malaria is spread by the female of which mosquito?", a: "Anopheles", o: ["Aedes", "Culex", "Housefly"], e: "The female Anopheles mosquito carries the malaria parasite." },
+    { g: 8, q: "Who discovered penicillin, the first antibiotic?", a: "Alexander Fleming", o: ["Louis Pasteur", "Robert Hooke", "Edward Jenner"], e: "Fleming discovered penicillin in 1928, from a mould." },
+    { g: 8, q: "Which organelle is called the 'powerhouse of the cell'?", a: "Mitochondria", o: ["Nucleus", "Ribosome", "Vacuole"], e: "Mitochondria release energy from food during respiration." },
+    { g: 8, q: "Rhizobium bacteria in the roots of pea plants fix which gas?", a: "Nitrogen", o: ["Oxygen", "Carbon dioxide", "Hydrogen"], e: "They turn nitrogen from the air into compounds the plant can use." },
+    { g: 8, q: "Which hormone controls the level of sugar in the blood?", a: "Insulin", o: ["Adrenaline", "Thyroxine", "Growth hormone"], e: "Insulin, made by the pancreas, lowers blood sugar." },
+    { g: 8, q: "In humans, fertilisation usually takes place in the…", a: "Fallopian tube (oviduct)", o: ["Uterus", "Ovary", "Vagina"], e: "The egg and sperm usually meet in the oviduct." },
+    { g: 9, q: "Who first observed and named 'cells' in a piece of cork?", a: "Robert Hooke", o: ["Anton van Leeuwenhoek", "Charles Darwin", "Gregor Mendel"], e: "Robert Hooke saw tiny box-like cells in cork in 1665." },
+    { g: 9, q: "Which cell organelle makes proteins?", a: "Ribosome", o: ["Lysosome", "Golgi apparatus", "Vacuole"], e: "Ribosomes join amino acids to build proteins." },
+    { g: 9, q: "Which organelles are called the 'suicide bags' of the cell?", a: "Lysosomes", o: ["Mitochondria", "Ribosomes", "Plastids"], e: "Lysosomes contain enzymes that can digest worn-out parts of the cell." },
+    { g: 9, q: "A tendon connects…", a: "Muscle to bone", o: ["Bone to bone", "Muscle to muscle", "Nerve to muscle"], e: "Tendons join muscle to bone. Ligaments join bone to bone." },
+    { g: 9, q: "Meristematic (growing) tissue is mainly found at the…", a: "Tips of roots and shoots", o: ["Middle of leaves", "Inside fruits", "Bark only"], e: "Meristems divide quickly, so plants grow at their tips." },
+    { g: 9, q: "Antibiotics do NOT work against…", a: "Viruses", o: ["Bacteria", "Most bacterial infections", "Germs that cause typhoid"], e: "Antibiotics attack bacteria, not viruses." },
+    { g: 9, q: "Which kingdom do mushrooms belong to?", a: "Fungi", o: ["Plantae", "Monera", "Protista"], e: "Mushrooms are fungi. They don't make their own food." },
+    { g: 10, q: "Photosynthesis happens inside which cell organelle?", a: "Chloroplast", o: ["Mitochondria", "Nucleus", "Ribosome"], e: "Chloroplasts contain chlorophyll, which traps light energy." },
+    { g: 10, q: "Which enzyme in saliva starts digesting starch?", a: "Salivary amylase", o: ["Pepsin", "Trypsin", "Lipase"], e: "Salivary amylase breaks starch into sugar." },
+    { g: 10, q: "What is the functional unit of the kidney?", a: "Nephron", o: ["Neuron", "Alveolus", "Villus"], e: "Each kidney has about a million nephrons that filter blood." },
+    { g: 10, q: "The tiny gap between two neurons is called a…", a: "Synapse", o: ["Axon", "Dendrite", "Reflex arc"], e: "Signals cross the synapse using chemicals." },
+    { g: 10, q: "Who is called the 'father of genetics'?", a: "Gregor Mendel", o: ["Charles Darwin", "Watson and Crick", "Robert Hooke"], e: "Mendel worked out the rules of inheritance using pea plants." },
+    { g: 10, q: "Which sex chromosomes does a human male have?", a: "XY", o: ["XX", "YY", "XO"], e: "Males are XY, females are XX. The father's sperm decides the baby's sex." },
+    { g: 10, q: "Which plant hormone makes shoots bend towards light?", a: "Auxin", o: ["Gibberellin", "Cytokinin", "Abscisic acid"], e: "Auxin builds up on the shaded side, making it grow more, so the shoot bends towards the light." },
+    { g: 10, q: "In Mendel's cross of tall × dwarf pea plants, the F2 ratio of tall : dwarf is…", a: "3 : 1", o: ["1 : 1", "9 : 3 : 3 : 1", "1 : 2 : 1"], e: "Phenotype ratio 3 tall : 1 dwarf (genotype ratio is 1 : 2 : 1)." },
+    { g: 10, q: "Which chamber of the heart pumps oxygen-rich blood to the whole body?", a: "Left ventricle", o: ["Right ventricle", "Left atrium", "Right atrium"], e: "The left ventricle has the thickest wall because it pumps to the whole body." },
+    { g: 10, q: "Yeast breaks down glucose WITHOUT oxygen to make…", a: "Ethanol and carbon dioxide", o: ["Lactic acid only", "Water and oxygen", "Starch"], e: "This is anaerobic respiration (fermentation), used to make bread rise." }
+  ],
+  physics: [
+    { g: 6, q: "What is the SI unit of length?", a: "Metre", o: ["Kilogram", "Second", "Litre"], e: "Length is measured in metres (m)." },
+    { g: 6, q: "Which of these is a good conductor of electricity?", a: "Copper", o: ["Rubber", "Plastic", "Wood"], e: "Metals like copper let electricity flow easily." },
+    { g: 6, q: "Which of these is an insulator?", a: "Rubber", o: ["Iron", "Aluminium", "Silver"], e: "Rubber does not let electricity pass. That's why wires are coated in it." },
+    { g: 6, q: "A magnet attracts…", a: "Iron", o: ["Wood", "Plastic", "Paper"], e: "Magnets attract iron, nickel and cobalt." },
+    { g: 6, q: "A freely hanging bar magnet always comes to rest pointing…", a: "North–South", o: ["East–West", "Up–Down", "Anywhere"], e: "That's how a compass works!" },
+    { g: 6, q: "Two north poles of magnets will…", a: "Repel each other", o: ["Attract each other", "Do nothing", "Stick together"], e: "Like poles repel, unlike poles attract." },
+    { g: 6, q: "A shadow forms when light is…", a: "Blocked by an opaque object", o: ["Reflected by a mirror", "Passing through glass", "Bent by water"], e: "Light travels in straight lines, so an opaque object leaves a dark area behind it." },
+    { g: 6, q: "The to-and-fro motion of a swing is called…", a: "Oscillatory (periodic) motion", o: ["Rotational motion", "Straight-line motion", "Random motion"], e: "It repeats itself again and again, so it's periodic." },
+    { g: 7, q: "Speed is calculated as…", a: "Distance ÷ time", o: ["Time ÷ distance", "Distance × time", "Distance + time"], e: "Speed = distance / time, e.g. 100 m in 10 s = 10 m/s." },
+    { g: 7, q: "What is the SI unit of time?", a: "Second", o: ["Minute", "Hour", "Day"], e: "Time is measured in seconds (s)." },
+    { g: 7, q: "Heat always flows from…", a: "Hotter to colder objects", o: ["Colder to hotter objects", "Heavier to lighter objects", "Bigger to smaller objects"], e: "That's why a hot cup of tea cools down." },
+    { g: 7, q: "Heat travelling through a metal spoon is called…", a: "Conduction", o: ["Convection", "Radiation", "Evaporation"], e: "Conduction is heat moving through a solid." },
+    { g: 7, q: "What is the normal human body temperature?", a: "About 37 °C", o: ["About 25 °C", "About 42 °C", "About 100 °C"], e: "Normal body temperature is about 37 °C (98.6 °F)." },
+    { g: 7, q: "In a plane mirror, your right hand looks like your left hand. This is called…", a: "Lateral inversion", o: ["Refraction", "Dispersion", "Magnification"], e: "Plane mirrors swap left and right." },
+    { g: 7, q: "A fuse protects a circuit by…", a: "Melting when too much current flows", o: ["Storing extra electricity", "Making the current bigger", "Cooling the wires"], e: "The thin fuse wire melts and breaks the circuit." },
+    { g: 7, q: "A prism splits white light into how many colours?", a: "Seven", o: ["Three", "Five", "Ten"], e: "VIBGYOR: violet, indigo, blue, green, yellow, orange, red." },
+    { g: 8, q: "A force is a push or a…", a: "Pull", o: ["Speed", "Mass", "Shape"], e: "Every force is a push or a pull." },
+    { g: 8, q: "Friction always acts…", a: "Against the direction of motion", o: ["In the direction of motion", "Upwards", "Only on wet surfaces"], e: "Friction opposes motion." },
+    { g: 8, q: "Pressure is equal to…", a: "Force ÷ area", o: ["Force × area", "Area ÷ force", "Mass × speed"], e: "Small area means big pressure. That's why knives are sharp!" },
+    { g: 8, q: "Sound CANNOT travel through…", a: "A vacuum", o: ["Water", "Steel", "Air"], e: "Sound needs a medium. In space, no one can hear you shout!" },
+    { g: 8, q: "Humans can hear sounds of frequencies between…", a: "20 Hz and 20,000 Hz", o: ["1 Hz and 100 Hz", "500 Hz and 1,000 Hz", "50,000 Hz and 100,000 Hz"], e: "Above 20,000 Hz is ultrasound. Bats and dolphins use it." },
+    { g: 8, q: "When light reflects, the angle of incidence is…", a: "Equal to the angle of reflection", o: ["Double the angle of reflection", "Always 90°", "Smaller than the angle of reflection"], e: "This is the law of reflection." },
+    { g: 8, q: "Lightning is a giant spark caused by…", a: "Electric charges in clouds", o: ["Magnets in the sky", "Sunlight", "Sound waves"], e: "Charges build up in clouds and jump as a huge spark." },
+    { g: 9, q: "What is the SI unit of force?", a: "Newton (N)", o: ["Joule (J)", "Watt (W)", "Pascal (Pa)"], e: "Named after Sir Isaac Newton." },
+    { g: 9, q: "Newton's first law is also called the law of…", a: "Inertia", o: ["Gravity", "Momentum", "Action and reaction"], e: "Objects keep doing what they're doing unless a force acts." },
+    { g: 9, q: "Acceleration due to gravity on Earth is about…", a: "9.8 m/s²", o: ["1.6 m/s²", "98 m/s²", "0.98 m/s²"], e: "On the Moon it's about 1.6 m/s², roughly one-sixth of Earth's." },
+    { g: 9, q: "On the Moon, your weight becomes about…", a: "One-sixth of your weight on Earth", o: ["Six times more", "Exactly the same", "Zero"], e: "Your mass stays the same, but weaker gravity means less weight." },
+    { g: 9, q: "A force of 10 N moves a box 5 m. How much work is done?", a: "50 J", o: ["2 J", "15 J", "0.5 J"], e: "Work = force × distance = 10 × 5 = 50 joules." },
+    { g: 9, q: "What is the SI unit of power?", a: "Watt", o: ["Joule", "Newton", "Volt"], e: "1 watt = 1 joule per second." },
+    { g: 9, q: "Kinetic energy is given by…", a: "½mv²", o: ["mgh", "mv", "m/v"], e: "KE = ½ × mass × velocity². Double the speed gives four times the energy!" },
+    { g: 9, q: "Momentum is equal to…", a: "Mass × velocity", o: ["Mass × acceleration", "Force × time²", "Mass ÷ velocity"], e: "p = mv. A heavy truck at the same speed has more momentum than a bicycle." },
+    { g: 9, q: "The speed of sound in air is about…", a: "340 m/s", o: ["3 × 10⁸ m/s", "34 m/s", "3,400 m/s"], e: "Sound is much slower than light, so you see lightning before hearing thunder." },
+    { g: 10, q: "Ohm's law states that…", a: "V = IR", o: ["V = I/R", "I = VR", "R = VI"], e: "Voltage = current × resistance (at constant temperature)." },
+    { g: 10, q: "A current of 2 A flows through a 5 Ω resistor. What is the voltage?", a: "10 V", o: ["2.5 V", "7 V", "0.4 V"], e: "V = IR = 2 × 5 = 10 V." },
+    { g: 10, q: "Resistors of 3 Ω and 6 Ω are joined in series. The total resistance is…", a: "9 Ω", o: ["2 Ω", "18 Ω", "3 Ω"], e: "In series, resistances simply add: 3 + 6 = 9 Ω." },
+    { g: 10, q: "What is the SI unit of resistance?", a: "Ohm (Ω)", o: ["Ampere (A)", "Volt (V)", "Coulomb (C)"], e: "Named after Georg Ohm." },
+    { g: 10, q: "A convex lens is also called a…", a: "Converging lens", o: ["Diverging lens", "Plane lens", "Concave mirror"], e: "It bends light rays together to a focus." },
+    { g: 10, q: "The SI unit of the power of a lens is…", a: "Dioptre", o: ["Metre", "Watt", "Lux"], e: "Power = 1 / focal length (in metres)." },
+    { g: 10, q: "The sky looks blue because of…", a: "Scattering of light", o: ["Reflection from the sea", "Refraction by clouds", "Dispersion by rain"], e: "Air molecules scatter blue light much more than red light." },
+    { g: 10, q: "The 'unit' on your electricity bill is a…", a: "Kilowatt-hour (kWh)", o: ["Watt", "Joule", "Volt"], e: "1 kWh = 1000 W used for 1 hour = 3.6 million joules." },
+    { g: 10, q: "Fleming's left-hand rule gives the direction of…", a: "Force on a current-carrying wire in a magnetic field", o: ["Induced current", "Magnetic field around a wire", "Flow of electrons in a battery"], e: "It's used for electric motors." }
+  ]
+};
+
+/* =====================================================
+   TOOLS
+   ===================================================== */
+const TOOLS = {
+  biology: [
+    { id: "cell", icon: "🔬", name: "Cell Explorer", desc: "Zoom into animal and plant cells. Tap each part to learn its job, then take the labelling challenge!", g: 6, color: "#f472b6" },
+    { id: "body", icon: "🫀", name: "Human Body Explorer", desc: "Find the organs, see which system they belong to and learn amazing facts.", g: 6, color: "#ef4444" },
+    { id: "quiz", icon: "🧬", name: "Biology Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#3ddc97" }
+  ],
+  physics: [
+    { id: "circuit", icon: "⚡", name: "Circuit Lab", desc: "Test which materials conduct electricity, then master Ohm's law with real-time current.", g: 6, color: "#ffb347" },
+    { id: "motion", icon: "🚗", name: "Motion Lab", desc: "Drive a car, watch the distance–time graph draw itself and predict how far it goes.", g: 7, color: "#55cfff" },
+    { id: "quiz", icon: "🧲", name: "Physics Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#7c5cff" }
+  ]
+};
+
+function showScreen(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id)); window.scrollTo(0, 0); }
+function renderHome() {
+  const bio = SUBJECT === "biology", g = GRADE();
+  $("#h-eyebrow").textContent = bio ? "BIOLOGY · THE SCIENCE OF LIFE" : "PHYSICS · HOW THE UNIVERSE WORKS";
+  $("#h-title").textContent = bio ? "🧬 Explore Biology" : "⚡ Explore Physics";
+  $("#h-sub").textContent = `Labs and quizzes for Class ${g}. Pick one to start!`;
+  $("#tools").innerHTML = TOOLS[SUBJECT].map(t => `<button class="tool" style="--c:${t.color}" data-tool="${t.id}"><span class="ic">${t.icon}</span><h3>${t.name}</h3><p>${t.desc}</p>${g >= t.g ? '<span class="tag rec">✓ FOR YOUR CLASS</span>' : `<span class="tag">CLASS ${t.g}+</span>`}</button>`).join("");
+  document.querySelectorAll("[data-tool]").forEach(b => b.addEventListener("click", () => { sfx.click(); location.hash = b.dataset.tool; }));
+}
+let cleanup = null;
+function openTool(id) {
+  const t = TOOLS[SUBJECT].find(x => x.id === id);
+  if (cleanup) { cleanup(); cleanup = null; }
+  if (!t) { renderHome(); showScreen("home"); return; }
+  $("#t-title").textContent = `${t.icon} ${t.name}`;
+  $("#t-extra").innerHTML = "";
+  showScreen("tool");
+  ({ cell: cellTool, body: bodyTool, quiz: quizTool, circuit: circuitTool, motion: motionTool })[id]();
+}
+$("#back").addEventListener("click", () => { sfx.click(); location.hash = ""; });
+window.addEventListener("hashchange", () => openTool(location.hash.slice(1)));
+
+/* ---------- 🔬 CELL EXPLORER ---------- */
+const CELL_PARTS = {
+  membrane: { name: "Cell membrane", g: 6, job: "A thin, flexible skin around the cell. It controls what goes in and out.", like: "🛂 Like the security gate of a city." },
+  wall: { name: "Cell wall", g: 6, job: "A strong, stiff layer outside the membrane of PLANT cells. It gives shape and support.", like: "🧱 Like the brick wall around a fort." },
+  nucleus: { name: "Nucleus", g: 6, job: "The control centre. It holds DNA, the instructions for everything the cell does.", like: "🏛 Like the city hall that makes all the rules." },
+  cytoplasm: { name: "Cytoplasm", g: 6, job: "The jelly-like fluid that fills the cell. All the organelles float in it and many reactions happen here.", like: "🍮 Like the jelly in a jelly dessert." },
+  vacuole: { name: "Vacuole", g: 6, job: "A storage sac for water, food and waste. Plant cells have one BIG vacuole that keeps them firm.", like: "🛢 Like a water tank." },
+  chloroplast: { name: "Chloroplast", g: 6, job: "Found only in plant cells. It has chlorophyll and makes food from sunlight (photosynthesis).", like: "☀️ Like a solar-powered kitchen." },
+  mito: { name: "Mitochondria", g: 8, job: "The powerhouse! It releases energy from food during respiration.", like: "⚡ Like the city's power station." },
+  er: { name: "Endoplasmic reticulum", g: 9, job: "A network of tubes that carries materials around the cell.", like: "🛣 Like the city's roads." },
+  golgi: { name: "Golgi apparatus", g: 9, job: "Packs and labels materials and sends them where they're needed.", like: "📦 Like the post office." },
+  ribo: { name: "Ribosomes", g: 9, job: "Tiny dots that build proteins.", like: "🏭 Like little factories." },
+  lyso: { name: "Lysosome", g: 9, job: "Contains enzymes that break down waste and worn-out parts. Mostly found in animal cells.", like: "♻️ Like the recycling and clean-up crew." }
+};
+function cellSVG(kind) {
+  const P = (id, inner) => `<g class="part" data-part="${id}">${inner}</g>`;
+  const ribos = pts => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.2" fill="#fde68a"/>`).join("");
+  const mito = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="34" ry="16" fill="#fb923c" stroke="#fdba74" stroke-width="2"/><path d="M-24 0 l6 -8 l6 16 l6 -16 l6 16 l6 -16 l6 16 l6 -8" fill="none" stroke="#7c2d12" stroke-width="2"/></g>`;
+  const chloro = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="30" ry="15" fill="#16a34a" stroke="#86efac" stroke-width="2"/><path d="M-18 -5 h36 M-20 0 h40 M-18 5 h36" stroke="#14532d" stroke-width="3"/></g>`;
+  if (kind === "animal") return `<svg class="dia" viewBox="0 0 520 360">
+    ${P("cytoplasm", `<ellipse cx="260" cy="180" rx="232" ry="152" fill="#3a2550"/>`)}
+    ${P("membrane", `<ellipse cx="260" cy="180" rx="232" ry="152" fill="none" stroke="#f472b6" stroke-width="7"/><ellipse cx="260" cy="180" rx="232" ry="152" fill="none" stroke="transparent" stroke-width="22"/>`)}
+    ${P("er", `<path d="M300 130 q30 10 20 35 q-10 25 20 35 q30 10 15 35 M285 230 q20 15 45 5 q25 -10 40 10" fill="none" stroke="#a78bfa" stroke-width="7" stroke-linecap="round"/>`)}
+    ${P("ribo", ribos([[318, 150], [336, 190], [350, 222], [300, 248], [338, 236], [190, 270], [215, 95], [380, 150], [120, 205]]))}
+    ${P("nucleus", `<circle cx="245" cy="175" r="58" fill="#7c3aed" stroke="#c4b5fd" stroke-width="4"/><circle cx="235" cy="165" r="17" fill="#4c1d95"/>`)}
+    ${P("mito", mito(400, 115, 20) + mito(135, 255, -25))}
+    ${P("golgi", `<g fill="none" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"><path d="M385 240 q30 -18 60 0"/><path d="M380 258 q35 -18 70 0"/><path d="M385 276 q30 -18 60 0"/></g>`)}
+    ${P("lyso", `<circle cx="150" cy="120" r="14" fill="#ef4444" stroke="#fca5a5" stroke-width="2"/><circle cx="330" cy="300" r="11" fill="#ef4444" stroke="#fca5a5" stroke-width="2"/>`)}
+    ${P("vacuole", `<circle cx="120" cy="170" r="20" fill="#38bdf855" stroke="#38bdf8" stroke-width="2"/>`)}
+  </svg>`;
+  return `<svg class="dia" viewBox="0 0 520 360">
+    ${P("wall", `<rect x="14" y="14" width="492" height="332" rx="24" fill="#0f2a1c" stroke="#22c55e" stroke-width="12"/>`)}
+    ${P("cytoplasm", `<rect x="30" y="30" width="460" height="300" rx="16" fill="#1d3a2a"/>`)}
+    ${P("membrane", `<rect x="30" y="30" width="460" height="300" rx="16" fill="none" stroke="#a3e635" stroke-width="4"/><rect x="30" y="30" width="460" height="300" rx="16" fill="none" stroke="transparent" stroke-width="16"/>`)}
+    ${P("vacuole", `<rect x="160" y="85" width="220" height="185" rx="60" fill="#38bdf833" stroke="#38bdf8" stroke-width="3"/>`)}
+    ${P("er", `<path d="M140 95 q15 20 0 40 q-15 20 0 40" fill="none" stroke="#a78bfa" stroke-width="6" stroke-linecap="round"/>`)}
+    ${P("ribo", ribos([[150, 105], [130, 150], [150, 192], [410, 300], [60, 300], [300, 55]]))}
+    ${P("nucleus", `<circle cx="90" cy="110" r="42" fill="#7c3aed" stroke="#c4b5fd" stroke-width="4"/><circle cx="84" cy="102" r="13" fill="#4c1d95"/>`)}
+    ${P("chloro", chloro(445, 85, 25) + chloro(450, 250, -20) + chloro(80, 255, 15) + chloro(265, 305, 0) + chloro(270, 55, 5))}
+    ${P("mito", mito(420, 170, 80))}
+    ${P("golgi", `<g fill="none" stroke="#22d3ee" stroke-width="5" stroke-linecap="round"><path d="M70 190 q22 -14 44 0"/><path d="M66 204 q26 -14 52 0"/></g>`)}
+  </svg>`;
+}
+// make the plant cell's chloroplast id match the parts list
+function cellTool() {
+  let kind = "animal", mode = "explore", sel = null, ch = null;
+  $("#t-extra").innerHTML = `<div class="seg"><button data-k="animal" class="on">🐾 Animal cell</button><button data-k="plant">🌿 Plant cell</button></div>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="cell-card"><div class="mission" id="cell-mission" hidden></div><div id="cell-svg"></div><div class="hint" id="cell-hint">👆 Tap any part of the cell</div></div>
+    <div class="card info" id="cell-info"></div></div>`;
+  const parts = () => [...$("#cell-svg").querySelectorAll(".part")].map(p => p.dataset.part.replace("chloro", "chloroplast")).filter((v, i, a) => a.indexOf(v) === i);
+  const infoDefault = () => {
+    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL CELL" : "PLANT CELL"}</div><h3>Tap a part!</h3><p>Cells are the building blocks of every living thing. Tap any coloured part to find out what it does.</p>
+      <div class="box"><b>Plant vs animal:</b> only plant cells have a <b>cell wall</b>, <b>chloroplasts</b> and one <b>big vacuole</b>.</div>
+      <button class="btn alt" id="cell-start">🎯 Start labelling challenge</button>`;
+    $("#cell-start").addEventListener("click", startChallenge);
+  };
+  const draw = () => {
+    $("#cell-svg").innerHTML = cellSVG(kind);
+    $("#cell-svg").querySelectorAll(".part").forEach(p => p.addEventListener("click", () => clickPart(p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part, p)));
+  };
+  const showInfo = id => {
+    const d = CELL_PARTS[id], g = GRADE();
+    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL" : "PLANT"} CELL PART ${d.g > g ? `<span class="tag">CLASS ${d.g}+</span>` : ""}</div><h3>${d.name}</h3><p>${d.job}</p><div class="box">${d.like}</div>
+      <button class="btn alt" id="cell-start">🎯 Start labelling challenge</button>`;
+    $("#cell-start").addEventListener("click", startChallenge);
+  };
+  const highlight = id => $("#cell-svg").querySelectorAll(".part").forEach(p => p.classList.toggle("sel", (p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part) === id));
+  function clickPart(id, el) {
+    sfx.click();
+    if (mode === "explore") { sel = id; highlight(id); showInfo(id); return; }
+    if (ch.done) return;
+    if (id === ch.target) {
+      el.classList.add("good"); setTimeout(() => el.classList.remove("good"), 900);
+      ch.score++; right(el, 8); ch.next();
+    } else {
+      el.classList.add("bad"); setTimeout(() => el.classList.remove("bad"), 600);
+      wrong($("#cell-card")); toast(`That's the ${CELL_PARTS[id].name}!`);
+      const t = [...$("#cell-svg").querySelectorAll(".part")].find(p => (p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part) === ch.target);
+      if (t) { t.classList.add("sel"); setTimeout(() => t.classList.remove("sel"), 1200); }
+      setTimeout(() => ch.next(), 1300);
+    }
+  }
+  function startChallenge() {
+    mode = "challenge"; highlight(null);
+    const pool = parts().filter(id => CELL_PARTS[id].g <= Math.max(GRADE(), 6));
+    const list = shuffle(pool).concat(shuffle(pool)).slice(0, 8);
+    let i = -1;
+    ch = { score: 0, done: false, target: null, next() {
+      if (!$("#cell-mission")) return;
+      i++;
+      if (i >= list.length) {
+        ch.done = true; mode = "explore";
+        $("#cell-mission").innerHTML = `<span>🏁 Challenge done: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost" id="cell-again">Again</button>`;
+        $("#cell-again").addEventListener("click", startChallenge);
+        if (ch.score >= 6) { sfx.win(); burst(120); }
+        return;
+      }
+      ch.target = list[i];
+      $("#cell-mission").hidden = false;
+      $("#cell-mission").innerHTML = `<span>🎯 Tap the <b style="color:var(--yellow)">${CELL_PARTS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+    } };
+    $("#cell-hint").textContent = "Find the part named above!";
+    ch.next();
+  }
+  document.querySelectorAll("#t-extra [data-k]").forEach(b => b.addEventListener("click", () => {
+    kind = b.dataset.k; mode = "explore";
+    document.querySelectorAll("#t-extra [data-k]").forEach(x => x.classList.toggle("on", x === b));
+    $("#cell-mission").hidden = true; $("#cell-hint").textContent = "👆 Tap any part of the cell";
+    draw(); infoDefault();
+  }));
+  draw(); infoDefault();
+}
+
+/* ---------- 🫀 HUMAN BODY EXPLORER ---------- */
+const ORGANS = {
+  brain: { name: "Brain", sys: "nervous", job: "Controls everything you think, feel and do. It sends messages through nerves.", fact: "It has about 86 billion nerve cells and uses about 20% of your body's energy!" },
+  lungs: { name: "Lungs", sys: "respiratory", job: "Take oxygen from the air into your blood and remove carbon dioxide.", fact: "The left lung is a bit smaller to make room for your heart." },
+  heart: { name: "Heart", sys: "circulatory", job: "Pumps blood through your body, carrying oxygen and food to every cell.", fact: "It beats about 100,000 times every day!" },
+  liver: { name: "Liver", sys: "digestive", job: "Makes bile to help digest fat, stores energy and removes poisons from the blood.", fact: "It's the largest organ inside your body, and it can regrow!" },
+  stomach: { name: "Stomach", sys: "digestive", job: "Churns food and mixes it with acid and enzymes to start digesting proteins.", fact: "Its acid is strong enough to kill most germs in your food." },
+  smallInt: { name: "Small intestine", sys: "digestive", job: "Finishes digestion and absorbs nutrients into the blood through tiny finger-like villi.", fact: "It's about 6 metres long, longer than a car!" },
+  largeInt: { name: "Large intestine", sys: "digestive", job: "Absorbs water from leftover food and forms waste (faeces).", fact: "It's wider but much shorter than the small intestine, about 1.5 m." },
+  kidneys: { name: "Kidneys", sys: "excretory", job: "Filter waste and extra water out of the blood to make urine.", fact: "Each kidney is about the size of your fist." },
+  bladder: { name: "Urinary bladder", sys: "excretory", job: "A stretchy bag that stores urine until you go to the toilet.", fact: "It can stretch to hold around 400–500 mL." }
+};
+const SYSTEMS = { all: "All", digestive: "🍎 Digestive", respiratory: "🌬 Respiratory", circulatory: "❤️ Circulatory", nervous: "🧠 Nervous", excretory: "💧 Excretory" };
+function bodySVG() {
+  const P = (id, inner) => `<g class="part" data-part="${id}">${inner}</g>`;
+  return `<svg class="dia" viewBox="0 0 300 520" style="max-width:360px;margin:0 auto">
+    <g fill="#1e2a44" stroke="#3a4b70" stroke-width="3">
+      <circle cx="150" cy="62" r="44"/><rect x="132" y="100" width="36" height="26" rx="8"/>
+      <path d="M78 130 Q150 112 222 130 L232 300 Q230 352 196 372 L104 372 Q70 352 68 300 Z"/>
+      <path d="M80 136 L44 250 L56 330 L70 328 L64 255 L92 180 Z"/><path d="M220 136 L256 250 L244 330 L230 328 L236 255 L208 180 Z"/>
+      <path d="M106 366 L98 510 L134 510 L146 380 Z"/><path d="M194 366 L202 510 L166 510 L154 380 Z"/>
+    </g>
+    ${P("brain", `<path d="M116 58 q0 -34 34 -34 q34 0 34 34 q0 20 -14 26 h-40 q-14 -6 -14 -26z" fill="#f9a8d4" stroke="#fbcfe8" stroke-width="2"/><path d="M130 45 q8 8 0 16 M150 32 q-6 12 4 22 M168 44 q-8 8 2 18" fill="none" stroke="#be185d" stroke-width="2"/>`)}
+    ${P("lungs", `<path d="M136 148 q-30 -6 -36 34 q-6 40 6 62 q16 6 30 -6 z" fill="#fda4af" stroke="#fecdd3" stroke-width="2"/><path d="M164 148 q30 -6 36 34 q6 40 -6 62 q-16 6 -30 -6 z" fill="#fda4af" stroke="#fecdd3" stroke-width="2"/>`)}
+    ${P("heart", `<path d="M160 214 q-18 -14 -18 -28 q0 -12 12 -12 q8 0 10 8 q2 -8 10 -8 q12 0 12 12 q0 14 -26 28z" fill="#ef4444" stroke="#fecaca" stroke-width="2"/>`)}
+    ${P("liver", `<path d="M92 252 q4 -22 40 -18 q38 4 46 18 q-30 22 -82 22 q-8 -8 -4 -22z" fill="#b45309" stroke="#fdba74" stroke-width="2"/>`)}
+    ${P("stomach", `<path d="M178 250 q22 -8 30 12 q6 26 -18 36 q-22 6 -30 -8 q12 -4 16 -14 q2 -12 2 -26z" fill="#fb923c" stroke="#fed7aa" stroke-width="2"/>`)}
+    ${P("kidneys", `<path d="M100 278 q-16 0 -16 15 q0 15 16 15 q7 0 5 -7 q-5 -8 0 -16 q2 -7 -5 -7z" fill="#be123c" stroke="#fda4af" stroke-width="2"/><path d="M200 278 q16 0 16 15 q0 15 -16 15 q-7 0 -5 -7 q5 -8 0 -16 q-2 -7 5 -7z" fill="#be123c" stroke="#fda4af" stroke-width="2"/>`)}
+    ${P("largeInt", `<path d="M110 362 L110 322 Q110 312 122 312 L178 312 Q190 312 190 322 L190 362" fill="none" stroke="#f59e0b" stroke-width="13" stroke-linecap="round"/>`)}
+    ${P("smallInt", `<rect x="122" y="320" width="56" height="40" rx="15" fill="#fdba74"/><path d="M128 330 q10 -8 20 0 t20 0 M128 341 q10 -8 20 0 t20 0 M128 352 q10 -8 20 0 t20 0" fill="none" stroke="#c2410c" stroke-width="2.5"/>`)}
+    ${P("bladder", `<ellipse cx="150" cy="378" rx="15" ry="11" fill="#fde047" stroke="#fef9c3" stroke-width="2"/>`)}
+  </svg>`;
+}
+function bodyTool() {
+  let sys = "all", ch = null;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="body-card"><div class="mission" id="body-mission" hidden></div><div class="seg" id="sys" style="margin-bottom:12px">${Object.entries(SYSTEMS).map(([k, v]) => `<button data-s="${k}" class="${k === "all" ? "on" : ""}">${v}</button>`).join("")}</div><div id="body-svg">${bodySVG()}</div></div>
+    <div class="card info" id="body-info"><div class="label">HUMAN BODY</div><h3>Tap an organ!</h3><p>Your body is made of organ systems that work as a team. Tap an organ, or pick a system to light it up.</p><button class="btn alt" id="body-start">🎯 Start organ challenge</button></div></div>`;
+  const all = () => [...document.querySelectorAll("#body-svg .part")];
+  const filter = () => all().forEach(p => p.classList.toggle("dim", sys !== "all" && ORGANS[p.dataset.part].sys !== sys));
+  document.querySelectorAll("#sys button").forEach(b => b.addEventListener("click", () => { sys = b.dataset.s; document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x === b)); filter(); sfx.click(); }));
+  all().forEach(p => p.addEventListener("click", () => {
+    const id = p.dataset.part, o = ORGANS[id];
+    sfx.click();
+    if (ch && !ch.done) {
+      if (id === ch.target) { p.classList.add("good"); setTimeout(() => p.classList.remove("good"), 900); ch.score++; right(p, 8); ch.next(); }
+      else { p.classList.add("bad"); setTimeout(() => p.classList.remove("bad"), 600); wrong($("#body-card")); toast(`That's the ${o.name}!`); setTimeout(() => ch.next(), 1100); }
+      return;
+    }
+    all().forEach(x => x.classList.toggle("sel", x === p));
+    $("#body-info").innerHTML = `<div class="label">${SYSTEMS[o.sys].toUpperCase()} SYSTEM</div><h3>${o.name}</h3><p>${o.job}</p><div class="box">🤯 <b>Fun fact:</b> ${o.fact}</div><button class="btn alt" id="body-start">🎯 Start organ challenge</button>`;
+    $("#body-start").addEventListener("click", start);
+  }));
+  function start() {
+    sys = "all"; filter(); document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x.dataset.s === "all"));
+    all().forEach(x => x.classList.remove("sel"));
+    const list = shuffle(Object.keys(ORGANS)).slice(0, 8); let i = -1;
+    ch = { score: 0, done: false, next() {
+      if (!$("#body-mission")) return;
+      i++;
+      if (i >= list.length) { ch.done = true; $("#body-mission").innerHTML = `<span>🏁 Done: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost" id="body-again">Again</button>`; $("#body-again").addEventListener("click", start); if (ch.score >= 6) { sfx.win(); burst(120); } return; }
+      ch.target = list[i]; $("#body-mission").hidden = false;
+      $("#body-mission").innerHTML = `<span>🎯 Tap the <b style="color:var(--yellow)">${ORGANS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+    } };
+    ch.next();
+  }
+  $("#body-start").addEventListener("click", start);
+}
+
+/* ---------- 🧬🧲 QUIZ ---------- */
+function quizTool() {
+  const g = GRADE();
+  const near = shuffle(BANK[SUBJECT].filter(q => q.g <= g && q.g >= g - 1));
+  const below = shuffle(BANK[SUBJECT].filter(q => q.g < g - 1));
+  const above = shuffle(BANK[SUBJECT].filter(q => q.g > g)).sort((x, y) => x.g - y.g);
+  const list = shuffle(near.concat(below).concat(above).slice(0, 10));
+  const res = []; let i = 0, xp = 0;
+  $("#t-extra").innerHTML = `<span class="tag rec">CLASS ${g}</span>`;
+  $("#t-body").innerHTML = `<div class="progress" id="qp"></div><div class="card" id="qcard"></div>`;
+  const prog = () => $("#qp").innerHTML = list.map((_, k) => `<i class="${res[k] || (k === i ? "now" : "")}"></i>`).join("");
+  function show() {
+    if (i >= list.length) return finish();
+    prog();
+    const q = list[i], opts = shuffle([q.a, ...q.o]);
+    $("#qcard").innerHTML = `<div class="label">QUESTION ${i + 1} / ${list.length} ${q.g > g ? `<span class="tag">CHALLENGE · CLASS ${q.g}</span>` : q.g < g - 1 ? `<span class="tag">REVISION · CLASS ${q.g}</span>` : ""}</div><p class="q">${q.q}</p>
+      <div class="opts">${opts.map((o, k) => `<button class="opt" data-k="${k}"><span class="l">${"ABCD"[k]}</span>${o}</button>`).join("")}</div><div class="fb" id="fb"></div><div class="row" style="justify-content:flex-end;margin-top:14px" id="nx"></div>`;
+    document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+      const ok = opts[b.dataset.k] === q.a;
+      document.querySelectorAll(".opt").forEach(x => { x.disabled = true; if (opts[x.dataset.k] === q.a) x.classList.add("right"); else if (x !== b) x.classList.add("dim"); });
+      const fb = $("#fb");
+      if (ok) { b.classList.add("right"); right(b); xp += 10; fb.className = "fb show good"; fb.innerHTML = `✓ Correct! ${q.e}`; res[i] = "good"; }
+      else { b.classList.add("wrong"); wrong($("#qcard")); fb.className = "fb show bad"; fb.innerHTML = `✗ The answer is <b>${q.a}</b>. ${q.e}`; res[i] = "bad"; }
+      i++; prog();
+      $("#nx").innerHTML = `<button class="btn" id="next">${i >= list.length ? "See results 🏁" : "Next →"}</button>`;
+      $("#next").addEventListener("click", () => { sfx.click(); show(); });
+      $("#next").focus();
+    }));
+  }
+  function finish() {
+    const score = res.filter(r => r === "good").length, pct = score / list.length;
+    const stars = pct >= .85 ? 3 : pct >= .6 ? 2 : pct >= .35 ? 1 : 0;
+    if (stars >= 2) { sfx.win(); burst(150); }
+    patch(d => { d.sciStars = d.sciStars || {}; d.sciStars[SUBJECT] = Math.max(d.sciStars[SUBJECT] || 0, stars); });
+    $("#qcard").innerHTML = `<div class="results"><div class="label">QUIZ COMPLETE</div><div class="stars">${[1, 2, 3].map(k => `<span class="${k <= stars ? "on" : ""}" style="animation-delay:${k * .25}s">★</span>`).join("")}</div><h2>${["💪 Keep practising!", "👍 Good effort!", "🎉 Great job!", "🌟 Amazing!"][stars]}</h2><p class="sub">You got ${score} out of ${list.length}.</p>
+      <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="q-home">← All</button><button class="btn" id="q-again">🔁 New quiz</button></div></div>`;
+    $("#q-home").addEventListener("click", () => location.hash = "");
+    $("#q-again").addEventListener("click", quizTool);
+  }
+  show();
+}
+
+/* ---------- ⚡ CIRCUIT LAB ---------- */
+const MATERIALS = [
+  { n: "Copper wire", i: "🔌", c: true, why: "Copper is a metal, one of the best conductors. It's used in almost all electric wires." },
+  { n: "Iron nail", i: "📌", c: true, why: "Iron is a metal, so it conducts electricity." },
+  { n: "Aluminium foil", i: "🥡", c: true, why: "Aluminium is a metal and conducts well." },
+  { n: "Pencil lead", i: "✏️", c: true, why: "Surprise! Pencil 'lead' is graphite, a form of carbon that conducts electricity." },
+  { n: "Salt water", i: "🧂", c: true, why: "Salt water has ions that can carry charge, so it conducts. Pure water barely conducts." },
+  { n: "Plastic ruler", i: "📏", c: false, why: "Plastic is an insulator. That's why wires are covered in plastic." },
+  { n: "Rubber band", i: "➰", c: false, why: "Rubber is an insulator. Electricians wear rubber gloves for safety." },
+  { n: "Wooden stick", i: "🪵", c: false, why: "Dry wood is an insulator." },
+  { n: "Glass", i: "🥛", c: false, why: "Glass is an insulator. It's used on electric poles to hold wires safely." }
+];
+function circuitSVG() {
+  return `<svg class="dia" id="circ" viewBox="0 0 520 330">
+    <defs><radialGradient id="glow"><stop offset="0" stop-color="#fff7c2"/><stop offset=".4" stop-color="#ffd84d" stop-opacity=".8"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient></defs>
+    <path id="wire" d="M80 165 L80 60 L440 60 L440 270 L80 270 Z" fill="none" stroke="#64748b" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="58" y="128" width="44" height="74" rx="8" fill="#0f1426" stroke="#ffb347" stroke-width="3"/>
+    <line x1="66" y1="150" x2="94" y2="150" stroke="#ffb347" stroke-width="5"/><line x1="72" y1="162" x2="88" y2="162" stroke="#ffb347" stroke-width="3"/><line x1="66" y1="174" x2="94" y2="174" stroke="#ffb347" stroke-width="5"/><line x1="72" y1="186" x2="88" y2="186" stroke="#ffb347" stroke-width="3"/>
+    <text x="80" y="120" text-anchor="middle" fill="#ffb347" font-weight="900" font-size="14" id="batt-label">Battery</text>
+    <rect x="225" y="48" width="70" height="24" fill="#0e1222"/>
+    <circle cx="228" cy="60" r="6" fill="#cbd5e1"/><circle cx="292" cy="60" r="6" fill="#cbd5e1"/>
+    <line id="switch" x1="228" y1="60" x2="290" y2="60" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" style="transform-origin:228px 60px;transition:transform .3s;cursor:pointer"/>
+    <text x="260" y="36" text-anchor="middle" fill="#c3cbe6" font-weight="800" font-size="13" id="switch-label">Switch: ON</text>
+    <circle id="bulb-glow" cx="440" cy="160" r="80" fill="url(#glow)" opacity="0"/>
+    <rect x="425" y="140" width="30" height="40" fill="#0e1222"/>
+    <circle cx="440" cy="150" r="24" fill="#334155" stroke="#e2e8f0" stroke-width="3" id="bulb"/>
+    <path d="M430 152 q5 -10 10 0 q5 10 10 0" fill="none" stroke="#94a3b8" stroke-width="2.5" id="filament"/>
+    <rect x="430" y="172" width="20" height="14" rx="3" fill="#94a3b8"/>
+    <rect x="200" y="252" width="120" height="36" rx="10" fill="#0e1222" stroke="#55cfff" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="260" y="276" text-anchor="middle" font-size="16" font-weight="900" fill="#e8ecf8" id="gap-label">?</text>
+    <g id="electrons"></g>
+  </svg>`;
+}
+function circuitTool() {
+  const g = GRADE();
+  let mode = g >= 10 ? "ohm" : "test", raf = null, phase = 0, on = true, current = 0, flowing = false;
+  $("#t-extra").innerHTML = `<div class="seg"><button data-m="test">🔍 Conductor test</button><button data-m="ohm">Ω Ohm's law ${g < 10 ? "(Class 10)" : ""}</button></div>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="circ-card">${circuitSVG()}<div class="hint" id="circ-hint"></div></div><div class="card info" id="circ-side"></div></div>`;
+  const wire = $("#wire"), len = wire.getTotalLength(), dots = 18;
+  $("#electrons").innerHTML = [...Array(dots)].map(() => `<circle r="4.5" fill="#55cfff" opacity="0"/>`).join("");
+  const e = [...document.querySelectorAll("#electrons circle")];
+  $("#switch").addEventListener("click", () => { on = !on; sfx.click(); update(); });
+  function setBulb(level) {
+    $("#bulb-glow").setAttribute("opacity", Math.min(1, level));
+    $("#bulb").setAttribute("fill", level > 0.02 ? `rgb(${255},${Math.round(200 + 50 * Math.min(1, level))},${Math.round(80 + 100 * Math.min(1, level))})` : "#334155");
+    $("#filament").setAttribute("stroke", level > 0.02 ? "#b45309" : "#94a3b8");
+  }
+  function anim() {
+    phase = (phase + (flowing ? Math.max(0.6, Math.min(8, current * 2.2)) : 0)) % len;
+    e.forEach((c, k) => { const pt = wire.getPointAtLength((len - ((phase + k * len / dots) % len)) % len); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); c.setAttribute("opacity", flowing ? 1 : .25); });
+    raf = requestAnimationFrame(anim);
+  }
+  let state = {};
+  function update() {
+    $("#switch").style.transform = on ? "rotate(0deg)" : "rotate(-35deg)";
+    $("#switch-label").textContent = `Switch: ${on ? "ON" : "OFF"} (tap it)`;
+    if (mode === "test") {
+      const m = state.mat;
+      $("#gap-label").textContent = m ? `${m.i} ${m.n}` : "?";
+      flowing = on && m && m.c && state.revealed; current = flowing ? 1.5 : 0;
+      setBulb(flowing ? .9 : 0);
+      $("#batt-label").textContent = "Battery";
+    } else {
+      const V = state.V, R = state.R, I = on ? V / R : 0;
+      current = I; flowing = on && I > 0;
+      $("#gap-label").textContent = `R = ${R} Ω`;
+      $("#batt-label").textContent = `${V} V`;
+      setBulb(on ? Math.sqrt(V * I) / 12 : 0);
+      $("#m-I").textContent = `${I.toFixed(2)} A`; $("#m-V").textContent = `${V} V`; $("#m-R").textContent = `${R} Ω`;
+      checkTarget(I);
+    }
+  }
+  function testSide() {
+    state = { mat: null, revealed: false, done: new Set() };
+    $("#circ-hint").textContent = "Pick a material to put in the gap ↓";
+    $("#circ-side").innerHTML = `<div class="label">CONDUCTOR OR INSULATOR?</div><p>Put a material in the gap. Predict: will the bulb glow?</p><div class="mats">${MATERIALS.map((m, k) => `<button class="mat" data-k="${k}"><span>${m.i}</span>${m.n}</button>`).join("")}</div><div id="predict"></div>`;
+    document.querySelectorAll(".mat").forEach(b => b.addEventListener("click", () => {
+      sfx.click(); state.mat = MATERIALS[b.dataset.k]; state.revealed = false; on = true; update();
+      $("#predict").innerHTML = `<div class="box" style="margin-top:12px"><b>${state.mat.i} ${state.mat.n}</b>: will the bulb glow?</div><div class="row"><button class="btn" id="p-yes">💡 Yes, it glows</button><button class="btn ghost" id="p-no">🌑 No</button></div><div class="fb" id="pfb"></div>`;
+      const go = guess => {
+        state.revealed = true; update();
+        const ok = guess === state.mat.c, fb = $("#pfb");
+        $("#p-yes").disabled = $("#p-no").disabled = true;
+        if (ok) { right($("#p-yes"), 6); fb.className = "fb show good"; } else { wrong($("#circ-card")); fb.className = "fb show bad"; }
+        fb.innerHTML = `${ok ? "✓ Correct!" : "✗ Not quite!"} It's a <b>${state.mat.c ? "conductor" : "insulator"}</b>. ${state.mat.why}`;
+        b.classList.add(state.mat.c ? "done-y" : "done-n");
+        state.done.add(state.mat.n);
+        if (state.done.size === MATERIALS.length) setTimeout(() => { toast("🏆 You tested every material!"); burst(120); sfx.win(); }, 600);
+      };
+      $("#p-yes").addEventListener("click", () => go(true)); $("#p-no").addEventListener("click", () => go(false));
+    }));
+    update();
+  }
+  let target = null, solved = 0;
+  function newTarget() {
+    if (!$("#target")) return;
+    let V, R; do { V = pick([3, 4.5, 6, 9, 12]); R = pick([2, 3, 4, 5, 6, 8, 10, 12]); } while (Math.abs(V / R - state.V / state.R) < 1e-9 || !Number.isInteger(V / R * 100));
+    target = Math.round(V / R * 100) / 100;
+    $("#target").innerHTML = `<span>🎯 Mission: make the current exactly <b style="color:var(--yellow)">${target} A</b></span><span class="score">✓ ${solved}</span>`;
+  }
+  function checkTarget(I) {
+    if (target === null || !on) return;
+    if (Math.abs(I - target) < 0.005) {
+      solved++; right($("#m-I"), 10); burst(70);
+      toast(`⚡ ${target} A! V = I × R → ${state.V} = ${target} × ${state.R}`);
+      target = null; setTimeout(newTarget, 1400);
+    }
+  }
+  function ohmSide() {
+    state = { V: 6, R: 4 };
+    $("#circ-hint").textContent = "Electrons (blue dots) move faster when the current is bigger";
+    $("#circ-side").innerHTML = `<div class="label">OHM'S LAW · V = I × R ${g < 10 ? '<span class="tag">CLASS 10</span>' : ""}</div>
+      <div class="mission" id="target"></div>
+      <div class="slider"><div class="row"><span>🔋 Voltage (V)</span><b id="v-out">6 V</b></div><input type="range" id="v-in" min="1.5" max="12" step="1.5" value="6"></div>
+      <div class="slider"><div class="row"><span>〰 Resistance (R)</span><b id="r-out">4 Ω</b></div><input type="range" id="r-in" min="1" max="12" step="1" value="4"></div>
+      <div class="meters"><div class="meter"><span>VOLTAGE</span><b id="m-V"></b></div><div class="meter"><span>CURRENT</span><b id="m-I"></b></div><div class="meter"><span>RESISTANCE</span><b id="m-R"></b></div></div>
+      <div class="box"><b>I = V ÷ R.</b> More voltage pushes more current. More resistance slows it down.</div>`;
+    $("#v-in").addEventListener("input", ev => { state.V = Number(ev.target.value); $("#v-out").textContent = `${state.V} V`; update(); });
+    $("#r-in").addEventListener("input", ev => { state.R = Number(ev.target.value); $("#r-out").textContent = `${state.R} Ω`; update(); });
+    newTarget(); update();
+  }
+  const setMode = m => { mode = m; on = true; document.querySelectorAll("#t-extra [data-m]").forEach(x => x.classList.toggle("on", x.dataset.m === m)); (m === "test" ? testSide : ohmSide)(); };
+  document.querySelectorAll("#t-extra [data-m]").forEach(b => b.addEventListener("click", () => { sfx.click(); setMode(b.dataset.m); }));
+  setMode(mode);
+  anim();
+  cleanup = () => cancelAnimationFrame(raf);
+}
+
+/* ---------- 🚗 MOTION LAB ---------- */
+function motionTool() {
+  const g = GRADE();
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card"><canvas class="road" id="road" width="720" height="170"></canvas><div class="row" style="margin:10px 0 6px;justify-content:space-between"><div class="label" style="margin:0">DISTANCE–TIME GRAPH</div><div class="label" style="margin:0;color:var(--muted)" id="graph-note"></div></div><canvas class="graph" id="gr" width="720" height="260"></canvas></div>
+    <div class="card info"><div class="mission" id="mm"></div>
+      <div class="slider"><div class="row"><span>🚗 Starting speed (u)</span><b id="u-out">10 m/s</b></div><input type="range" id="u-in" min="0" max="25" step="1" value="10"></div>
+      <div class="slider"><div class="row"><span>🚀 Acceleration (a) ${g < 9 ? '<span class="tag">CLASS 9</span>' : ""}</span><b id="a-out">0 m/s²</b></div><input type="range" id="a-in" min="0" max="4" step="1" value="0"></div>
+      <div class="meters"><div class="meter"><span>TIME</span><b id="mt">0 s</b></div><div class="meter"><span>DISTANCE</span><b id="md">0 m</b></div><div class="meter"><span>SPEED</span><b id="mv">0 m/s</b></div></div>
+      <div class="row"><button class="btn" id="go">▶ Drive 10 s</button><button class="btn ghost" id="reset">↺ Reset</button></div>
+      <div class="box" style="margin-top:12px" id="formula"></div></div></div>`;
+  const road = $("#road"), rc = road.getContext("2d"), gr = $("#gr"), gc = gr.getContext("2d");
+  let u = 10, a = 0, t = 0, running = false, raf = null, last = 0, pts = [], challenge = null, solved = 0;
+  const T = 10, dist = tt => u * tt + .5 * a * tt * tt, maxD = () => Math.max(50, dist(T));
+  function formula() { $("#formula").innerHTML = a === 0 ? `<b>Constant speed:</b> distance = speed × time<br>= ${u} × t` : `<b>Speeding up:</b> s = ut + ½at²<br>= ${u}t + ½ × ${a} × t²`; }
+  function drawRoad() {
+    const W = road.width, H = road.height, d = dist(t), md = maxD();
+    rc.clearRect(0, 0, W, H);
+    rc.fillStyle = "#1b2238"; rc.fillRect(0, 70, W, 70);
+    rc.strokeStyle = "#ffd84d"; rc.setLineDash([22, 18]); rc.lineWidth = 3; rc.beginPath(); rc.moveTo(0, 105); rc.lineTo(W, 105); rc.stroke(); rc.setLineDash([]);
+    rc.fillStyle = "#8f9bbd"; rc.font = "700 13px Nunito"; rc.textAlign = "center";
+    const step = md > 400 ? 100 : md > 150 ? 50 : 10;
+    for (let m = 0; m <= md; m += step) { const x = 30 + m / md * (W - 80); rc.fillRect(x - 1, 140, 2, 10); rc.fillText(`${m} m`, x, 166); }
+    if (challenge) { const x = 30 + challenge.answer / md * (W - 80); rc.fillStyle = "#3ddc97"; if (challenge.show) { rc.fillRect(x - 2, 58, 4, 86); rc.fillText("🏁", x, 52); } }
+    const x = 30 + d / md * (W - 80);
+    rc.font = "44px serif"; rc.save(); rc.translate(x, 106); rc.scale(-1, 1); rc.fillText("🚗", 0, 14); rc.restore();
+  }
+  function drawGraph() {
+    const W = gr.width, H = gr.height, p = 44, md = maxD();
+    gc.clearRect(0, 0, W, H);
+    gc.strokeStyle = "#2e3854"; gc.lineWidth = 1; gc.fillStyle = "#8f9bbd"; gc.font = "700 12px Nunito"; gc.textAlign = "center";
+    for (let s = 0; s <= T; s += 2) { const x = p + s / T * (W - 2 * p); gc.beginPath(); gc.moveTo(x, 12); gc.lineTo(x, H - p); gc.stroke(); gc.fillText(`${s} s`, x, H - p + 18); }
+    gc.textAlign = "right";
+    for (let k = 0; k <= 4; k++) { const y = H - p - k / 4 * (H - p - 12); gc.beginPath(); gc.moveTo(p, y); gc.lineTo(W - p, y); gc.stroke(); gc.fillText(`${Math.round(md * k / 4)}`, p - 6, y + 4); }
+    gc.save(); gc.translate(14, H / 2); gc.rotate(-Math.PI / 2); gc.textAlign = "center"; gc.fillText("distance (m)", 0, 0); gc.restore();
+    gc.strokeStyle = "#55cfff"; gc.lineWidth = 3.5; gc.shadowColor = "#55cfff"; gc.shadowBlur = 8; gc.beginPath();
+    pts.forEach(([tt, dd], k) => { const x = p + tt / T * (W - 2 * p), y = H - p - dd / md * (H - p - 12); k ? gc.lineTo(x, y) : gc.moveTo(x, y); });
+    gc.stroke(); gc.shadowBlur = 0;
+    $("#graph-note").textContent = a === 0 ? "straight line = constant speed" : "curve gets steeper = speeding up";
+  }
+  function meters() { $("#mt").textContent = `${t.toFixed(1)} s`; $("#md").textContent = `${Math.round(dist(t))} m`; $("#mv").textContent = `${Math.round(u + a * t)} m/s`; }
+  function frame(now) {
+    if (!running) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    t = Math.min(T, t + dt * (challenge && challenge.fast ? 2 : 1)); pts.push([t, dist(t)]);
+    drawRoad(); drawGraph(); meters();
+    if (t >= T || (challenge && challenge.run && t >= challenge.t)) { running = false; $("#go").disabled = false; if (challenge && challenge.run) finishChallenge(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function reset() { cancelAnimationFrame(raf); running = false; t = 0; pts = [[0, 0]]; $("#go").disabled = false; drawRoad(); drawGraph(); meters(); formula(); }
+  function go() { if (running) return; if (t >= T) reset(); running = true; $("#go").disabled = true; last = performance.now(); raf = requestAnimationFrame(frame); sfx.click(); }
+  function newChallenge() {
+    if (!$("#mm")) return;
+    const accel = g >= 9 && Math.random() < .4;
+    const cu = accel ? 0 : rnd(2, 12) * (Math.random() < .5 ? 1 : 2), ca = accel ? pick([2, 4]) : 0, ct = accel ? pick([2, 4, 6]) : rnd(3, 9);
+    challenge = { u: cu, a: ca, t: ct, answer: cu * ct + .5 * ca * ct * ct, run: false, show: false };
+    $("#mm").innerHTML = `<div style="flex:1">🎯 <b>Predict:</b> ${ca ? `starting from rest with a = ${ca} m/s²` : `at ${cu} m/s`}, how far in <b>${ct} s</b>?<div class="row" style="margin-top:8px"><input class="ans" id="pa" inputmode="numeric" placeholder="? m"><button class="btn alt" id="pgo">Check 🏁</button></div></div><span class="score">✓ ${solved}</span>`;
+    $("#pgo").addEventListener("click", runChallenge);
+    $("#pa").addEventListener("keydown", ev => { if (ev.key === "Enter") runChallenge(); });
+  }
+  function runChallenge() {
+    const v = Number(String($("#pa").value).trim());
+    if (!$("#pa").value.trim() || Number.isNaN(v)) { toast("Type a distance first! 🙂"); return; }
+    challenge.guess = v; challenge.run = true; challenge.show = true;
+    u = challenge.u; a = challenge.a; $("#u-in").value = u; $("#a-in").value = a; $("#u-out").textContent = `${u} m/s`; $("#a-out").textContent = `${a} m/s²`;
+    $("#pgo").disabled = true; reset(); go();
+  }
+  function finishChallenge() {
+    const c = challenge, ok = Math.abs(c.guess - c.answer) < .01;
+    if (ok) { solved++; right($("#md"), 12); burst(90); toast(`🏁 Spot on! ${c.answer} m`); }
+    else { wrong(); toast(`The car went ${c.answer} m, not ${c.guess} m`); }
+    $("#formula").innerHTML = c.a ? `s = ½at² = ½ × ${c.a} × ${c.t}² = <b>${c.answer} m</b>` : `distance = speed × time = ${c.u} × ${c.t} = <b>${c.answer} m</b>`;
+    setTimeout(() => { if (!$("#mm")) return; challenge.run = false; newChallenge(); drawRoad(); }, 2200);
+  }
+  $("#u-in").addEventListener("input", ev => { u = Number(ev.target.value); $("#u-out").textContent = `${u} m/s`; reset(); });
+  $("#a-in").addEventListener("input", ev => { a = Number(ev.target.value); $("#a-out").textContent = `${a} m/s²`; reset(); });
+  $("#go").addEventListener("click", go); $("#reset").addEventListener("click", reset);
+  newChallenge(); reset();
+  cleanup = () => { cancelAnimationFrame(raf); running = false; };
+}
+
+/* ---------- start ---------- */
+renderHome();
+openTool(location.hash.slice(1));
+</script>
+</body>
+</html>
