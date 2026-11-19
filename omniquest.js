@@ -28,10 +28,10 @@
 
   /* ---------- 1. subjects + full topic catalogue ---------- */
   const SUBJECTS = {
-    chem: { name: "Chemistry", color: "#55cfff" },
-    maths: { name: "Maths", color: "#ffb347" },
-    bio: { name: "Biology", color: "#3ddc97" },
-    phy: { name: "Physics", color: "#a78bfa" }
+    maths: { name: "Maths", color: "#ffb347", blurb: "Numbers, algebra, geometry" },
+    phy: { name: "Physics", color: "#a78bfa", blurb: "Forces, energy, electricity" },
+    chem: { name: "Chemistry", color: "#55cfff", blurb: "Elements, atoms, reactions" },
+    bio: { name: "Biology", color: "#3ddc97", blurb: "Cells, body, living things" }
   };
   // [name, subject, fromClass, toClass, open (an interactive page) or null, extra search words]
   const T = (name, s, a, b, open, kw = "") => ({ name, s, a, b, open, kw: kw.toLowerCase() });
@@ -235,6 +235,48 @@
     .oq-go { border: 0; border-radius: 12px; padding: 12px 26px; font: 900 15px "Nunito", sans-serif; color: #04202e; background: #55cfff; cursor: pointer; }
     .oq-go:disabled { opacity: .4; cursor: default; }
 
+    .oq-center { min-height: calc(100vh - 160px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 30px; }
+    .oq-center h1 { font-size: clamp(30px, 4.4vw, 52px); margin: 6px 0 22px; color: #f1f5f9; font-weight: 700; }
+    .oq-center h1 span { color: #55cfff; }
+    .oq-slot { width: min(720px, 100%); }
+    .oq-slot .oq-search { max-width: none; }
+    .oq-slot .oq-search input { padding: 18px 18px 18px 50px; font-size: 18px; border-radius: 16px; box-shadow: 0 18px 50px #0006; }
+    .oq-slot .oq-search svg { left: 18px; width: 21px; height: 21px; }
+    .oq-try { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 16px 0 34px; color: #7d8fa8; font: 800 13px "Nunito", sans-serif; align-items: center; }
+    .oq-try button { border: 1px solid #334155; background: #131d2f; color: #c8d5e5; border-radius: 30px; padding: 7px 14px; font: 700 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-try button:hover { border-color: #55cfff; color: #fff; }
+    .oq-subjects4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: min(980px, 100%); }
+    .oq-subj { position: relative; text-align: left; border: 1px solid #2c3d53; background: linear-gradient(160deg, #1b2639, #141e30); color: #fff; border-radius: 16px; padding: 18px 18px 16px; cursor: pointer; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; }
+    .oq-subj::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: var(--c); }
+    .oq-subj:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 14px 34px #0006; }
+    .oq-subj b { display: block; font: 700 21px "Fredoka", "Nunito", sans-serif; margin-bottom: 4px; }
+    .oq-subj span { color: #8aa0b8; font: 700 12.5px "Nunito", sans-serif; }
+    .oq-subj i { position: absolute; right: 16px; top: 18px; font-style: normal; color: var(--c); font-weight: 900; transition: transform .2s; }
+    .oq-subj:hover i { transform: translateX(4px); }
+    .oq-subhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .oq-subhead h1 { margin: 2px 0 4px; font-size: clamp(28px, 3.4vw, 40px); color: #fff; }
+    .oq-subhead p { margin: 0; color: #8aa0b8; font-weight: 700; font-size: 14px; }
+    .oq-subhead p .ok { color: #45e2a1; }
+    .oq-filter { background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 11px 14px; color: #fff; font: 700 14px "Nunito", sans-serif; outline: none; min-width: 260px; }
+    .oq-filter:focus { border-color: var(--c, #55cfff); }
+    .oq-labs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .oq-labs .oq-label { margin: 0 6px 0 0; }
+    .oq-labbtn { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 12%, #111a2b); color: #fff; border-radius: 10px; padding: 8px 13px; font: 800 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-labbtn:hover { background: color-mix(in srgb, var(--c) 25%, #111a2b); }
+    .oq-chapters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .oq-ch { background: linear-gradient(160deg, #1b2639, #141e30); border: 1px solid #2c3d53; border-radius: 14px; padding: 14px 16px; animation: oqUp .35s ease-out both; }
+    .oq-ch-top { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .oq-ch-top:hover b { color: var(--c); }
+    .oq-ch-top .n { width: 28px; height: 28px; flex: none; border-radius: 8px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 18%, #0f1828); color: var(--c); font: 800 13px "Nunito", sans-serif; }
+    .oq-ch-top b { font: 800 15.5px "Nunito", sans-serif; color: #fff; transition: color .2s; }
+    .oq-ch-top .lab { margin-left: auto; border: 1px solid var(--c); color: var(--c); background: transparent; border-radius: 8px; padding: 3px 8px; font: 900 10.5px "Nunito", sans-serif; letter-spacing: 1px; cursor: pointer; }
+    .oq-subs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .oq-subs button { border: 1px solid #2c3d53; background: #111a2b; color: #c8d5e5; border-radius: 20px; padding: 5px 11px; font: 700 12.5px "Nunito", sans-serif; cursor: pointer; }
+    .oq-subs button:hover { border-color: var(--c); color: #fff; }
+    .oq-note { color: #7d8fa8; font-size: 12.5px; font-weight: 700; margin-top: 14px; }
+    .oq-hook { font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px; }
+    .oq-funfact { border-left: 3px solid #ffb347; }
+    @media (max-width: 900px) { .oq-subjects4 { grid-template-columns: repeat(2, 1fr); } .oq-chapters { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .oq-stats { grid-template-columns: repeat(2, 1fr); } .oq-opts { grid-template-columns: 1fr; } }
     @media (max-width: 680px) {
       body .main-content { padding: 0 12px 60px !important; }
@@ -279,6 +321,10 @@
     sec.innerHTML = `<iframe class="oq-frame" title="${id}" loading="lazy"></iframe>`;
     main.appendChild(sec);
   });
+  const subjPage = document.createElement("section");
+  subjPage.id = "oq-subject";
+  subjPage.className = "page-section";
+  main.appendChild(subjPage);
   const lesson = document.createElement("section");
   lesson.id = "oq-lesson";
   lesson.className = "page-section";
@@ -287,24 +333,33 @@
   /* ---------- 5. navigation ---------- */
   let current = { page: "Dashboard" };
   function activate(id) {
+    if (id !== "oq-home" && typeof placeSearch === "function") placeSearch(false);
     document.querySelectorAll(".page-section").forEach(s => s.classList.toggle("active", s.id === id));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function setCrumb(topic) {
     if (!topic) { crumb.classList.remove("show"); return; }
     const subj = SUBJECTS[topic.s] || { name: "Topic" };
-    crumb.innerHTML = `<button type="button" id="oq-back">← Dashboard</button><span>${esc(subj.name)}</span><span class="sep">/</span><span class="cur">${esc(topic.name)}</span>
+    crumb.innerHTML = `<button type="button" id="oq-back">← Dashboard</button>${topic.s && SUBJECTS[topic.s] && topic.name !== subj.name ? `<a href="#" id="oq-crumb-subj" style="color:#8aa0b8">${esc(subj.name)}</a><span class="sep">/</span>` : ""}<span class="cur">${esc(topic.name)}</span>
       ${topic.open ? `<button type="button" class="lessonbtn" id="oq-readlesson">Read the lesson</button>` : (topic.lab ? `<button type="button" class="lessonbtn" id="oq-openlab">Open the interactive lab</button>` : "")}`;
     crumb.classList.add("show");
     $("oq-back").addEventListener("click", goHome);
+    if ($("oq-crumb-subj")) $("oq-crumb-subj").addEventListener("click", e => { e.preventDefault(); openSubject(topic.s); });
     if ($("oq-readlesson")) $("oq-readlesson").addEventListener("click", () => openLesson(topic, true));
     if ($("oq-openlab")) $("oq-openlab").addEventListener("click", () => openTopic(topic.lab));
+  }
+  const searchBox = top.querySelector(".oq-search");
+  function placeSearch(onHome) {
+    const slot = $("oq-slot");
+    if (onHome && slot) slot.appendChild(searchBox);
+    else if (searchBox.parentElement !== top) top.insertBefore(searchBox, top.querySelector(".oq-right"));
   }
   function goHome() {
     current = { page: "Dashboard" };
     setCrumb(null);
     renderHome();
     activate("oq-home");
+    placeSearch(true);
   }
   function openTopic(t) {
     if (!t.open) return openLesson(t);
@@ -330,21 +385,33 @@
     const words = text.toLowerCase().split(/\s+/).filter(Boolean);
     if (!words.length) return [];
     const g = Number(read().grade) || 7;
-    return CATALOG.map(t => {
+    const pool = CATALOG.filter(t => t.open || (g >= t.a && g <= t.b) || true).map(t => ({ name: t.name, s: t.s, kw: t.kw, cat: t, a: t.a, b: t.b }));
+    Object.keys(SUBJECTS).forEach(sk => {
+      const syl = sylCached(sk);
+      if (!syl) return;
+      syl.chapters.forEach((c, i) => {
+        pool.push({ name: c.name, s: sk, kw: c.subtopics.join(" ").toLowerCase(), chapterNo: i + 1, syl: true });
+        c.subtopics.forEach(t => pool.push({ name: t, s: sk, kw: c.name.toLowerCase(), inChapter: c.name, syl: true }));
+      });
+    });
+    const seen = new Set();
+    return pool.map(t => {
       const name = t.name.toLowerCase(), all = `${name} ${t.kw} ${SUBJECTS[t.s].name.toLowerCase()}`;
       if (!words.every(w => all.includes(w))) return null;
       let score = name.startsWith(words[0]) ? 3 : name.includes(words.join(" ")) ? 2 : words.some(w => name.includes(w)) ? 1 : 0;
-      if (g >= t.a && g <= t.b) score += .5;
-      if (t.open) score += .2;
+      if (t.syl) score += .6;
+      if (t.cat && t.cat.open) score += .4;
+      if (t.cat && !(g >= t.a && g <= t.b)) score -= .5;
       return { t, score };
-    }).filter(Boolean).sort((x, y) => y.score - x.score).slice(0, 8).map(x => x.t);
+    }).filter(Boolean).sort((x, y) => y.score - x.score).filter(x => { const k = x.t.name.toLowerCase() + x.t.s; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 9).map(x => x.t);
   }
   function drawResults() {
     const text = q.value.trim();
     if (!text) { box.classList.remove("show"); return; }
     hits = search(text);
     const word = read().board === "IGCSE" ? "Grade" : "Class";
-    box.innerHTML = hits.map((t, i) => `<button type="button" class="oq-res ${i === sel ? "on" : ""}" style="--c:${SUBJECTS[t.s].color}" data-i="${i}"><span class="d"></span>${esc(t.name)}<span class="m">${SUBJECTS[t.s].name} · ${t.open ? "Interactive" : "Lesson"} · ${word} ${t.a}${t.b > t.a ? `–${t.b}` : ""}</span></button>`).join("") +
+    const meta = t => t.cat ? `${t.cat.open ? "Interactive" : "Lesson"} · ${word} ${t.a}${t.b > t.a ? `–${t.b}` : ""}` : t.chapterNo ? `Chapter ${t.chapterNo}` : `in ${esc(t.inChapter)}`;
+    box.innerHTML = hits.map((t, i) => `<button type="button" class="oq-res ${i === sel ? "on" : ""}" style="--c:${SUBJECTS[t.s].color}" data-i="${i}"><span class="d"></span>${esc(t.name)}<span class="m">${SUBJECTS[t.s].name} · ${meta(t)}</span></button>`).join("") +
       `<button type="button" class="oq-res ai ${sel === hits.length ? "on" : ""}" data-i="ai">✦ Ask Verity to teach me: "${esc(text)}"</button>`;
     box.classList.add("show");
     box.querySelectorAll(".oq-res").forEach(b => b.addEventListener("mousedown", e => { e.preventDefault(); choose(b.dataset.i); }));
@@ -354,7 +421,11 @@
     box.classList.remove("show");
     q.blur();
     if (i === "ai" || i === undefined || i === null) { if (text) openLesson({ name: text, s: guessSubject(text), custom: true }); }
-    else openTopic(hits[Number(i)]);
+    else {
+      const h = hits[Number(i)];
+      if (h.cat) openTopic(h.cat);
+      else openLesson({ name: h.name, s: h.s, inChapter: h.inChapter, chapter: !!h.chapterNo });
+    }
     q.value = ""; sel = -1;
   }
   function guessSubject(text) {
@@ -410,32 +481,110 @@
     "Water expands when it freezes, which is why ice floats.",
     "A googol is 1 followed by 100 zeros."
   ];
-  function renderStats() {
-    const d = read(), xp = d.xp || 0;
-    $("oq-stats").innerHTML = `<div class="oq-stat"><span>LEVEL</span><b>${Math.floor(xp / 100) + 1}</b></div><div class="oq-stat"><span>TOTAL XP</span><b>${xp}</b></div><div class="oq-stat"><span>BEST STREAK</span><b>${d.bestStreak || 0}</b></div><div class="oq-stat"><span>QUESTIONS SOLVED</span><b>${d.solved || 0}</b></div>`;
-  }
+
+  const EXAMPLES = ["Photosynthesis", "Periodic table", "Ohm's law", "Linear equations", "Human heart", "Acids and bases", "Fractions", "Newton's laws", "Quadratic equations", "Food chains", "Magnets", "Pythagoras theorem"];
   function renderHome() {
     const d = read(), g = Number(d.grade) || 7, word = d.board === "IGCSE" ? "Grade" : "Class";
-    const list = CATALOG.filter(t => (filter === "all" || t.s === filter) && (showAll || (g >= t.a && g <= t.b)));
-    home.innerHTML = `
-      <div class="oq-hero"><div><span class="oq-label">DASHBOARD · ${esc(d.board || "")} ${word.toUpperCase()} ${g}</span><h1>What would you like to <span>learn</span> today?</h1>
-        <p class="subtitle">Search above or pick a topic below. Labs are interactive; every other topic opens a lesson written by Verity, your AI tutor.</p></div></div>
-      <div class="oq-stats" id="oq-stats"></div>
-      <div class="oq-tabs">
-        <button type="button" class="oq-tab ${filter === "all" ? "on" : ""}" data-f="all">All subjects</button>
-        ${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-tab ${filter === k ? "on" : ""}" style="--c:${s.color}" data-f="${k}"><span class="d"></span>${s.name}</button>`).join("")}
-        <label class="oq-toggle"><input type="checkbox" id="oq-all" ${showAll ? "checked" : ""}> Show topics from every class</label>
-      </div>
-      ${Object.entries(SUBJECTS).filter(([k]) => filter === "all" || filter === k).map(([k, s]) => {
-        const items = list.filter(t => t.s === k).sort((x, y) => (y.open ? 1 : 0) - (x.open ? 1 : 0));
-        return `<div class="oq-block" style="--c:${s.color}"><h2><span class="bar"></span>${s.name}<small>${items.length} topics</small></h2>
-          ${items.length ? `<div class="oq-grid">${items.map(t => `<button type="button" class="oq-card" style="--c:${s.color}" data-t="${CATALOG.indexOf(t)}">${esc(t.name)}<small><span class="${t.open ? "lab" : ""}">${t.open ? "INTERACTIVE" : "LESSON"}</span>${g >= t.a && g <= t.b ? '<span class="rec">● YOUR CLASS</span>' : `<span>${word.toUpperCase()} ${t.a}${t.b > t.a ? `–${t.b}` : ""}</span>`}</small></button>`).join("")}</div>` : `<p class="oq-empty">No topics for your class here. Tick "Show topics from every class".</p>`}</div>`;
-      }).join("")}
-      <div class="oq-sec" style="border-left:3px solid #55cfff"><span class="oq-label">DID YOU KNOW?</span><p>${FACTS[Math.floor(Math.random() * FACTS.length)]}</p></div>`;
-    renderStats();
-    home.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { filter = b.dataset.f; renderHome(); }));
-    $("oq-all").addEventListener("change", e => { showAll = e.target.checked; renderHome(); });
-    home.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => openTopic(CATALOG[b.dataset.t])));
+    const tries = EXAMPLES.slice().sort(() => Math.random() - .5).slice(0, 4);
+    home.innerHTML = `<div class="oq-center">
+      <span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span>
+      <h1>What do you want to <span>learn</span> today?</h1>
+      <div class="oq-slot" id="oq-slot"></div>
+      <div class="oq-try">Try: ${tries.map(t => `<button type="button" data-try="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+      <div class="oq-subjects4">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-subj" style="--c:${s.color}" data-subj="${k}"><i>→</i><b>${s.name}</b><span>${s.blurb}</span></button>`).join("")}</div>
+    </div>`;
+    if (home.classList.contains("active") || !document.querySelector(".page-section.active")) placeSearch(true);
+    home.querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => { q.value = b.dataset.try; q.focus(); drawResults(); }));
+    home.querySelectorAll("[data-subj]").forEach(b => b.addEventListener("click", () => openSubject(b.dataset.subj)));
+  }
+  function renderStats() { /* stats now live in the top bar */ }
+
+  /* ---------- 8b. syllabus: chapters + subtopics for your board and class ---------- */
+  const SKEY = "omniQuestSyllabus";
+  const pending = {};
+  const sylKey = sk => { const d = read(); return `${d.board || "CBSE"}|${Number(d.grade) || 7}|${SUBJECTS[sk].name}`; };
+  const sylCached = sk => { try { return (JSON.parse(localStorage.getItem(SKEY)) || {})[sylKey(sk)] || null; } catch (_) { return null; } };
+  function getSyllabus(sk) {
+    const cached = sylCached(sk);
+    if (cached) return Promise.resolve(cached);
+    const key = sylKey(sk);
+    if (pending[key]) return pending[key];
+    pending[key] = fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "syllabus", subject: SUBJECTS[sk].name, message: "syllabus" }) })
+      .then(r => r.json().then(j => ({ ok: r.ok, j })).catch(() => ({ ok: false, j: {} })))
+      .then(({ ok, j }) => {
+        delete pending[key];
+        if (!ok || !j.syllabus) throw new Error(j.error || "Couldn't load the chapters right now.");
+        try { const all = JSON.parse(localStorage.getItem(SKEY)) || {}; all[key] = j.syllabus; localStorage.setItem(SKEY, JSON.stringify(all)); } catch (_) { /* ignore */ }
+        return j.syllabus;
+      }, err => { delete pending[key]; throw err; });
+    return pending[key];
+  }
+  function prefetchAll() {
+    Object.keys(SUBJECTS).forEach((sk, i) => setTimeout(() => { if (!sylCached(sk)) getSyllabus(sk).catch(() => {}); }, 400 + i * 1500));
+  }
+  // Which interactive lab fits a chapter or subtopic?
+  function labFor(text, sk) {
+    const t = text.toLowerCase(), g = Number(read().grade) || 7, find = n => CATALOG.find(x => x.name === n);
+    if (sk === "maths") {
+      if (/quadratic/.test(t)) return find("Quadratic Equations");
+      if (/(linear equation|finding the unknown|simple (linear )?equation|equations? in one variable|algebra play|forming equations)/.test(t)) return find(g <= 8 ? "Sentence to Equation" : "Solving Linear Equations");
+    }
+    if (sk === "chem") {
+      if (/periodic/.test(t)) return find("Periodic Table");
+      if (/(atom|isotope|electron configuration)/.test(t)) return find("Atomic Structure");
+      if (/(bond|molecule)/.test(t)) return find("Molecules and Chemical Bonding");
+    }
+    if (sk === "bio") {
+      if (/\bcells?\b|cell structure|unit of life/.test(t)) return find("The Cell");
+      if (/(human body|organ system|digest|circulat|respirat|excret|nervous|heart|lungs)/.test(t)) return find("Human Body and Organ Systems");
+    }
+    if (sk === "phy") {
+      if (/(electric|current|circuit|ohm)/.test(t)) return find("Electricity and Circuits");
+      if (/(motion|speed|velocity)/.test(t)) return find("Motion and Speed");
+    }
+    return null;
+  }
+  async function openSubject(sk) {
+    const s = SUBJECTS[sk], d = read(), g = Number(d.grade) || 7, word = d.board === "IGCSE" ? "Grade" : "Class";
+    current = { page: `${s.name} (chapters)` };
+    setCrumb({ name: s.name, s: sk });
+    activate("oq-subject");
+    subjPage.style.setProperty("--c", s.color);
+    const labs = CATALOG.filter(t => t.s === sk && t.open && g >= t.a && g <= t.b);
+    const head = book => `<div class="oq-subhead"><div><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name}</h1><p>${book}</p></div><input class="oq-filter" id="oq-filter" type="search" placeholder="Filter chapters and subtopics…"></div>
+      ${labs.length ? `<div class="oq-labs" style="--c:${s.color}"><span class="oq-label">INTERACTIVE</span>${labs.map(t => `<button type="button" class="oq-labbtn" data-lab="${CATALOG.indexOf(t)}">${esc(t.name)}</button>`).join("")}</div>` : ""}`;
+    const bindLabs = () => subjPage.querySelectorAll("[data-lab]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); openTopic(CATALOG[b.dataset.lab]); }));
+    subjPage.innerHTML = head("Loading your chapters…") + `<div class="oq-loading"><span class="oq-dots"><span></span><span></span><span></span></span>Verity is fetching your ${s.name} chapters…</div>`;
+    bindLabs();
+    let syl;
+    try { syl = await getSyllabus(sk); } catch (err) {
+      if (current.page !== `${s.name} (chapters)`) return;
+      subjPage.querySelector(".oq-loading").outerHTML = `<div class="oq-sec"><h3>Chapters not available</h3><p>${esc(err.message)}</p><div class="oq-actions"><button type="button" class="oq-btn primary" id="oq-sretry">Try again</button></div></div>`;
+      $("oq-sretry").addEventListener("click", () => openSubject(sk));
+      return;
+    }
+    if (current.page !== `${s.name} (chapters)`) return;
+    subjPage.innerHTML = head(`${esc(syl.book || "")} · ${syl.chapters.length} chapters ${syl.verified ? '<span class="ok">● checked against the official book</span>' : ""}`) +
+      `<div class="oq-chapters" id="oq-chs">${syl.chapters.map((c, i) => {
+        const lab = labFor(c.name + " " + c.subtopics.join(" "), sk);
+        return `<div class="oq-ch" style="animation-delay:${Math.min(i, 12) * .03}s" data-text="${esc((c.name + " " + c.subtopics.join(" ")).toLowerCase())}">
+          <div class="oq-ch-top" data-ch="${i}"><span class="n">${i + 1}</span><b>${esc(c.name)}</b>${lab ? `<button type="button" class="lab" data-lab="${CATALOG.indexOf(lab)}">LAB</button>` : ""}</div>
+          <div class="oq-subs">${c.subtopics.map((t, k) => `<button type="button" data-ch="${i}" data-sub="${k}">${esc(t)}</button>`).join("")}</div></div>`;
+      }).join("")}</div>
+      ${syl.verified ? "" : `<p class="oq-note">This chapter list was put together by Verity for your board and class. Your school's textbook may name or order chapters a little differently.</p>`}`;
+    bindLabs();
+    subjPage.querySelectorAll(".oq-ch-top").forEach(el => el.addEventListener("click", () => {
+      const c = syl.chapters[el.dataset.ch];
+      openLesson({ name: c.name, s: sk, chapter: true });
+    }));
+    subjPage.querySelectorAll(".oq-subs button").forEach(b => b.addEventListener("click", () => {
+      const c = syl.chapters[b.dataset.ch];
+      openLesson({ name: c.subtopics[b.dataset.sub], s: sk, inChapter: c.name });
+    }));
+    $("oq-filter").addEventListener("input", e => {
+      const v = e.target.value.trim().toLowerCase();
+      subjPage.querySelectorAll(".oq-ch").forEach(ch => { ch.style.display = !v || ch.dataset.text.includes(v) ? "" : "none"; });
+    });
   }
 
   /* ---------- 9. AI lessons (written by Verity for your board + class) ---------- */
@@ -453,18 +602,19 @@
   async function openLesson(t, fromLab, refresh) {
     const d = read(), g = Number(d.grade) || 7, word = d.board === "IGCSE" ? "Grade" : "Class";
     const subj = SUBJECTS[t.s] || { name: "General", color: "#55cfff" };
-    const lab = t.open ? t : CATALOG.find(x => x.open && x.s === t.s && x.name.toLowerCase() === t.name.toLowerCase());
+    const lab = t.open ? t : (CATALOG.find(x => x.open && x.s === t.s && x.name.toLowerCase() === t.name.toLowerCase()) || (t.s ? labFor(`${t.name} ${t.inChapter || ""}`, t.s) : null));
     current = { page: `${subj.name} > ${t.name} (lesson)` };
     setCrumb({ name: t.name, s: t.s, lab: lab && lab.open ? lab : null });
     activate("oq-lesson");
     lesson.style.setProperty("--c", subj.color);
     lesson.innerHTML = `<div class="oq-lesson"><span class="oq-label">${subj.name.toUpperCase()} · ${esc(d.board || "")} ${word.toUpperCase()} ${g}</span><h1>${esc(t.name)}</h1>
       <div class="oq-loading"><span class="oq-dots"><span></span><span></span><span></span></span>Verity is writing your lesson…</div></div>`;
-    const key = `${t.name.toLowerCase()}|${g}|${d.board || ""}`;
+    const fullTopic = t.inChapter ? `${t.name} (from the chapter "${t.inChapter}")` : t.name;
+    const key = `${fullTopic.toLowerCase()}|${g}|${d.board || ""}`;
     let data = refresh ? null : cacheGet(key);
     if (!data) {
       try {
-        const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "lesson", topic: t.name, subject: subj.name, message: t.name }) });
+        const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "lesson", topic: fullTopic, subject: subj.name, message: t.name }) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok || !j.lesson) throw new Error(j.error || "Verity couldn't write this lesson right now.");
         data = j.lesson;
@@ -476,20 +626,24 @@
       }
     }
     if (current.page !== `${subj.name} > ${t.name} (lesson)`) return;
-    const related = CATALOG.filter(x => x.s === t.s && x.name !== t.name && g >= x.a && g <= x.b).slice(0, 6);
+    const related = CATALOG.filter(x => x.s === t.s && x.open && x.name !== t.name && g >= x.a && g <= x.b).slice(0, 4);
     lesson.innerHTML = `<div class="oq-lesson">
       <span class="oq-label">${subj.name.toUpperCase()} · ${esc(d.board || "")} ${word.toUpperCase()} ${g}</span>
       <h1>${esc(data.title || t.name)}</h1>
+      ${t.inChapter ? `<span class="oq-label">CHAPTER: ${esc(t.inChapter).toUpperCase()}</span>` : ""}
+      ${data.hook ? `<p class="oq-hook">${esc(data.hook)}</p>` : ""}
       <p class="lead">${esc(data.summary || "")}</p>
       ${(data.sections || []).map((s, i) => `<div class="oq-sec" style="animation-delay:${i * .08}s"><h3>${esc(s.heading)}</h3><p>${esc(s.text)}</p></div>`).join("")}
       ${data.keyPoints && data.keyPoints.length ? `<div class="oq-sec"><span class="oq-label">KEY POINTS</span><ul class="oq-keys">${data.keyPoints.map(k => `<li>${esc(k)}</li>`).join("")}</ul></div>` : ""}
+      ${data.funFact ? `<div class="oq-sec oq-funfact"><span class="oq-label">FUN FACT</span><p>${esc(data.funFact)}</p></div>` : ""}
       ${data.quiz && data.quiz.length ? `<div class="oq-sec"><span class="oq-label">QUICK CHECK · +10 XP EACH</span>${data.quiz.map((qq, i) => `<div class="oq-q" data-q="${i}"><p>${i + 1}. ${esc(qq.q)}</p><div class="oq-opts">${qq.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(qq.explain || "")}</div></div>`).join("")}</div>` : ""}
       <div class="oq-actions">
         <button type="button" class="oq-btn primary" id="oq-ask">Ask Verity a question about this</button>
         ${lab && lab.open ? `<button type="button" class="oq-btn" id="oq-lab">Open the interactive lab</button>` : ""}
         <button type="button" class="oq-btn" id="oq-new">Write it again</button>
       </div>
-      ${related.length ? `<div class="oq-block" style="margin-top:22px"><span class="oq-label">RELATED TOPICS</span><div class="oq-grid">${related.map(x => `<button type="button" class="oq-card" style="--c:${subj.color}" data-t="${CATALOG.indexOf(x)}">${esc(x.name)}<small><span class="${x.open ? "lab" : ""}">${x.open ? "INTERACTIVE" : "LESSON"}</span></small></button>`).join("")}</div></div>` : ""}
+      ${t.s ? `<div class="oq-actions"><button type="button" class="oq-btn" id="oq-allch">See all ${subj.name} chapters</button></div>` : ""}
+      ${related.length ? `<div class="oq-block" style="margin-top:22px"><span class="oq-label">INTERACTIVE LABS</span><div class="oq-grid">${related.map(x => `<button type="button" class="oq-card" style="--c:${subj.color}" data-t="${CATALOG.indexOf(x)}">${esc(x.name)}<small><span class="${x.open ? "lab" : ""}">${x.open ? "INTERACTIVE" : "LESSON"}</span></small></button>`).join("")}</div></div>` : ""}
     </div>`;
     lesson.querySelectorAll(".oq-q").forEach(box => {
       const qq = data.quiz[box.dataset.q];
@@ -506,6 +660,7 @@
       if (input) { input.value = `Can you explain more about ${t.name}?`; input.focus(); }
     });
     if ($("oq-lab")) $("oq-lab").addEventListener("click", () => openTopic(lab));
+    if ($("oq-allch")) $("oq-allch").addEventListener("click", () => openSubject(t.s));
     $("oq-new").addEventListener("click", () => openLesson(t, fromLab, true));
     lesson.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => openTopic(CATALOG[b.dataset.t])));
   }
@@ -533,7 +688,9 @@
         m.remove();
         if (changed) Object.keys(FRAMES).forEach(id => { const f = $(id).querySelector("iframe"); if (f.getAttribute("src")) { try { f.contentWindow.location.reload(); } catch (_) { f.removeAttribute("src"); } } });
         refreshTop();
+        prefetchAll();
         if ($("oq-home").classList.contains("active")) renderHome();
+        else if ($("oq-subject").classList.contains("active")) { const sk = Object.keys(SUBJECTS).find(k => current.page.startsWith(SUBJECTS[k].name)); if (sk) openSubject(sk); }
       });
       setTimeout(() => m.querySelector("#oq-save").focus(), 30);
     };
@@ -563,5 +720,6 @@
   refreshTop();
   goHome();
   setTimeout(openProfile, 250);
+  if (read().board) prefetchAll();
   console.log(`OmniQuest loaded: ${CATALOG.length} topics.`);
 })();
