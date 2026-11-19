@@ -22,6 +22,9 @@ module.exports = async (req, res) => {
   }
   body = body || {};
 
+  // ---- Lesson mode: write a full lesson + quick quiz for any topic ----
+  if (body.mode === "lesson") return writeLesson(body, apiKey, res);
+
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   if (!message) return res.status(400).json({ error: "Message is empty." });
 
@@ -118,3 +121,67 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: "Verity's server had a problem. Please try again." });
   }
 };
+
+
+// Writes a structured lesson for the student's board and class, returned as JSON
+async function writeLesson(body, apiKey, res) {
+  const topic = typeof body.topic === "string" ? body.topic.trim().slice(0, 100) : "";
+  if (!topic) return res.status(400).json({ error: "No topic given." });
+  const subject = typeof body.subject === "string" ? body.subject.slice(0, 30) : "General";
+  const profile = body.profile || {};
+  const board = ["CBSE", "ICSE", "IGCSE", "State", "Other"].includes(profile.board) ? profile.board : "CBSE";
+  const grade = Number.isInteger(profile.grade) && profile.grade >= 1 && profile.grade <= 12 ? profile.grade : 7;
+  const syllabus = board === "Other" ? "a general school" : board === "State" ? "an Indian State board" : `the ${board}`;
+
+  const system =
+    `You are an expert, friendly school teacher. Write an accurate lesson for a ${board === "IGCSE" ? "Grade" : "Class"} ${grade} student following ${syllabus} syllabus. ` +
+    `Subject: ${subject}. Pitch it exactly at that level and use that syllabus's terms and methods. ` +
+    "If the topic is not a real school topic, or it is unsafe or inappropriate for a child, write a short lesson on the closest suitable school topic instead. " +
+    "Reply with ONLY a JSON object (no markdown, no code fences, no extra text) in exactly this shape: " +
+    '{"title": string, "summary": string (2 sentences), "sections": [{"heading": string, "text": string}], "keyPoints": [string], ' +
+    '"quiz": [{"q": string, "options": [string, string, string, string], "answer": number (index 0-3 of the correct option), "explain": string}]}. ' +
+    "Use 3 to 5 sections of 60 to 120 words each in plain text; include a worked example or real-life example where helpful (for maths, show the steps on separate lines). " +
+    "Give 4 to 6 short key points and exactly 3 quiz questions with one clearly correct answer each. " +
+    "Write in the same language as the topic text (English if unsure).";
+
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const request = {
+    model,
+    messages: [{ role: "system", content: system }, { role: "user", content: `Topic: ${topic}` }],
+    max_completion_tokens: 3000
+  };
+  if (model.startsWith("openai/gpt-oss")) request.reasoning_effort = "low";
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+      body: JSON.stringify(request)
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const friendly = response.status === 429 ? "Lots of students are learning right now! Please wait a minute and try again." : (data?.error?.message || "AI request failed.");
+      return res.status(response.status).json({ error: friendly });
+    }
+    const text = data?.choices?.[0]?.message?.content || "";
+    const start = text.indexOf("{"), end = text.lastIndexOf("}");
+    let lesson;
+    try { lesson = JSON.parse(text.slice(start, end + 1)); } catch { lesson = null; }
+    if (!lesson || !Array.isArray(lesson.sections)) return res.status(502).json({ error: "Verity's lesson came out jumbled. Please try again." });
+
+    const str = (v, n) => (typeof v === "string" ? v.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#{1,6}\s*/gm, "").trim().slice(0, n) : "");
+    const clean = {
+      title: str(lesson.title, 120) || topic,
+      summary: str(lesson.summary, 600),
+      sections: lesson.sections.slice(0, 6).map(s => ({ heading: str(s && s.heading, 120), text: str(s && s.text, 1600) })).filter(s => s.heading && s.text),
+      keyPoints: (Array.isArray(lesson.keyPoints) ? lesson.keyPoints : []).slice(0, 8).map(k => str(k, 240)).filter(Boolean),
+      quiz: (Array.isArray(lesson.quiz) ? lesson.quiz : []).slice(0, 5).filter(q => q && Array.isArray(q.options) && q.options.length === 4 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer <= 3)
+        .map(q => ({ q: str(q.q, 300), options: q.options.map(o => str(String(o), 160)), answer: q.answer, explain: str(q.explain, 400) }))
+    };
+    if (!clean.sections.length) return res.status(502).json({ error: "Verity's lesson came out empty. Please try again." });
+    return res.status(200).json({ lesson: clean });
+  } catch (error) {
+    console.error("Lesson error:", error);
+    return res.status(500).json({ error: "Verity's server had a problem. Please try again." });
+  }
+}
