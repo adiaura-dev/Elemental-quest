@@ -1,0 +1,14 @@
+{
+  "name": "OmniQuest: Learn Everything",
+  "short_name": "OmniQuest",
+  "description": "Learn Chemistry, Maths, Biology and Physics with labs, lessons, tests and Verity, your AI tutor.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f1726",
+  "theme_color": "#0f1726",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
