@@ -1382,3 +1382,7 @@ bossSpriteReset = function () {
 const atomLabScript = document.createElement("script");
 atomLabScript.src = "atom-lab.js";
 document.body.appendChild(atomLabScript);
+/* Load OmniQuest (all subjects) */
+const omniScript = document.createElement("script");
+omniScript.src = "omniquest.js";
+document.body.appendChild(omniScript);
