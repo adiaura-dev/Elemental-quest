@@ -37,33 +37,45 @@
   const T = (name, s, a, b, open, kw = "") => ({ name, s, a, b, open, kw: kw.toLowerCase() });
   const CATALOG = [
     T("Periodic Table", "chem", 6, 10, { sec: "periodic-section" }, "elements groups periods mendeleev symbols atomic number families"),
-    T("Atomic Structure", "chem", 8, 10, { sec: "atomlab-section" }, "atom proton neutron electron shells isotopes ions bohr atom lab"),
-    T("Molecules and Chemical Bonding", "chem", 9, 10, { sec: "atomlab-section" }, "covalent ionic bond molecule water methane atom lab"),
+    T("Atom Lab (3D builder)", "chem", 8, 10, { sec: "atomlab-section" }, "atom proton neutron electron shells isotopes ions bohr molecule bond"),
+    T("Build an Atom", "chem", 8, 10, { lab: "atom" }, "atomic structure proton neutron electron charge mass number"),
+    T("Isotopes and Atomic Mass", "chem", 9, 10, { lab: "isotopes" }, "isotope atomic mass"),
+    T("States of Matter", "chem", 6, 9, { lab: "states" }, "solid liquid gas particles melting boiling matter"),
+    T("Balancing Chemical Equations", "chem", 8, 10, { lab: "equations" }, "chemical reactions equations balance"),
+    T("pH Scale: Acids and Bases", "chem", 7, 10, { lab: "ph" }, "acids bases salts ph indicator neutral"),
+    T("Molecule Shapes", "chem", 9, 10, { lab: "shapes" }, "covalent bond molecule shape geometry lone pair chemical bonding"),
+    T("Build a Molecule", "chem", 8, 10, { lab: "molecule" }, "molecules compounds formula water carbon dioxide"),
+    T("Reactants, Products and Leftovers", "chem", 9, 10, { lab: "reactions" }, "limiting reactant reaction"),
+    T("Concentration of Solutions", "chem", 9, 10, { lab: "concentration" }, "solution solute solvent dissolve saturated"),
     T("Chemistry Quiz", "chem", 6, 10, { sec: "quiz-section" }, "test practice questions"),
     T("Element Boss Fight", "chem", 6, 10, { sec: "boss-section" }, "game battle guardian"),
-    T("Matter and its States", "chem", 6, 9, null, "solid liquid gas particles melting boiling"),
     T("Elements, Compounds and Mixtures", "chem", 6, 9, null, "pure substance"),
     T("Separation of Substances", "chem", 6, 7, null, "filtration evaporation distillation sieving decantation"),
     T("Physical and Chemical Changes", "chem", 6, 8, null, "reversible irreversible rusting"),
-    T("Acids, Bases and Salts", "chem", 7, 10, null, "ph indicator litmus neutralisation"),
     T("Water", "chem", 6, 8, null, "water cycle hard soft"),
     T("Air and the Atmosphere", "chem", 6, 8, null, "oxygen nitrogen pollution"),
     T("Combustion and Flame", "chem", 7, 8, null, "fire fuel burning"),
     T("Synthetic Fibres and Plastics", "chem", 8, 8, null, "nylon polyester polymer"),
     T("Coal and Petroleum", "chem", 8, 8, null, "fossil fuels"),
     T("Metals and Non-metals", "chem", 8, 10, null, "reactivity series"),
-    T("Chemical Reactions and Equations", "chem", 8, 10, null, "balancing equations reaction types"),
     T("Mole Concept", "chem", 9, 10, null, "avogadro molar mass"),
     T("Carbon and its Compounds", "chem", 9, 10, null, "organic hydrocarbons alkanes"),
 
+    T("Equation Balance", "maths", 6, 9, { lab: "balance" }, "solving linear equations find x balance scale algebra"),
     T("Sentence to Equation", "maths", 6, 8, { frame: "oq-maths", tool: "sentence" }, "forming linear equations word problems"),
-    T("Solving Linear Equations", "maths", 7, 10, { frame: "oq-maths", tool: "solve" }, "find x balance"),
-    T("Quadratic Equations", "maths", 9, 10, { frame: "oq-maths", tool: "quad" }, "roots factorisation graph parabola"),
+    T("Solving Linear Equations", "maths", 7, 10, { frame: "oq-maths", tool: "solve" }, "find x balance practice"),
+    T("Quadratic Equations Practice", "maths", 9, 10, { frame: "oq-maths", tool: "quad" }, "roots factorisation"),
+    T("Graphing Quadratics", "maths", 9, 10, { lab: "quadgraph" }, "quadratic equations parabola vertex roots graph"),
+    T("Straight-Line Graphs", "maths", 8, 10, { lab: "lines" }, "linear equations in two variables coordinate geometry slope gradient intercept"),
+    T("Fractions", "maths", 6, 7, { lab: "fractions" }, "fractions decimals numerator denominator"),
+    T("Area and Perimeter", "maths", 6, 8, { lab: "area" }, "mensuration area perimeter"),
+    T("Integers on a Number Line", "maths", 6, 7, { lab: "integers" }, "integers negative numbers number line"),
+    T("Ratio and Unit Rates", "maths", 6, 8, { lab: "ratios" }, "ratio proportion unitary method rate"),
+    T("Trigonometry", "maths", 10, 10, { lab: "trig" }, "sin cos tan unit circle"),
+    T("Probability", "maths", 8, 10, { lab: "probability" }, "chance probability"),
+    T("Mean, Median and Mode", "maths", 6, 10, { lab: "stats" }, "data handling statistics mean median mode range"),
     T("Maths Boss Battle", "maths", 7, 10, { frame: "oq-maths", tool: "boss" }, "game x-beast"),
     T("Number System", "maths", 6, 9, null, "natural whole rational irrational"),
-    T("Integers", "maths", 6, 7, null, "negative numbers"),
-    T("Fractions and Decimals", "maths", 6, 7, null, ""),
-    T("Ratio and Proportion", "maths", 6, 8, null, "unitary method"),
     T("Percentage", "maths", 7, 8, null, "profit loss discount"),
     T("Algebraic Expressions", "maths", 6, 8, null, "terms like terms variables"),
     T("Exponents and Powers", "maths", 7, 8, null, "indices laws"),
@@ -71,30 +83,29 @@
     T("Cubes and Cube Roots", "maths", 8, 8, null, ""),
     T("Factorisation", "maths", 8, 9, null, "identities"),
     T("Polynomials", "maths", 9, 10, null, "zeroes degree"),
-    T("Linear Equations in Two Variables", "maths", 9, 10, null, "simultaneous equations pair of lines"),
-    T("Coordinate Geometry", "maths", 9, 10, null, "x axis y axis distance formula"),
     T("Lines and Angles", "maths", 6, 9, null, "parallel lines transversal"),
     T("Triangles", "maths", 7, 10, null, "congruence similarity"),
     T("Pythagoras Theorem", "maths", 7, 9, null, "right triangle hypotenuse"),
     T("Quadrilaterals", "maths", 8, 9, null, "parallelogram"),
     T("Circles", "maths", 9, 10, null, "chord tangent arc"),
-    T("Area and Perimeter", "maths", 6, 8, null, "mensuration"),
     T("Surface Area and Volume", "maths", 8, 10, null, "cube cuboid cylinder cone sphere mensuration"),
-    T("Data Handling and Statistics", "maths", 6, 10, null, "mean median mode bar graph"),
-    T("Probability", "maths", 8, 10, null, "chance"),
     T("Simple and Compound Interest", "maths", 7, 9, null, "interest"),
     T("Arithmetic Progressions", "maths", 10, 10, null, "ap sequence nth term"),
-    T("Trigonometry", "maths", 10, 10, null, "sin cos tan"),
 
-    T("The Cell", "bio", 6, 10, { frame: "oq-bio", tool: "cell" }, "cell structure organelles nucleus plant animal"),
-    T("Human Body and Organ Systems", "bio", 6, 10, { frame: "oq-bio", tool: "body" }, "organs heart lungs brain"),
+    T("Human Organs in 3D", "bio", 6, 10, { lab: "organs" }, "human body organ systems organs heart lungs liver stomach intestines anatomy parts"),
+    T("The Human Heart in 3D", "bio", 7, 10, { lab: "heart" }, "heart circulation blood transportation circulatory"),
+    T("The Human Brain in 3D", "bio", 8, 10, { lab: "brain" }, "brain nervous system control coordination"),
+    T("Animal Cell in 3D", "bio", 6, 10, { lab: "animalcell" }, "cell structure organelles nucleus mitochondria the cell unit of life"),
+    T("Plant Cell in 3D", "bio", 6, 10, { lab: "plantcell" }, "plant cell wall chloroplast vacuole the cell"),
+    T("Digestive System in 3D", "bio", 7, 10, { lab: "digestive" }, "digestion nutrition stomach intestine liver food"),
+    T("The Skeleton in 3D", "bio", 6, 8, { lab: "skeleton" }, "bones skeleton body movement joints"),
+    T("DNA in 3D", "bio", 9, 10, { lab: "dna" }, "dna genes heredity chromosomes"),
+    T("Natural Selection", "bio", 9, 10, { lab: "selection" }, "heredity evolution natural selection adaptation"),
     T("Biology Quiz", "bio", 6, 10, { frame: "oq-bio", tool: "quiz" }, "test practice questions"),
     T("Components of Food", "bio", 6, 7, null, "nutrients vitamins balanced diet deficiency"),
     T("Classification of Living Things", "bio", 6, 9, null, "kingdoms diversity"),
     T("Nutrition in Plants (Photosynthesis)", "bio", 6, 10, null, "chlorophyll"),
-    T("Nutrition and Digestion in Animals", "bio", 7, 10, null, "digestive system"),
     T("Respiration", "bio", 7, 10, null, "breathing aerobic anaerobic"),
-    T("Transportation in Plants and Animals", "bio", 7, 10, null, "blood circulation xylem phloem heart"),
     T("Excretion", "bio", 7, 10, null, "kidney nephron"),
     T("Reproduction in Plants", "bio", 7, 10, null, "pollination seeds"),
     T("Reproduction in Animals", "bio", 8, 10, null, "fertilisation"),
@@ -102,28 +113,30 @@
     T("Adolescence", "bio", 8, 8, null, "puberty hormones"),
     T("Tissues", "bio", 9, 9, null, "meristematic epithelial"),
     T("Diseases and Health", "bio", 8, 9, null, "immunity vaccines"),
-    T("Control and Coordination", "bio", 9, 10, null, "nervous system brain hormones"),
-    T("Heredity and Evolution", "bio", 10, 10, null, "mendel genetics dna"),
     T("Ecosystems and Food Chains", "bio", 6, 10, null, "environment food web"),
 
-    T("Electricity and Circuits", "phy", 6, 10, { frame: "oq-phy", tool: "circuit" }, "current ohm's law resistance conductors insulators"),
-    T("Motion and Speed", "phy", 7, 9, { frame: "oq-phy", tool: "motion" }, "distance time graph velocity acceleration"),
+    T("Electric Circuits", "phy", 6, 10, { lab: "circuits" }, "electricity current circuit conductors insulators bulb battery series parallel"),
+    T("Ohm's Law", "phy", 9, 10, { lab: "ohm" }, "ohms law voltage current resistance electricity"),
+    T("Forces and Motion", "phy", 7, 9, { lab: "forces" }, "force motion speed laws of motion newton push pull"),
+    T("Friction", "phy", 8, 8, { lab: "friction" }, "friction heat"),
+    T("Energy: Skate Park", "phy", 9, 10, { lab: "energy" }, "work energy power kinetic potential conservation"),
+    T("Refraction of Light", "phy", 8, 10, { lab: "refraction" }, "light refraction prism bending"),
+    T("Mirrors and Lenses", "phy", 7, 10, { lab: "optics" }, "light reflection mirror lens image"),
+    T("Gravity and Orbits", "phy", 8, 9, { lab: "gravity" }, "gravitation gravity weight orbit moon"),
+    T("Waves", "phy", 9, 9, { lab: "waves" }, "wave amplitude frequency wavelength"),
+    T("Sound", "phy", 8, 9, { lab: "sound" }, "sound frequency pitch vibration echo"),
+    T("Pressure in Liquids", "phy", 8, 9, { lab: "pressure" }, "force and pressure liquid air"),
+    T("Density: Float or Sink", "phy", 8, 9, { lab: "density" }, "density float sink buoyancy mass volume"),
+    T("Magnets", "phy", 6, 8, { lab: "magnets" }, "magnet poles compass field"),
+    T("Electromagnetic Induction", "phy", 10, 10, { lab: "induction" }, "magnetic effects of current electromagnet generator faraday"),
+    T("Pendulum", "phy", 7, 9, { lab: "pendulum" }, "time period oscillation motion"),
+    T("Build a Solar System", "phy", 6, 8, { lab: "solar" }, "stars and the solar system planets orbit"),
     T("Physics Quiz", "phy", 6, 10, { frame: "oq-phy", tool: "quiz" }, "test practice questions"),
     T("Measurement and Units", "phy", 6, 9, null, "si units length"),
-    T("Magnets", "phy", 6, 6, null, "poles compass"),
-    T("Light: Shadows and Reflection", "phy", 6, 10, null, "mirror"),
-    T("Light: Refraction and Lenses", "phy", 10, 10, null, "lens refraction"),
     T("Heat and Temperature", "phy", 7, 9, null, "conduction convection radiation"),
-    T("Force and Pressure", "phy", 8, 9, null, ""),
-    T("Friction", "phy", 8, 8, null, ""),
-    T("Sound", "phy", 8, 9, null, "frequency echo vibration"),
-    T("Laws of Motion", "phy", 9, 9, null, "newton inertia momentum"),
-    T("Gravitation", "phy", 9, 9, null, "gravity weight mass"),
-    T("Work, Energy and Power", "phy", 9, 10, null, "kinetic potential"),
-    T("Magnetic Effects of Current", "phy", 10, 10, null, "electromagnet motor"),
+    T("Light: Shadows and Reflection", "phy", 6, 7, null, "shadow"),
     T("The Human Eye", "phy", 10, 10, null, "vision defects"),
-    T("Sources of Energy", "phy", 9, 10, null, "renewable solar"),
-    T("Stars and the Solar System", "phy", 8, 8, null, "planets moon space")
+    T("Sources of Energy", "phy", 9, 10, null, "renewable solar")
   ];
 
   /* ---------- 2. styles ---------- */
@@ -133,23 +146,23 @@
     body .main-content { margin: 0 auto !important; width: 100% !important; max-width: 1320px; padding: 0 28px 70px !important; }
     .oq-top { position: sticky; top: 0; z-index: 1500; display: flex; align-items: center; gap: 16px; padding: 14px 0; margin-bottom: 18px; background: rgba(15, 23, 38, .9); backdrop-filter: blur(10px); border-bottom: 1px solid #22324a; }
     .oq-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: none; }
-    .oq-brand b { font: 700 21px "Fredoka", "Nunito", sans-serif; color: #fff; letter-spacing: .5px; }
+    .oq-brand b { font: 700 21px "Inter", system-ui, sans-serif; color: #fff; letter-spacing: .5px; }
     .oq-brand b span { color: #55cfff; }
     .oq-logo { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, #55cfff, #a855f7); color: #fff; font-size: 18px; box-shadow: 0 0 18px #55cfff55; }
     .oq-search { position: relative; flex: 1; max-width: 620px; }
-    .oq-search input { width: 100%; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px 12px 40px; color: #fff; font: 700 15px "Nunito", sans-serif; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .oq-search input { width: 100%; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px 12px 40px; color: #fff; font: 700 15px "Inter", system-ui, sans-serif; outline: none; transition: border-color .2s, box-shadow .2s; }
     .oq-search input:focus { border-color: #55cfff; box-shadow: 0 0 0 4px #55cfff22; }
     .oq-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); }
     .oq-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #131d2f; border: 1px solid #334155; border-radius: 14px; box-shadow: 0 24px 60px #000a; padding: 6px; display: none; max-height: 420px; overflow-y: auto; }
     .oq-results.show { display: block; animation: oqDrop .18s ease-out; }
     @keyframes oqDrop { from { opacity: 0; transform: translateY(-4px); } }
-    .oq-res { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: #e2ebf6; text-align: left; padding: 10px 12px; border-radius: 10px; cursor: pointer; font: 700 14.5px "Nunito", sans-serif; }
+    .oq-res { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: #e2ebf6; text-align: left; padding: 10px 12px; border-radius: 10px; cursor: pointer; font: 700 14.5px "Inter", system-ui, sans-serif; }
     .oq-res:hover, .oq-res.on { background: #1f2d45; }
     .oq-res .d { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
     .oq-res .m { margin-left: auto; color: #7d8fa8; font-size: 11.5px; font-weight: 800; white-space: nowrap; }
     .oq-res.ai { border-top: 1px solid #263449; margin-top: 4px; color: #9fdcff; }
     .oq-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
-    .oq-pill { display: flex; align-items: center; gap: 8px; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 8px 12px; color: #dbe7f3; font: 800 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-pill { display: flex; align-items: center; gap: 8px; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 8px 12px; color: #dbe7f3; font: 800 13px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-pill:hover { border-color: #55cfff; }
     .oq-xpbar { width: 70px; height: 6px; background: #1e293b; border-radius: 6px; overflow: hidden; }
     .oq-xpbar div { height: 100%; background: linear-gradient(90deg, #55cfff, #a855f7); transition: width .6s; }
@@ -172,20 +185,20 @@
     .oq-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
     .oq-stat { background: linear-gradient(145deg, #1e293b, #172337); border: 1px solid #334155; border-radius: 14px; padding: 13px 16px; }
     .oq-stat span { display: block; color: #8195ad; font-size: 11px; font-weight: 900; letter-spacing: 1.2px; }
-    .oq-stat b { font: 700 24px "Fredoka", "Nunito", sans-serif; color: #fff; }
+    .oq-stat b { font: 700 24px "Inter", system-ui, sans-serif; color: #fff; }
     .oq-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-    .oq-tab { border: 1px solid #334155; background: #111a2b; color: #b8c6d8; border-radius: 30px; padding: 8px 15px; font: 800 13.5px "Nunito", sans-serif; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+    .oq-tab { border: 1px solid #334155; background: #111a2b; color: #b8c6d8; border-radius: 30px; padding: 8px 15px; font: 800 13.5px "Inter", system-ui, sans-serif; cursor: pointer; display: flex; align-items: center; gap: 7px; }
     .oq-tab .d { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
     .oq-tab.on { border-color: var(--c, #55cfff); color: #fff; background: #1b2840; }
     .oq-tab:hover { color: #fff; }
-    .oq-toggle { margin-left: auto; color: #8195ad; font: 800 13px "Nunito", sans-serif; display: flex; align-items: center; gap: 7px; cursor: pointer; }
+    .oq-toggle { margin-left: auto; color: #8195ad; font: 800 13px "Inter", system-ui, sans-serif; display: flex; align-items: center; gap: 7px; cursor: pointer; }
     .oq-toggle input { accent-color: #55cfff; }
     .oq-block { margin-bottom: 22px; }
     .oq-block h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 20px; color: #fff; }
     .oq-block h2 .bar { width: 4px; height: 20px; border-radius: 4px; background: var(--c); }
-    .oq-block h2 small { color: #7d8fa8; font: 800 12px "Nunito", sans-serif; }
+    .oq-block h2 small { color: #7d8fa8; font: 800 12px "Inter", system-ui, sans-serif; }
     .oq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
-    .oq-card { position: relative; text-align: left; border: 1px solid #2c3d53; background: linear-gradient(160deg, #1b2639, #141e30); color: #e2ebf6; border-radius: 13px; padding: 13px 14px; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s; font: 800 14.5px "Nunito", sans-serif; }
+    .oq-card { position: relative; text-align: left; border: 1px solid #2c3d53; background: linear-gradient(160deg, #1b2639, #141e30); color: #e2ebf6; border-radius: 13px; padding: 13px 14px; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s; font: 800 14.5px "Inter", system-ui, sans-serif; }
     .oq-card:hover { border-color: var(--c); transform: translateY(-2px); box-shadow: 0 10px 24px #0005; }
     .oq-card small { display: flex; gap: 8px; margin-top: 6px; font-size: 10.5px; letter-spacing: 1px; color: #7d8fa8; }
     .oq-card .lab { color: var(--c); }
@@ -205,7 +218,7 @@
     .oq-q { margin-bottom: 14px; }
     .oq-q p { font-weight: 800; color: #fff; margin: 0 0 8px; }
     .oq-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .oq-opt { text-align: left; border: 1px solid #334155; background: #111a2b; color: #e2ebf6; border-radius: 10px; padding: 10px 12px; font: 700 14px "Nunito", sans-serif; cursor: pointer; }
+    .oq-opt { text-align: left; border: 1px solid #334155; background: #111a2b; color: #e2ebf6; border-radius: 10px; padding: 10px 12px; font: 700 14px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-opt:hover:not(:disabled) { border-color: #55cfff; }
     .oq-opt.right { border-color: #25c58a; background: #10392e; }
     .oq-opt.wrong { border-color: #f07883; background: #3d1c25; }
@@ -213,7 +226,7 @@
     .oq-exp { margin-top: 8px; color: #b8c6d8; font-size: 13.5px; line-height: 1.55; display: none; }
     .oq-exp.show { display: block; }
     .oq-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    .oq-btn { border: 1px solid #334155; background: #1e293b; color: #fff; border-radius: 11px; padding: 10px 16px; font: 800 14px "Nunito", sans-serif; cursor: pointer; }
+    .oq-btn { border: 1px solid #334155; background: #1e293b; color: #fff; border-radius: 11px; padding: 10px 16px; font: 800 14px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-btn:hover { border-color: #55cfff; }
     .oq-btn.primary { background: #55cfff; color: #04202e; border-color: #55cfff; }
     .oq-loading { display: flex; align-items: center; gap: 14px; padding: 26px; color: #c8d5e5; font-weight: 800; background: #172337; border: 1px solid #2c3d53; border-radius: 16px; }
@@ -228,11 +241,11 @@
     .oq-dialog h2 { margin: 4px 0 4px; font-size: 26px; color: #fff; }
     .oq-dialog p { color: #9aabc0; margin: 0 0 18px; }
     .oq-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 9px; margin-bottom: 18px; }
-    .oq-choice { border: 1.5px solid #334155; background: #111a2b; color: #fff; border-radius: 12px; padding: 13px 8px; font: 900 15px "Nunito", sans-serif; cursor: pointer; transition: all .2s; }
+    .oq-choice { border: 1.5px solid #334155; background: #111a2b; color: #fff; border-radius: 12px; padding: 13px 8px; font: 900 15px "Inter", system-ui, sans-serif; cursor: pointer; transition: all .2s; }
     .oq-choice small { display: block; color: #8195ad; font-size: 10.5px; margin-top: 3px; font-weight: 800; }
     .oq-choice:hover { border-color: #55cfff; }
     .oq-choice.on { border-color: #55cfff; background: #20334a; box-shadow: 0 0 16px #55cfff33; }
-    .oq-go { border: 0; border-radius: 12px; padding: 12px 26px; font: 900 15px "Nunito", sans-serif; color: #04202e; background: #55cfff; cursor: pointer; }
+    .oq-go { border: 0; border-radius: 12px; padding: 12px 26px; font: 900 15px "Inter", system-ui, sans-serif; color: #04202e; background: #55cfff; cursor: pointer; }
     .oq-go:disabled { opacity: .4; cursor: default; }
 
     .oq-center { min-height: calc(100vh - 160px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 30px; }
@@ -242,42 +255,42 @@
     .oq-slot .oq-search { max-width: none; }
     .oq-slot .oq-search input { padding: 18px 18px 18px 50px; font-size: 18px; border-radius: 16px; box-shadow: 0 18px 50px #0006; }
     .oq-slot .oq-search svg { left: 18px; width: 21px; height: 21px; }
-    .oq-try { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 16px 0 34px; color: #7d8fa8; font: 800 13px "Nunito", sans-serif; align-items: center; }
-    .oq-try button { border: 1px solid #334155; background: #131d2f; color: #c8d5e5; border-radius: 30px; padding: 7px 14px; font: 700 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-try { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 16px 0 34px; color: #7d8fa8; font: 800 13px "Inter", system-ui, sans-serif; align-items: center; }
+    .oq-try button { border: 1px solid #334155; background: #131d2f; color: #c8d5e5; border-radius: 30px; padding: 7px 14px; font: 700 13px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-try button:hover { border-color: #55cfff; color: #fff; }
     .oq-subjects4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: min(980px, 100%); }
     .oq-subj { position: relative; text-align: left; border: 1px solid #2c3d53; background: linear-gradient(160deg, #1b2639, #141e30); color: #fff; border-radius: 16px; padding: 18px 18px 16px; cursor: pointer; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; }
     .oq-subj::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: var(--c); }
     .oq-subj:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 14px 34px #0006; }
-    .oq-subj b { display: block; font: 700 21px "Fredoka", "Nunito", sans-serif; margin-bottom: 4px; }
-    .oq-subj span { color: #8aa0b8; font: 700 12.5px "Nunito", sans-serif; }
+    .oq-subj b { display: block; font: 700 21px "Inter", system-ui, sans-serif; margin-bottom: 4px; }
+    .oq-subj span { color: #8aa0b8; font: 700 12.5px "Inter", system-ui, sans-serif; }
     .oq-subj i { position: absolute; right: 16px; top: 18px; font-style: normal; color: var(--c); font-weight: 900; transition: transform .2s; }
     .oq-subj:hover i { transform: translateX(4px); }
     .oq-subhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
     .oq-subhead h1 { margin: 2px 0 4px; font-size: clamp(28px, 3.4vw, 40px); color: #fff; }
     .oq-subhead p { margin: 0; color: #8aa0b8; font-weight: 700; font-size: 14px; }
     .oq-subhead p .ok { color: #45e2a1; }
-    .oq-filter { background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 11px 14px; color: #fff; font: 700 14px "Nunito", sans-serif; outline: none; min-width: 260px; }
+    .oq-filter { background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 11px 14px; color: #fff; font: 700 14px "Inter", system-ui, sans-serif; outline: none; min-width: 260px; }
     .oq-filter:focus { border-color: var(--c, #55cfff); }
     .oq-labs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
     .oq-labs .oq-label { margin: 0 6px 0 0; }
-    .oq-labbtn { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 12%, #111a2b); color: #fff; border-radius: 10px; padding: 8px 13px; font: 800 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-labbtn { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 12%, #111a2b); color: #fff; border-radius: 10px; padding: 8px 13px; font: 800 13px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-labbtn:hover { background: color-mix(in srgb, var(--c) 25%, #111a2b); }
     .oq-chapters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .oq-ch { background: linear-gradient(160deg, #1b2639, #141e30); border: 1px solid #2c3d53; border-radius: 14px; padding: 14px 16px; animation: oqUp .35s ease-out both; }
     .oq-ch-top { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .oq-ch-top:hover b { color: var(--c); }
-    .oq-ch-top .n { width: 28px; height: 28px; flex: none; border-radius: 8px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 18%, #0f1828); color: var(--c); font: 800 13px "Nunito", sans-serif; }
-    .oq-ch-top b { font: 800 15.5px "Nunito", sans-serif; color: #fff; transition: color .2s; }
-    .oq-ch-top .lab { margin-left: auto; border: 1px solid var(--c); color: var(--c); background: transparent; border-radius: 8px; padding: 3px 8px; font: 900 10.5px "Nunito", sans-serif; letter-spacing: 1px; cursor: pointer; }
+    .oq-ch-top .n { width: 28px; height: 28px; flex: none; border-radius: 8px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 18%, #0f1828); color: var(--c); font: 800 13px "Inter", system-ui, sans-serif; }
+    .oq-ch-top b { font: 800 15.5px "Inter", system-ui, sans-serif; color: #fff; transition: color .2s; }
+    .oq-ch-top .lab { margin-left: auto; border: 1px solid var(--c); color: var(--c); background: transparent; border-radius: 8px; padding: 3px 8px; font: 900 10.5px "Inter", system-ui, sans-serif; letter-spacing: 1px; cursor: pointer; }
     .oq-subs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .oq-subs button { border: 1px solid #2c3d53; background: #111a2b; color: #c8d5e5; border-radius: 20px; padding: 5px 11px; font: 700 12.5px "Nunito", sans-serif; cursor: pointer; }
+    .oq-subs button { border: 1px solid #2c3d53; background: #111a2b; color: #c8d5e5; border-radius: 20px; padding: 5px 11px; font: 700 12.5px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-subs button:hover { border-color: var(--c); color: #fff; }
     .oq-note { color: #7d8fa8; font-size: 12.5px; font-weight: 700; margin-top: 14px; }
     .oq-hook { font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px; }
     .oq-funfact { border-left: 3px solid #ffb347; }
     .oq-extra { margin-top: 22px; display: flex; gap: 10px; align-items: center; color: #4b5d76; }
-    .oq-extra button { border: 0; background: transparent; color: #8aa0b8; font: 800 14px "Nunito", sans-serif; cursor: pointer; padding: 4px 6px; border-bottom: 1px dashed #3a4b62; }
+    .oq-extra button { border: 0; background: transparent; color: #8aa0b8; font: 800 14px "Inter", system-ui, sans-serif; cursor: pointer; padding: 4px 6px; border-bottom: 1px dashed #3a4b62; }
     .oq-extra button:hover { color: #fff; border-color: #55cfff; }
     .oq-steps { display: flex; gap: 6px; margin-bottom: 14px; }
     .oq-steps i { flex: 1; height: 4px; border-radius: 4px; background: #263449; }
@@ -285,15 +298,15 @@
     .oq-langs { max-height: 300px; overflow-y: auto; grid-template-columns: repeat(3, 1fr); }
     .oq-langs .oq-choice small { font-size: 11px; }
     .oq-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .oq-backbtn { border: 1px solid #334155; background: transparent; color: #c8d5e5; border-radius: 12px; padding: 11px 18px; font: 800 14px "Nunito", sans-serif; cursor: pointer; }
+    .oq-backbtn { border: 1px solid #334155; background: transparent; color: #c8d5e5; border-radius: 12px; padding: 11px 18px; font: 800 14px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-page { max-width: 860px; }
     .oq-page h1 { font-size: clamp(26px, 3.2vw, 38px); margin: 2px 0 6px; color: #fff; }
     .oq-page > p { color: #9aabc0; margin: 0 0 18px; }
     .oq-field { margin-bottom: 14px; }
-    .oq-field textarea { width: 100%; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px; color: #fff; font: 600 15px "Nunito", sans-serif; resize: vertical; outline: none; }
+    .oq-field textarea { width: 100%; background: #111a2b; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px; color: #fff; font: 600 15px "Inter", system-ui, sans-serif; resize: vertical; outline: none; }
     .oq-field textarea:focus { border-color: #55cfff; }
     .oq-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .oq-chip { border: 1px solid #334155; background: #111a2b; color: #c8d5e5; border-radius: 30px; padding: 7px 14px; font: 800 13px "Nunito", sans-serif; cursor: pointer; }
+    .oq-chip { border: 1px solid #334155; background: #111a2b; color: #c8d5e5; border-radius: 30px; padding: 7px 14px; font: 800 13px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-chip.on { border-color: var(--c, #55cfff); color: #fff; background: #1b2840; }
     .oq-photo img { max-height: 150px; border-radius: 10px; border: 1px solid #334155; display: block; margin-top: 8px; }
     .oq-verdict { border-radius: 14px; padding: 14px 18px; font-weight: 800; margin-bottom: 12px; border: 1px solid; }
@@ -305,22 +318,22 @@
     .oq-step:last-child { border-bottom: 0; }
     .oq-step .ic { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 900; }
     .oq-step .ic.y { background: #25c58a; color: #062218; } .oq-step .ic.n { background: #f07883; color: #fff; }
-    .oq-step b { display: block; color: #fff; font-family: "Fredoka", sans-serif; font-weight: 600; }
+    .oq-step b { display: block; color: #fff; font-family: "Inter", system-ui, sans-serif; font-weight: 600; }
     .oq-step span { color: #b8c6d8; font-size: 14px; }
     .oq-checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 300px; overflow-y: auto; padding: 2px; }
-    .oq-checks label { display: flex; gap: 8px; align-items: center; background: #111a2b; border: 1px solid #2c3d53; border-radius: 10px; padding: 8px 10px; color: #dbe7f3; font: 700 13.5px "Nunito", sans-serif; cursor: pointer; }
+    .oq-checks label { display: flex; gap: 8px; align-items: center; background: #111a2b; border: 1px solid #2c3d53; border-radius: 10px; padding: 8px 10px; color: #dbe7f3; font: 700 13.5px "Inter", system-ui, sans-serif; cursor: pointer; }
     .oq-checks input { accent-color: #55cfff; }
     .oq-timer { position: sticky; top: 74px; z-index: 5; display: flex; justify-content: space-between; align-items: center; background: #131d2f; border: 1px solid #334155; border-radius: 12px; padding: 10px 16px; margin-bottom: 14px; font-weight: 800; color: #dbe7f3; }
-    .oq-timer b { font: 700 20px "Fredoka", sans-serif; color: #55cfff; }
+    .oq-timer b { font: 700 20px "Inter", system-ui, sans-serif; color: #55cfff; }
     .oq-timer b.low { color: #ff8c9c; }
     .oq-opt.picked { border-color: #55cfff; background: #1b2840; }
     .oq-score { text-align: center; padding: 10px 0 6px; }
-    .oq-score b { display: block; font: 700 54px "Fredoka", sans-serif; color: #fff; }
+    .oq-score b { display: block; font: 700 54px "Inter", system-ui, sans-serif; color: #fff; }
     .oq-bars { display: grid; gap: 8px; }
     .oq-bar { display: grid; grid-template-columns: minmax(0, 1fr) 140px 50px; gap: 10px; align-items: center; color: #dbe7f3; font-weight: 700; font-size: 14px; }
     .oq-bar .t { height: 8px; background: #1e293b; border-radius: 8px; overflow: hidden; }
     .oq-bar .t div { height: 100%; border-radius: 8px; }
-    .oq-offline { display: none; border: 1px solid #d4a017; color: #fde68a; background: #3a2f0e; border-radius: 10px; padding: 6px 10px; font: 800 12px "Nunito", sans-serif; }
+    .oq-offline { display: none; border: 1px solid #d4a017; color: #fde68a; background: #3a2f0e; border-radius: 10px; padding: 6px 10px; font: 800 12px "Inter", system-ui, sans-serif; }
     .oq-offline.show { display: inline-block; }
     @media (max-width: 900px) { .oq-subjects4 { grid-template-columns: repeat(2, 1fr); } .oq-chapters { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .oq-stats { grid-template-columns: repeat(2, 1fr); } .oq-opts { grid-template-columns: 1fr; } }
@@ -335,6 +348,35 @@
       .oq-frame { height: calc(100vh - 190px); }
     }
   `;
+  css.textContent += `
+    body, body button, body input, body select, body textarea, body h1, body h2, body h3, body h4, body p, body span, body b, body a, body li, body label, body div { font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif !important; }
+    body h1, body h2, body h3 { letter-spacing: -.02em; }
+    .oq-labview { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+    .oq-stage { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid #2c3d53; background: #0b1220; height: calc(100vh - 170px); min-height: 520px; }
+    .oq-stage:fullscreen { border-radius: 0; height: 100vh; }
+    .oq-stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+    .oq-stage-load { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: #0b1220; color: #e2ebf6; text-align: center; padding: 20px; transition: opacity .4s; }
+    .oq-stage-load b { font-size: 16px; }
+    .oq-stage-load small { color: #7d8fa8; font-weight: 600; }
+    .oq-stage-load.done { opacity: 0; pointer-events: none; }
+    .oq-spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #22324a; border-top-color: var(--c, #55cfff); animation: oqSpin .8s linear infinite; }
+    @keyframes oqSpin { to { transform: rotate(360deg); } }
+    .oq-labside { background: linear-gradient(160deg, #1b2639, #141e30); border: 1px solid #2c3d53; border-radius: 16px; padding: 20px; position: sticky; top: 90px; }
+    .oq-labside .oq-label { color: var(--c); }
+    .oq-labside h2 { margin: 2px 0 8px; font-size: 22px; color: #fff; }
+    .oq-labside p { color: #c8d5e5; line-height: 1.6; font-size: 14.5px; margin: 0; }
+    .oq-tasks { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: #dbe7f3; font-size: 14px; line-height: 1.5; }
+    .oq-tasks li::marker { color: var(--c); font-weight: 800; }
+    .oq-credit { margin-top: 16px !important; font-size: 11.5px !important; color: #7d8fa8 !important; line-height: 1.5 !important; }
+    .oq-credit a { color: #9fb3cc; }
+    @media (max-width: 900px) { .oq-labview { grid-template-columns: 1fr; } .oq-labside { position: static; } .oq-stage { height: 70vh; min-height: 420px; } }
+  `;
+  if (!document.querySelector('link[href*="family=Inter"]')) {
+    const font = document.createElement("link");
+    font.rel = "stylesheet";
+    font.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap";
+    document.head.appendChild(font);
+  }
   document.head.appendChild(css);
 
   /* ---------- 3. top bar + breadcrumb ---------- */
@@ -368,7 +410,7 @@
     const sec = document.createElement("section");
     sec.id = id;
     sec.className = "page-section";
-    sec.innerHTML = `<iframe class="oq-frame" title="${id}" loading="lazy"></iframe>`;
+    sec.innerHTML = `<iframe class="oq-frame" title="${id}"></iframe>`;
     main.appendChild(sec);
   });
   const subjPage = document.createElement("section");
@@ -392,6 +434,7 @@
   let current = { page: "Dashboard" };
   function activate(id) {
     if (id !== "oq-home" && typeof placeSearch === "function") placeSearch(false);
+    if (id !== "oq-lab") { const lf = document.getElementById("oq-labframe"); if (lf) lf.remove(); }
     document.querySelectorAll(".page-section").forEach(s => s.classList.toggle("active", s.id === id));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -399,7 +442,7 @@
     if (!topic) { crumb.classList.remove("show"); return; }
     const subj = SUBJECTS[topic.s] || { name: "Topic" };
     crumb.innerHTML = `<button type="button" id="oq-back">← Dashboard</button>${topic.s && SUBJECTS[topic.s] && topic.name !== subj.name ? `<a href="#" id="oq-crumb-subj" style="color:#8aa0b8">${esc(subj.name)}</a><span class="sep">/</span>` : ""}<span class="cur">${esc(topic.name)}</span>
-      ${topic.open ? `<button type="button" class="lessonbtn" id="oq-readlesson">Read the lesson</button>` : (topic.lab ? `<button type="button" class="lessonbtn" id="oq-openlab">Open the interactive lab</button>` : "")}`;
+      ${topic.open && !topic.open.lab ? `<button type="button" class="lessonbtn" id="oq-readlesson">Read the lesson</button>` : (topic.lab ? `<button type="button" class="lessonbtn" id="oq-openlab">Open the interactive lab</button>` : "")}`;
     crumb.classList.add("show");
     $("oq-back").addEventListener("click", goHome);
     if ($("oq-crumb-subj")) $("oq-crumb-subj").addEventListener("click", e => { e.preventDefault(); openSubject(topic.s); });
@@ -423,6 +466,7 @@
     if (!t.open) return openLesson(t);
     current = { page: `${SUBJECTS[t.s].name} > ${t.name}` };
     setCrumb(t);
+    if (t.open.lab) return openLab(t);
     if (t.open.sec) {
       activate(t.open.sec);
       if (t.open.sec === "atomlab-section") document.querySelector('.nav-button[data-section="atomlab-section"]')?.click();
@@ -434,13 +478,103 @@
     if (!frame.getAttribute("src")) frame.setAttribute("src", want); else frame.src = want;
     activate(t.open.frame);
   }
+  /* ---------- REAL LABS: PhET simulations + 3D models ---------- */
+  // PhET Interactive Simulations, University of Colorado Boulder (CC BY 4.0) and 3D models on Sketchfab
+  const PHET_CREDIT = 'Simulation by <a href="https://phet.colorado.edu" target="_blank" rel="noopener">PhET Interactive Simulations</a>, University of Colorado Boulder, licensed under CC BY 4.0.';
+  const P = (slug, about, tasks) => ({ kind: "phet", src: slug, about, tasks });
+  const M = (uid, author, license, about, tasks) => ({ kind: "3d", src: uid, author, license, about, tasks });
+  const LABS = {
+    // biology (3D)
+    organs: M("fe69d7b1ed6f46a3bd0b6933b796092e", "unlim3d", "Sketchfab Standard", "A 3D model of the main organs in the chest and abdomen. Drag to rotate, scroll or pinch to zoom.", ["Find the heart. Which two organs sit on either side of it?", "Rotate to the back. Which organ is the largest?", "Follow the food pipe down to the stomach and the intestines."]),
+    heart: M("3f8072336ce94d18b3d0d055a1ece089", "neshallads", "CC BY 4.0", "A realistic model of the human heart, the muscular pump of the circulatory system.", ["Find the aorta, the biggest artery leaving the top of the heart.", "Find the coronary arteries on the surface. What do they supply blood to?", "Count the large blood vessels joined to the heart."]),
+    brain: M("7a27c17fd6c0488bb31ab093236a47fb", "3DRT STUDIOS", "CC BY 4.0", "The human brain, the control centre of the nervous system.", ["Find the cerebrum, the large wrinkled top part.", "Find the cerebellum at the back. It controls balance.", "Why do you think the brain is folded into ridges?"]),
+    animalcell: M("0d9f7f4257224975b2ef83a283709b2f", "montanna", "CC BY 4.0", "A labelled 3D animal cell. Click the numbered dots to read about each organelle.", ["Find the nucleus and the nucleolus inside it.", "Find a mitochondrion. What does it do?", "Which structures does a plant cell have that this cell does not?"]),
+    plantcell: M("1c5ce80d03d149208d30cc5aeb6e42fb", "Vida Systems", "CC BY-NC-ND 4.0", "A 3D plant cell with its cell wall, chloroplasts and large central vacuole.", ["Find the chloroplasts. What do they make?", "How big is the vacuole compared with the rest of the cell?", "Find the cell wall outside the cell membrane."]),
+    digestive: M("f78ce703805f49d3b732e37be5b93188", "7D production", "CC BY 4.0", "The digestive system, from the food pipe to the large intestine.", ["Trace the path food takes, starting at the oesophagus.", "Find the liver. Which digestive juice does it make?", "Which is longer, the small or the large intestine?"]),
+    skeleton: M("4de7b96a351a4a35b1b6e5415277ff07", "Diego Luján García", "CC BY 4.0", "The human skeleton, with all its major bones.", ["Find the skull, ribcage and backbone.", "Which bones protect the heart and lungs?", "Find a ball-and-socket joint at the shoulder or hip."]),
+    dna: M("60e95170b37549e3b45ee490b74bb112", "Holoxica", "CC BY 4.0", "A model of DNA, the double helix that carries genetic information.", ["Count how many strands twist around each other.", "The rungs of the ladder are base pairs. Which bases pair together?", "Where in a cell is DNA found?"]),
+    selection: P("natural-selection", "Watch a population of bunnies change over generations as their environment changes.", ["Add wolves. Which fur colour survives best in the snow?", "Add a mutation and watch how it spreads.", "What happens when you change the environment to an equator?"]),
+    // physics
+    circuits: P("circuit-construction-kit-dc", "Build real circuits with batteries, bulbs, switches and wires, and measure current and voltage.", ["Make a bulb light with one battery.", "Put two bulbs in series, then in parallel. Which is brighter?", "Test a coin, an eraser and a paper clip. Which ones conduct?"]),
+    ohm: P("ohms-law", "See how voltage, current and resistance are linked by V = I × R.", ["Raise the voltage. What happens to the current?", "Raise the resistance. What happens to the current?", "Find a voltage and resistance that give exactly 0.5 A."]),
+    forces: P("forces-and-motion-basics", "Push objects, add friction and watch forces change motion.", ["In the Net Force screen, make the cart stay still with people pulling on both sides.", "In the Motion screen, push a box and watch the speed change.", "Turn on friction. How much harder do you have to push?"]),
+    friction: P("friction", "Rub two surfaces together and see what friction does to atoms and temperature.", ["Rub the book on the surface. What happens to the thermometer?", "Keep rubbing. What happens to the atoms at the top?", "Why do your hands get warm when you rub them together?"]),
+    energy: P("energy-skate-park-basics", "Ride a skater along a track and watch kinetic and potential energy swap.", ["Turn on the pie chart. Where is potential energy highest?", "Where on the track is the skater fastest?", "Add friction. Where does the energy go?"]),
+    refraction: P("bending-light", "Shine a laser through water and glass and see light bend.", ["Measure the angle when light goes from air into water.", "Find total internal reflection.", "Use a prism to split white light."]),
+    optics: P("geometric-optics-basics", "Form images with lenses and mirrors and see the rays.", ["Move the object closer to the lens. What happens to the image?", "Find where the image is upside down.", "Switch to a mirror and compare."]),
+    gravity: P("gravity-and-orbits", "Explore how gravity keeps the Moon and planets in orbit.", ["Turn gravity off. What happens to the Earth?", "Make the Sun heavier. How does the orbit change?", "Compare the Earth–Moon system with the Sun–Earth system."]),
+    waves: P("wave-on-a-string", "Wiggle a string and explore amplitude, frequency and wavelength.", ["Make a wave with a high frequency. What happens to the wavelength?", "Increase the amplitude. What changes?", "Turn on damping and see the wave die away."]),
+    sound: P("sound-waves", "See and hear sound waves, and change their frequency and amplitude.", ["Raise the frequency. How does the pitch change?", "Raise the amplitude. How does the loudness change?", "Remove the air from the box. Can sound travel?"]),
+    pressure: P("under-pressure", "Measure air and water pressure at different depths and in different liquids.", ["How does pressure change as you go deeper?", "Compare pressure in water and in honey.", "Does the shape of the container change the pressure at the bottom?"]),
+    density: P("density", "Find out why some objects float and others sink.", ["Compare blocks with the same mass but different volumes.", "Which material is densest?", "Predict which blocks will float before you drop them."]),
+    magnets: P("magnet-and-compass", "Move a bar magnet and see its magnetic field with a compass.", ["Where does the compass needle point near the north pole?", "Show the field lines. Where are they closest together?", "Flip the magnet and watch the compass."]),
+    induction: P("faradays-electromagnetic-lab", "Move a magnet through a coil to make electricity.", ["Move the magnet quickly through the coil. What does the bulb do?", "Hold it still. Is any current produced?", "Add more loops to the coil. What changes?"]),
+    pendulum: P("pendulum-lab", "Time a swinging pendulum and find what changes its period.", ["Does a heavier bob swing faster?", "Make the string longer. What happens to the period?", "Try it on the Moon."]),
+    solar: P("my-solar-system", "Build your own solar system and watch the orbits.", ["Make a moon orbit a planet.", "What happens if two bodies have the same mass?", "Make an orbit that is a perfect circle."]),
+    // chemistry
+    atom: P("build-an-atom", "Build atoms from protons, neutrons and electrons, and see the element, charge and mass.", ["Build a helium atom.", "Make an ion with a charge of +1.", "Which particle changes the element when you add it?"]),
+    isotopes: P("isotopes-and-atomic-mass", "Make isotopes and see how average atomic mass is worked out.", ["Make carbon-12 and carbon-14. What is different?", "Which isotopes are stable?", "Mix isotopes and watch the average mass change."]),
+    states: P("states-of-matter-basics", "Heat and cool solids, liquids and gases and watch the particles move.", ["Heat ice. What happens to the particles when it melts?", "Compare neon, argon, oxygen and water.", "Cool a gas down until it turns into a liquid."]),
+    equations: P("balancing-chemical-equations", "Balance chemical equations by adding molecules on each side.", ["Balance the equation for making ammonia.", "Use the balance view to check your answer.", "Try the game on level 2."]),
+    ph: P("ph-scale-basics", "Test the pH of everyday liquids like milk, coffee and soap.", ["Which liquid is the most acidic?", "Add water to an acid. What happens to the pH?", "Which liquids are bases?"]),
+    shapes: P("molecule-shapes-basics", "Build molecules in 3D and see their shapes and bond angles.", ["Build a molecule with 4 bonds. What shape is it?", "Add a lone pair. How does the shape change?", "Look at the real water molecule. What is its bond angle?"]),
+    molecule: P("build-a-molecule", "Build molecules from atoms and collect them.", ["Build a water molecule.", "Build carbon dioxide.", "Fill all the collection boxes."]),
+    reactions: P("reactants-products-and-leftovers", "Make sandwiches and molecules and see what is used up and what is left over.", ["Make 3 sandwiches. What is left over?", "Make water from hydrogen and oxygen.", "Find the limiting reactant."]),
+    concentration: P("concentration", "Dissolve a solute and measure the concentration of the solution.", ["Add more solute. What happens to the colour?", "Add water. What happens to the concentration?", "Make a saturated solution."]),
+    // maths
+    balance: P("equality-explorer", "Solve equations on a balance scale, keeping both sides equal.", ["Make both sides of the scale balance.", "Solve for x by doing the same thing to both sides.", "Try the Solve It! game."]),
+    quadgraph: P("graphing-quadratics", "Change a, b and c and watch the parabola move.", ["Make a parabola that opens downwards.", "Find the vertex and the roots.", "What does c change?"]),
+    lines: P("graphing-lines", "Explore straight-line graphs, slope and intercept.", ["Make a line with slope 2.", "Change the y-intercept. What moves?", "Draw two parallel lines."]),
+    fractions: P("fractions-intro", "Build and compare fractions with shapes and number lines.", ["Show 3/4 in two different ways.", "Which is bigger, 2/3 or 3/5?", "Make a fraction greater than 1."]),
+    area: P("area-builder", "Build shapes on a grid and find their area and perimeter.", ["Make a shape with area 12.", "Make two shapes with the same area but different perimeters.", "Try the game."]),
+    integers: P("number-line-integers", "Explore positive and negative numbers on a number line.", ["Put -3 and 2 on the number line. Which is greater?", "In the Explore screen, compare temperatures on the thermometer.", "What is the distance between -4 and 3?"]),
+    ratios: P("unit-rates", "Shop for fruit and candy and discover unit rates.", ["Find the cost of one apple.", "Which is the better deal?", "Race the cars and compare their speeds."]),
+    trig: P("trig-tour", "Take a tour of sine, cosine and tangent on the unit circle.", ["Move the point. When is sin θ largest?", "Find an angle where cos θ = 0.", "Watch the graph draw as you move the angle."]),
+    probability: P("plinko-probability", "Drop balls through a Plinko board and see probability in action.", ["Drop 100 balls. Where do most land?", "Change the probability. What happens to the pattern?", "Compare the result with the ideal histogram."]),
+    stats: P("center-and-variability", "Kick footballs and explore mean, median, mode and range.", ["Find the median of the kicks.", "Where is the mean compared with the median?", "Make the range larger."])
+  };
+  const LANG_LOCALE = { English: "en", Hindi: "hi", Bengali: "bn", Marathi: "mr", Telugu: "te", Tamil: "ta", Gujarati: "gu", Urdu: "ur", Kannada: "kn", Odia: "or", Malayalam: "ml", Punjabi: "pa", French: "fr", German: "de", Spanish: "es", Arabic: "ar", Chinese: "zh_CN", Japanese: "ja" };
+  function labURL(L) {
+    if (L.kind === "phet") return `https://phet.colorado.edu/sims/html/${L.src}/latest/${L.src}_all.html?locale=${LANG_LOCALE[read().lang] || "en"}`;
+    return `https://sketchfab.com/models/${L.src}/embed?autostart=1&ui_theme=dark&ui_infos=0&dnt=1`;
+  }
+  const labPage = document.createElement("section");
+  labPage.id = "oq-lab";
+  labPage.className = "page-section";
+  main.appendChild(labPage);
+  function openLab(t) {
+    const L = LABS[t.open.lab], subj = SUBJECTS[t.s];
+    const credit = L.kind === "phet" ? PHET_CREDIT : `3D model by ${esc(L.author)} on <a href="https://sketchfab.com/3d-models/${L.src}" target="_blank" rel="noopener">Sketchfab</a> (${esc(L.license)}).`;
+    labPage.style.setProperty("--c", subj.color);
+    labPage.innerHTML = `<div class="oq-labview">
+      <div class="oq-stage"><div class="oq-stage-load" id="oq-stage-load"><span class="oq-spin"></span><b>Loading ${L.kind === "phet" ? "simulation" : "3D model"}…</b><small>This can take a few seconds the first time.</small></div>
+        <iframe id="oq-labframe" title="${esc(t.name)}" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div>
+      <aside class="oq-labside">
+        <span class="oq-label">${subj.name.toUpperCase()} · ${L.kind === "phet" ? "SIMULATION" : "3D MODEL"}</span>
+        <h2>${esc(t.name)}</h2><p>${esc(L.about)}</p>
+        <span class="oq-label" style="margin-top:16px">TRY THIS</span>
+        <ol class="oq-tasks">${L.tasks.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+        <div class="oq-actions"><button type="button" class="oq-btn primary" id="oq-lab-lesson">Read the lesson</button><button type="button" class="oq-btn" id="oq-lab-full">Full screen</button></div>
+        <p class="oq-credit">${credit}</p>
+      </aside></div>`;
+    const frame = $("oq-labframe"), load = $("oq-stage-load");
+    if (!navigator.onLine) { load.innerHTML = `<b>You're offline</b><small>This ${L.kind === "phet" ? "simulation" : "3D model"} needs the internet. Lessons you've opened before still work offline.</small>`; }
+    else {
+      frame.addEventListener("load", () => setTimeout(() => load.classList.add("done"), L.kind === "phet" ? 400 : 1200), { once: true });
+      frame.src = labURL(L);
+    }
+    $("oq-lab-lesson").addEventListener("click", () => openLesson(t, true));
+    $("oq-lab-full").addEventListener("click", () => { const el = labPage.querySelector(".oq-stage"); (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); });
+    activate("oq-lab");
+  }
+
   top.querySelector("#oq-brand").addEventListener("click", goHome);
 
   /* ---------- 6. search ---------- */
   const q = $("oq-q"), box = $("oq-results");
   let hits = [], sel = -1;
   function search(text) {
-    const words = text.toLowerCase().split(/\s+/).filter(Boolean);
+    const words = text.toLowerCase().replace(/['’]/g, "").split(/\s+/).filter(Boolean);
     if (!words.length) return [];
     const g = Number(read().grade) || 7;
     const pool = CATALOG.filter(t => t.open || (g >= t.a && g <= t.b) || true).map(t => ({ name: t.name, s: t.s, kw: t.kw, cat: t, a: t.a, b: t.b }));
@@ -454,11 +588,13 @@
     });
     const seen = new Set();
     return pool.map(t => {
-      const name = t.name.toLowerCase(), all = `${name} ${t.kw} ${SUBJECTS[t.s].name.toLowerCase()}`;
-      if (!words.every(w => all.includes(w))) return null;
+      const name = t.name.toLowerCase(), all = `${name} ${t.kw} ${SUBJECTS[t.s].name.toLowerCase()}`.replace(/['’]/g, "");
+      const found = words.filter(w => all.includes(w)).length;
+      if (found < words.length && !(words.length >= 3 && found >= words.length - 1)) return null;
       let score = name.startsWith(words[0]) ? 3 : name.includes(words.join(" ")) ? 2 : words.some(w => name.includes(w)) ? 1 : 0;
       if (t.syl) score += .6;
-      if (t.cat && t.cat.open) score += .4;
+      if (t.cat && t.cat.open) score += 1;
+      if (found < words.length) score -= 1;
       if (t.cat && !(g >= t.a && g <= t.b)) score -= .5;
       return { t, score };
     }).filter(Boolean).sort((x, y) => y.score - x.score).filter(x => { const k = x.t.name.toLowerCase() + x.t.s; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 9).map(x => x.t);
@@ -584,24 +720,18 @@
     Object.keys(SUBJECTS).forEach((sk, i) => setTimeout(() => { if (!sylCached(sk)) getSyllabus(sk).catch(() => {}); }, 400 + i * 1500));
   }
   // Which interactive lab fits a chapter or subtopic?
+  const LAB_RULES = {
+    maths: [[/quadratic/, "Graphing Quadratics"], [/(linear equations? in two|coordinate|straight line|graph)/, "Straight-Line Graphs"], [/(linear equation|finding the unknown|simple (linear )?equation|equations? in one variable|algebra play|forming equations|balance)/, "Equation Balance"], [/fraction/, "Fractions"], [/(integer|negative number|number line)/, "Integers on a Number Line"], [/(area|perimeter|mensuration)/, "Area and Perimeter"], [/(ratio|proportion|unit rate|unitary)/, "Ratio and Unit Rates"], [/(trigonometr|sine|cosine)/, "Trigonometry"], [/probabilit/, "Probability"], [/(statistic|data handling|mean|median|mode)/, "Mean, Median and Mode"]],
+    chem: [[/periodic/, "Periodic Table"], [/isotope/, "Isotopes and Atomic Mass"], [/(atom|electron configuration|structure of the atom)/, "Build an Atom"], [/(state|solid|liquid|matter)/, "States of Matter"], [/(acid|base|salt|\bph\b)/, "pH Scale: Acids and Bases"], [/(equation|chemical reaction)/, "Balancing Chemical Equations"], [/(bond|molecule|covalent)/, "Molecule Shapes"], [/(solution|concentration|dissolv)/, "Concentration of Solutions"]],
+    bio: [[/(heredity|evolution|natural selection)/, "Natural Selection"], [/(dna|gene|chromosome)/, "DNA in 3D"], [/plant cell/, "Plant Cell in 3D"], [/\bcells?\b|cell structure|unit of life|organelle/, "Animal Cell in 3D"], [/(digest|nutrition in animals|alimentary)/, "Digestive System in 3D"], [/(heart|circulat|transportation|blood)/, "The Human Heart in 3D"], [/(brain|nervous|control and coordination)/, "The Human Brain in 3D"], [/(skeleton|bone|movement)/, "The Skeleton in 3D"], [/(human body|organ system|respirat|excret|organs)/, "Human Organs in 3D"]],
+    phy: [[/ohm/, "Ohm's Law"], [/(electric|current|circuit)/, "Electric Circuits"], [/(magnetic effect|electromagnet|induction)/, "Electromagnetic Induction"], [/magnet/, "Magnets"], [/friction/, "Friction"], [/(force|motion|newton|speed|velocity)/, "Forces and Motion"], [/(work|energy|power)/, "Energy: Skate Park"], [/(refraction|prism)/, "Refraction of Light"], [/(light|mirror|lens|reflection)/, "Mirrors and Lenses"], [/(gravit|orbit)/, "Gravity and Orbits"], [/sound/, "Sound"], [/wave/, "Waves"], [/pressure/, "Pressure in Liquids"], [/(density|float|sink|buoyan)/, "Density: Float or Sink"], [/(pendulum|oscillat|time period)/, "Pendulum"], [/(solar system|planet|stars)/, "Build a Solar System"]]
+  };
   function labFor(text, sk) {
-    const t = text.toLowerCase(), g = Number(read().grade) || 7, find = n => CATALOG.find(x => x.name === n);
-    if (sk === "maths") {
-      if (/quadratic/.test(t)) return find("Quadratic Equations");
-      if (/(linear equation|finding the unknown|simple (linear )?equation|equations? in one variable|algebra play|forming equations)/.test(t)) return find(g <= 8 ? "Sentence to Equation" : "Solving Linear Equations");
-    }
-    if (sk === "chem") {
-      if (/periodic/.test(t)) return find("Periodic Table");
-      if (/(atom|isotope|electron configuration)/.test(t)) return find("Atomic Structure");
-      if (/(bond|molecule)/.test(t)) return find("Molecules and Chemical Bonding");
-    }
-    if (sk === "bio") {
-      if (/\bcells?\b|cell structure|unit of life/.test(t)) return find("The Cell");
-      if (/(human body|organ system|digest|circulat|respirat|excret|nervous|heart|lungs)/.test(t)) return find("Human Body and Organ Systems");
-    }
-    if (sk === "phy") {
-      if (/(electric|current|circuit|ohm)/.test(t)) return find("Electricity and Circuits");
-      if (/(motion|speed|velocity)/.test(t)) return find("Motion and Speed");
+    const t = text.toLowerCase(), g = Number(read().grade) || 7;
+    for (const [re, name] of LAB_RULES[sk] || []) {
+      if (!re.test(t)) continue;
+      const hit = CATALOG.find(x => x.name === name);
+      if (hit && g >= hit.a - 1 && g <= hit.b + 1) return hit;
     }
     return null;
   }
@@ -921,7 +1051,7 @@ x = 8.33"></textarea></div>
     if (right) giveXP(right * 5);
     window.scrollTo({ top: 0, behavior: "smooth" });
     examPage.innerHTML = `<div class="oq-page">
-      <div class="oq-sec oq-score"><span class="oq-label">${s.name.toUpperCase()} TEST RESULT</span><b>${right} / ${qs.length}</b><p>${pct}% · ${pct >= 85 ? "Excellent! 🌟" : pct >= 60 ? "Good work! 👍" : "Keep practising, you'll get there! 💪"} · +${right * 5} XP</p></div>
+      <div class="oq-sec oq-score"><span class="oq-label">${s.name.toUpperCase()} TEST RESULT</span><b>${right} / ${qs.length}</b><p>${pct}% · ${pct >= 85 ? "Excellent! " : pct >= 60 ? "Good work! " : "Keep practising, you'll get there! "} · +${right * 5} XP</p></div>
       <div class="oq-sec"><span class="oq-label">BY CHAPTER</span><div class="oq-bars">${Object.entries(by).map(([k, v]) => { const p = v.r / v.n; return `<div class="oq-bar"><span>${esc(k)}</span><span class="t"><div style="width:${p * 100}%;background:${p >= .6 ? "#25c58a" : "#f07883"}"></div></span><span>${v.r}/${v.n}</span></div>`; }).join("")}</div></div>
       ${weak.length ? `<div class="oq-sec oq-funfact"><span class="oq-label">REVISE THESE</span><div class="oq-row">${weak.map(w => `<button type="button" class="oq-chip" data-rev="${esc(w)}">${esc(w)}</button>`).join("")}</div></div>` : ""}
       <div class="oq-sec"><span class="oq-label">REVIEW YOUR ANSWERS</span>${qs.map((q, i) => `<div class="oq-q"><p>${i + 1}. ${esc(q.q)}</p><div class="oq-opts">${q.options.map((o, k) => `<button type="button" class="oq-opt ${k === q.answer ? "right" : k === picks[i] ? "wrong" : ""}" disabled>${esc(o)}</button>`).join("")}</div><div class="oq-exp show">${picks[i] === null ? "Not answered. " : ""}${esc(q.explain)}</div></div>`).join("")}</div>
