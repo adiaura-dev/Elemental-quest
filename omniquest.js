@@ -371,6 +371,14 @@
     .oq-credit a { color: #9fb3cc; }
     @media (max-width: 900px) { .oq-labview { grid-template-columns: 1fr; } .oq-labside { position: static; } .oq-stage { height: 70vh; min-height: 420px; } }
   `;
+  css.textContent += `
+    .oq-numin { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #334155; background: #111a2b; border-radius: 30px; padding: 4px 12px 4px 6px; transition: border-color .2s; }
+    .oq-numin.on, .oq-numin:focus-within { border-color: var(--c, #55cfff); }
+    .oq-numin input { width: 64px; border: 0; background: transparent; color: #fff; font: 700 14px "Inter", system-ui, sans-serif; text-align: center; outline: none; padding: 4px 0; -moz-appearance: textfield; }
+    .oq-numin input::-webkit-outer-spin-button, .oq-numin input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .oq-numin span { color: #8195ad; font: 700 13px "Inter", system-ui, sans-serif; }
+    .oq-hint { color: #5f7290; font: 600 12px "Inter", system-ui, sans-serif; }
+  `;
   if (!document.querySelector('link[href*="family=Inter"]')) {
     const font = document.createElement("link");
     font.rel = "stylesheet";
@@ -1001,11 +1009,16 @@
     examPage.innerHTML = `<div class="oq-page"><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>Exam mode</h1><p>Pick the chapters, and Verity writes a test in your board's style, marks it and shows what to revise.</p>
       <div class="oq-field"><span class="oq-label">SUBJECT</span><div class="oq-row">${Object.entries(SUBJECTS).map(([k, x]) => `<button type="button" class="oq-chip ${k === sk ? "on" : ""}" style="--c:${x.color}" data-es="${k}">${x.name}</button>`).join("")}</div></div>
       <div class="oq-field"><div class="oq-row" style="justify-content:space-between"><span class="oq-label">CHAPTERS</span><button type="button" class="oq-chip" id="ex-all">Select all</button></div><div id="ex-ch">${loadingHTML("Loading chapters…")}</div></div>
-      <div class="oq-field"><span class="oq-label">QUESTIONS</span><div class="oq-row" id="ex-n">${[10, 15, 20].map(n => `<button type="button" class="oq-chip ${n === 10 ? "on" : ""}" data-n="${n}">${n}</button>`).join("")}</div></div>
-      <div class="oq-field"><span class="oq-label">TIME</span><div class="oq-row" id="ex-t">${[[15, "15 min"], [30, "30 min"], [0, "No timer"]].map(([t, l], i) => `<button type="button" class="oq-chip ${i === 0 ? "on" : ""}" data-t="${t}">${l}</button>`).join("")}</div></div>
+      <div class="oq-field"><span class="oq-label">QUESTIONS</span><div class="oq-row" id="ex-n">${[10, 15, 20].map(n => `<button type="button" class="oq-chip ${n === 10 ? "on" : ""}" data-n="${n}">${n}</button>`).join("")}<label class="oq-numin"><input id="ex-nc" type="number" min="5" max="40" step="1" inputmode="numeric" placeholder="Other"><span>questions</span></label><small class="oq-hint">5 to 40</small></div></div>
+      <div class="oq-field"><span class="oq-label">TIME</span><div class="oq-row" id="ex-t">${[[15, "15 min"], [30, "30 min"], [0, "No timer"]].map(([t, l], i) => `<button type="button" class="oq-chip ${i === 0 ? "on" : ""}" data-t="${t}">${l}</button>`).join("")}<label class="oq-numin"><input id="ex-tc" type="number" min="5" max="180" step="1" inputmode="numeric" placeholder="Other"><span>minutes</span></label><small class="oq-hint">5 to 180</small></div></div>
       <div class="oq-actions"><button type="button" class="oq-btn primary" id="ex-go" disabled>Start test</button></div></div>`;
     examPage.querySelectorAll("[data-es]").forEach(b => b.addEventListener("click", () => openExam(b.dataset.es)));
-    ["ex-n", "ex-t"].forEach(id => $(id).querySelectorAll(".oq-chip").forEach(b => b.addEventListener("click", () => $(id).querySelectorAll(".oq-chip").forEach(x => x.classList.toggle("on", x === b)))));
+    [["ex-n", "ex-nc"], ["ex-t", "ex-tc"]].forEach(([id, inp]) => {
+      const chips = $(id).querySelectorAll(".oq-chip"), box = $(inp);
+      chips.forEach(b => b.addEventListener("click", () => { chips.forEach(x => x.classList.toggle("on", x === b)); box.value = ""; box.parentElement.classList.remove("on"); }));
+      box.addEventListener("input", () => { const typed = box.value !== ""; box.parentElement.classList.toggle("on", typed); if (typed) chips.forEach(x => x.classList.remove("on")); else chips[0].classList.add("on"); });
+      box.addEventListener("blur", () => { if (box.value === "") return; const v = Math.round(Number(box.value)), lo = Number(box.min), hi = Number(box.max); box.value = Math.min(hi, Math.max(lo, isNaN(v) ? lo : v)); });
+    });
     let syl;
     try { syl = await getSyllabus(sk); } catch (err) { if ($("ex-ch")) $("ex-ch").innerHTML = `<p class="oq-note">${esc(err.message)}</p>`; return; }
     if (current.page !== `${s.name} exam`) return;
@@ -1016,7 +1029,8 @@
     $("ex-all").addEventListener("click", () => { const all = boxes.every(b => b.checked); boxes.forEach(b => { b.checked = !all; }); sync(); });
     $("ex-go").addEventListener("click", () => {
       const chapters = boxes.filter(b => b.checked).map(b => syl.chapters[b.value].name);
-      const count = Number($("ex-n").querySelector(".on").dataset.n), mins = Number($("ex-t").querySelector(".on").dataset.t);
+      const pickNum = (id, inp, attr) => { const box = $(inp); if (box.value !== "") { const v = Math.round(Number(box.value)); return Math.min(Number(box.max), Math.max(Number(box.min), isNaN(v) ? Number(box.min) : v)); } const on = $(id).querySelector(".oq-chip.on"); return on ? Number(on.dataset[attr]) : (attr === "n" ? 10 : 15); };
+      const count = pickNum("ex-n", "ex-nc", "n"), mins = pickNum("ex-t", "ex-tc", "t");
       runExam(sk, chapters, count, mins);
     });
   }
