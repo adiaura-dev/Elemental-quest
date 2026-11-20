@@ -53,6 +53,8 @@ module.exports = async (req, res) => {
   // ---- Exam mode and homework checking ----
   if (body.mode === "exam") return writeExam(body, apiKey, res);
   if (body.mode === "check") return checkHomework(body, apiKey, res);
+  // ---- Translate the website's own buttons and headings into the student's language ----
+  if (body.mode === "translate") return translateUI(body, apiKey, res);
 
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   if (!message) return res.status(400).json({ error: "Message is empty." });
@@ -343,5 +345,27 @@ async function checkHomework(body, apiKey, res) {
   } catch (e) {
     const msg = image && e.status && e.status !== 429 ? "Photo checking isn't working right now. Please type your question and working instead." : (e.status ? e.message : "Verity's server had a problem. Please try again.");
     return res.status(e.status || 500).json({ error: msg });
+  }
+}
+
+// Translates short pieces of the website (buttons, headings, hints) into the chosen language
+async function translateUI(body, apiKey, res) {
+  const lang = LANGS.includes(body.lang) ? body.lang : "English";
+  const texts = Array.isArray(body.texts) ? body.texts.filter(t => typeof t === "string").slice(0, 80).map(t => t.slice(0, 500)) : [];
+  if (!texts.length || lang === "English") return res.status(200).json({ texts });
+  const system =
+    `You translate the user interface of OmniQuest, a learning website for school students, from English into ${lang}. ` +
+    "Translate every string in the list. Use simple, natural words a school student would use, and keep each translation about as short as the original. " +
+    "Keep these exactly as they are: numbers, maths, chemical formulas and symbols, units (V, A, Ω, km/h, XP), the names OmniQuest, Verity, PhET and Sketchfab, and board names (CBSE, ICSE, IGCSE). " +
+    "Keep any leading or trailing punctuation such as ':', '…', '?', '→'. " +
+    "Some strings contain simple HTML tags such as <b>…</b> or <span class=\"x\">…</span>: keep every tag and its attributes exactly, translate only the words, and move the tags with the words they wrap. " +
+    'Reply with ONLY a JSON object in exactly this shape: {"t": [string, ...]} with the same number of items, in the same order.';
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: JSON.stringify(texts) }], 4000);
+    const t = out && Array.isArray(out.t) && out.t.length === texts.length ? out.t.map((x, i) => (typeof x === "string" && x.trim() ? x : texts[i])) : null;
+    if (!t) return res.status(502).json({ error: "Translation failed. Please try again." });
+    return res.status(200).json({ texts: t });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message || "Translation failed." });
   }
 }
