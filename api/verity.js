@@ -55,6 +55,8 @@ module.exports = async (req, res) => {
   if (body.mode === "check") return checkHomework(body, apiKey, res);
   // ---- Translate the website's own buttons and headings into the student's language ----
   if (body.mode === "translate") return translateUI(body, apiKey, res);
+  // ---- Flashcards for a chapter or topic ----
+  if (body.mode === "cards") return writeCards(body, apiKey, res);
 
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   if (!message) return res.status(400).json({ error: "Message is empty." });
@@ -367,5 +369,28 @@ async function translateUI(body, apiKey, res) {
     return res.status(200).json({ texts: t });
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message || "Translation failed." });
+  }
+}
+
+// Makes a deck of revision flashcards for a chapter or topic, at the student's level
+async function writeCards(body, apiKey, res) {
+  const topic = typeof body.topic === "string" ? body.topic.trim().slice(0, 160) : "";
+  if (!topic) return res.status(400).json({ error: "Type a chapter or topic first." });
+  const subject = typeof body.subject === "string" ? body.subject.slice(0, 30) : "General";
+  const { board, grade, word } = levelOf(body);
+  const system =
+    `You are Verity, an expert school teacher. Make revision flashcards on the topic below for a ${word} ${grade} ${board} student (subject: ${subject}). ` +
+    "Make 12 cards that cover the most important definitions, facts, formulas, processes and common exam questions for this topic, at exactly that level. " +
+    "The front is a short question or term (under 15 words). The back is a clear, correct answer (under 35 words). No emojis. Every card must be accurate. " +
+    "If the topic is not a real school topic, or is unsafe for a child, make cards on the closest suitable school topic instead. " +
+    `Write the cards in ${langOf(body)}; keep scientific symbols, units and formulas as they are. ` +
+    'Reply with ONLY a JSON object in exactly this shape: {"cards": [{"front": string, "back": string}]}.';
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `Topic: ${topic}` }], 3000);
+    const cards = out && Array.isArray(out.cards) ? out.cards.filter(c => c && typeof c.front === "string" && typeof c.back === "string").slice(0, 16).map(c => ({ front: clip(c.front, 200), back: clip(c.back, 400) })) : [];
+    if (cards.length < 3) return res.status(502).json({ error: "Verity couldn't make cards for that. Try a chapter name." });
+    return res.status(200).json({ cards });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message || "Couldn't make flashcards right now." });
   }
 }
