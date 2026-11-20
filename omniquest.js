@@ -876,7 +876,7 @@
         ? `<h2>Which board are you in?</h2><p>We'll match chapters and questions to your syllabus.</p><div class="oq-choices">${[["CBSE", "NCERT"], ["ICSE", "CISCE"], ["IGCSE", "Cambridge"], ["State", "State board"], ["Other", "Any"]].map(([b, s]) => `<button type="button" class="oq-choice ${board === b ? "on" : ""}" data-v="${b}">${b}<small>${s}</small></button>`).join("")}</div>`
         : step === 1
         ? `<h2>Which ${word.toLowerCase()} are you in?</h2><p>Topics and difficulty will fit your ${word.toLowerCase()}.</p><div class="oq-choices">${[6, 7, 8, 9, 10].map(g => `<button type="button" class="oq-choice ${grade === g ? "on" : ""}" data-v="${g}">${word} ${g}</button>`).join("")}</div>`
-        : `<h2>Which language?</h2><p>Lessons, tests and Verity will use this language.</p><div class="oq-choices oq-langs">${LANGUAGES.map(([en, nat]) => `<button type="button" class="oq-choice ${lang === en ? "on" : ""}" data-v="${en}">${nat}${nat !== en ? `<small>${en}</small>` : ""}</button>`).join("")}</div>`;
+        : `<h2>Which language?</h2><p>The website, lessons, tests and Verity will all use this language.</p><div class="oq-choices oq-langs">${LANGUAGES.map(([en, nat]) => `<button type="button" class="oq-choice ${lang === en ? "on" : ""}" data-v="${en}">${nat}${nat !== en ? `<small>${en}</small>` : ""}</button>`).join("")}</div>`;
       m.innerHTML = `<div class="oq-dialog"><div class="oq-steps">${[0, 1, 2].map(i => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>
         <span class="oq-label">STEP ${step + 1} OF 3</span>${body}
         <div class="oq-foot">${step ? `<button type="button" class="oq-backbtn" id="oq-prev">Back</button>` : "<span></span>"}<button type="button" class="oq-go" id="oq-next" ${ready ? "" : "disabled"}>${step === 2 ? "Start learning" : "Next"}</button></div></div>`;
@@ -888,7 +888,7 @@
       m.querySelector("#oq-next").addEventListener("click", () => {
         if (step < 2) { step++; draw(); return; }
         const changed = board !== d.board || grade !== Number(d.grade);
-        write({ board, grade, lang });
+        write({ board, grade, lang }); trSoon();
         m.remove();
         if (changed) Object.keys(FRAMES).forEach(id => { const f = $(id).querySelector("iframe"); if (f.getAttribute("src")) { try { f.contentWindow.location.reload(); } catch (_) { f.removeAttribute("src"); } } });
         refreshTop();
@@ -1096,6 +1096,141 @@
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => { /* offline mode not available */ });
   const netState = () => $("oq-offline").classList.toggle("show", !navigator.onLine);
   window.addEventListener("online", netState); window.addEventListener("offline", netState);
+
+  /* ---------- 11c. site language: translates every button, heading and hint ---------- */
+  // Each piece of text is translated once by Verity, saved in this browser, and reused (also offline).
+  const TKEY = "omniQuestTr";
+  const trStore = (() => { try { return JSON.parse(localStorage.getItem(TKEY)) || {}; } catch (_) { return {}; } })();
+  const trSave = () => { try { localStorage.setItem(TKEY, JSON.stringify(trStore)); } catch (_) { /* storage full */ } };
+  const TR_SKIP = '[translate="no"], .eqn, .ans, .chatbot-messages, .oq-langs, .oq-brand, .oq-credit, .al-symbol, textarea, script, style, code, pre, svg';
+  const TR_UNIT_TAGS = new Set(["B", "STRONG", "I", "EM", "SPAN", "SMALL", "SUP", "SUB", "BR", "MARK", "U"]);
+  const unitRec = new WeakMap();
+  // a sentence with <b>highlighted</b> words is translated as one piece, so the word order stays right
+  function isUnit(el) {
+    if (el.hasAttribute("data-oqt")) return true;
+    if (!el.children.length || el.closest(TR_SKIP) || el.querySelector(TR_SKIP) || (el.parentElement && el.parentElement.closest("[data-oqt]"))) return false;
+    for (const k of el.querySelectorAll("*")) if (!TR_UNIT_TAGS.has(k.tagName) || k.id || Object.keys(k.dataset).length) return false;
+    if (![...el.childNodes].some(n => n.nodeType === 3 && /[A-Za-z]{3,}/.test(n.nodeValue))) return false;
+    el.setAttribute("data-oqt", "1");
+    return true;
+  }
+  const tagCount = h => (h.match(/<[a-z]/gi) || []).length;
+  const trTpl = document.createElement("template");
+  const normHTML = h => { trTpl.innerHTML = h; return trTpl.innerHTML; };
+  const TR_KEEP = /^(CBSE|ICSE|IGCSE|OmniQuest|Verity|PhET|Sketchfab|XP|Lv \d+)$/i;
+  const textRec = new WeakMap(), attrRec = new WeakMap(), trDocs = new WeakSet();
+  const trWait = new Set(), trFail = new Map();
+  let trBusy = 0, trTimer = null;
+  const siteLang = () => (read().lang || "English");
+  const trKey = s => s.replace(/\s+/g, " ").trim();
+  const worth = s => s.length >= 2 && s.length <= 280 && /[A-Za-z]{3,}/.test(s) && !TR_KEEP.test(s);
+  const shownNow = el => { try { return !!(el && el.getClientRects().length); } catch (_) { return true; } };
+  function trText(orig, lang) {
+    const key = trKey(orig), dict = trStore[lang] || {};
+    if (!worth(key)) return orig;
+    if (dict[key] !== undefined) return orig.match(/^\s*/)[0] + dict[key] + orig.match(/\s*$/)[0];
+    return null;
+  }
+  function trScanDoc(doc, lang, want) {
+    if (!doc || !doc.body) return;
+    doc.body.querySelectorAll("h1, h2, h3, h4, p, li, label, span, div, b, small, td, th, button, a").forEach(el => {
+      if (!isUnit(el)) return;
+      let rec = unitRec.get(el);
+      if (!rec || el.innerHTML !== rec.shown) { rec = { orig: el.innerHTML, shown: el.innerHTML }; unitRec.set(el, rec); }
+      let next = rec.orig;
+      if (lang !== "English") {
+        const key = trKey(rec.orig), dict = trStore[lang] || {};
+        if (key.length <= 400) {
+          if (dict[key] === undefined) { if (shownNow(el)) want.add(key); }
+          else if (tagCount(dict[key]) === tagCount(key)) next = normHTML(dict[key]);
+        }
+      }
+      if (el.innerHTML !== next) el.innerHTML = next;
+      rec.shown = el.innerHTML;
+    });
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const el = n.parentElement;
+      if (!el || el.closest(TR_SKIP) || el.closest("[data-oqt]")) continue;
+      let rec = textRec.get(n);
+      if (!rec || n.nodeValue !== rec.shown) { rec = { orig: n.nodeValue, shown: n.nodeValue }; textRec.set(n, rec); }
+      let next = rec.orig;
+      if (lang !== "English") {
+        const t = trText(rec.orig, lang);
+        if (t === null) { if (shownNow(el)) want.add(trKey(rec.orig)); }
+        else next = t;
+      }
+      if (n.nodeValue !== next) { n.nodeValue = next; }
+      rec.shown = next;
+    }
+    doc.body.querySelectorAll("[placeholder], [title], [aria-label]").forEach(el => {
+      if (el.closest('[translate="no"], .chatbot-messages, .oq-langs')) return;
+      let recs = attrRec.get(el); if (!recs) { recs = {}; attrRec.set(el, recs); }
+      ["placeholder", "title", "aria-label"].forEach(a => {
+        const v = el.getAttribute(a); if (v === null) return;
+        let r = recs[a];
+        if (!r || v !== r.shown) r = recs[a] = { orig: v, shown: v };
+        let next = r.orig;
+        if (lang !== "English") { const t = trText(r.orig, lang); if (t === null) { if (shownNow(el)) want.add(trKey(r.orig)); } else next = t; }
+        if (v !== next) el.setAttribute(a, next);
+        r.shown = next;
+      });
+    });
+  }
+  function trDocsAll() {
+    const docs = [document];
+    document.querySelectorAll("iframe").forEach(f => { try { if (f.contentDocument && f.contentDocument.body && f.contentWindow.location.origin === location.origin) docs.push(f.contentDocument); } catch (_) { /* other website */ } });
+    return docs;
+  }
+  function trWatch(doc) {
+    if (trDocs.has(doc) || !doc.body) return;
+    trDocs.add(doc);
+    new MutationObserver(trSoon).observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["placeholder", "title", "class", "hidden", "style"] });
+  }
+  function trSoon() { clearTimeout(trTimer); trTimer = setTimeout(trScan, 150); }
+  function trScan() {
+    const lang = siteLang(), want = new Set();
+    document.documentElement.lang = ({ English: "en", Hindi: "hi", Bengali: "bn", Marathi: "mr", Telugu: "te", Tamil: "ta", Gujarati: "gu", Urdu: "ur", Kannada: "kn", Odia: "or", Malayalam: "ml", Punjabi: "pa", French: "fr", German: "de", Spanish: "es", Arabic: "ar", Chinese: "zh", Japanese: "ja" })[lang] || "en";
+    trDocsAll().forEach(d => { trWatch(d); trScanDoc(d, lang, want); });
+    if (lang === "English") return;
+    const now = Date.now();
+    want.forEach(k => { if (!trWait.has(k) && !(trFail.get(k) > now)) trWait.add(k); });
+    trPump(lang);
+  }
+  async function trPump(lang) {
+    if (trBusy >= 2 || !trWait.size || !navigator.onLine) return;
+    const batch = [...trWait].slice(0, 60);
+    batch.forEach(k => trWait.delete(k));
+    trBusy++;
+    $("oq-trpill")?.classList.add("show");
+    try {
+      const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "translate", lang, texts: batch }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !Array.isArray(j.texts) || j.texts.length !== batch.length) throw new Error(j.error || "translate failed");
+      const dict = trStore[lang] = trStore[lang] || {};
+      batch.forEach((k, i) => { dict[k] = String(j.texts[i]).trim() || k; });
+      trSave();
+    } catch (_) {
+      const later = Date.now() + 30000;
+      batch.forEach(k => trFail.set(k, later));
+      setTimeout(trSoon, 31000);
+    } finally {
+      trBusy--;
+      if (!trBusy) $("oq-trpill")?.classList.remove("show");
+      if (siteLang() === lang) trScan();
+    }
+  }
+  // a small "Translating…" pill in the top bar while new text is being translated
+  const trPill = document.createElement("span");
+  trPill.id = "oq-trpill"; trPill.className = "oq-trpill"; trPill.setAttribute("translate", "no");
+  trPill.innerHTML = '<span class="oq-spin" style="width:12px;height:12px;border-width:2px"></span>';
+  top.querySelector(".oq-right")?.prepend(trPill);
+  const trCss = document.createElement("style");
+  trCss.textContent = `.oq-trpill { display: none; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #334155; border-radius: 12px; background: #111a2b; } .oq-trpill.show { display: inline-flex; }`;
+  document.head.appendChild(trCss);
+  document.addEventListener("load", e => { if (e.target && e.target.tagName === "IFRAME") trSoon(); }, true);
+  window.addEventListener("storage", trSoon);
+  trSoon();
 
   /* ---------- 12. start ---------- */
   if (sidebar) sidebar.setAttribute("aria-hidden", "true");
