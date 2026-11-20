@@ -1,4 +1,4 @@
-// api/verity.js — Verity, the OmniQuest AI tutor, on Vercel using Groq's FREE plan.
+// api/verity.js — Verity, the OmniQuest AI tutor, on Vercel using Groq's FREE plan. (v2: also translates the website)
 // The key comes from Vercel's Environment Variables (GROQ_API_KEY), never from your code.
 
 const LANGS = ["English", "Hindi", "Bengali", "Marathi", "Telugu", "Tamil", "Gujarati", "Urdu", "Kannada", "Odia", "Malayalam", "Punjabi", "French", "German", "Spanish", "Arabic", "Chinese", "Japanese"];
