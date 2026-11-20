@@ -6,7 +6,7 @@
 <title>Science | OmniQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root { --bg: #0e1222; --panel: #1a2136; --panel2: #141a2c; --line: #2e3854; --text: #e8ecf8; --muted: #8f9bbd; --amber: #ffb347; --violet: #7c5cff; --green: #3ddc97; --red: #ff5d73; --blue: #55cfff; --yellow: #ffd84d; --accent: #3ddc97; }
 * { box-sizing: border-box; }
@@ -15,7 +15,7 @@ html, body { margin: 0; }
 body { font-family: "Nunito", system-ui, sans-serif; color: var(--text); background: var(--bg); min-height: 100vh; overflow-x: hidden; }
 html.embed body { background: transparent; }
 button { font-family: inherit; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-h1, h2, h3 { font-family: "Fredoka", "Nunito", sans-serif; }
+h1, h2, h3 { font-family: "Inter", system-ui, sans-serif; }
 main { max-width: 1180px; margin: 0 auto; padding: 8px 18px 50px; }
 .screen { display: none; animation: screenIn .4s ease-out; }
 .screen.active { display: block; }
@@ -103,11 +103,11 @@ svg.dia { width: 100%; height: auto; display: block; }
 input[type=range] { width: 100%; accent-color: var(--amber); }
 .slider { margin-bottom: 12px; }
 .slider .row { justify-content: space-between; font-weight: 800; font-size: 14px; margin-bottom: 4px; }
-.slider b { color: var(--yellow); font-family: "Fredoka", sans-serif; font-size: 18px; }
+.slider b { color: var(--yellow); font-family: "Inter", system-ui, sans-serif; font-size: 18px; }
 .meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
 .meter { background: #0f1426; border: 1px solid var(--line); border-radius: 12px; padding: 9px; text-align: center; }
 .meter span { display: block; font-size: 10.5px; color: var(--muted); font-weight: 900; letter-spacing: 1px; }
-.meter b { font: 700 22px "Fredoka", sans-serif; color: #fff; }
+.meter b { font: 700 22px "Inter", system-ui, sans-serif; color: #fff; }
 .mats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .mat { background: #222b44; border: 2px solid #313c5c; color: var(--text); border-radius: 12px; padding: 9px 6px; font-weight: 800; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .mat span { font-size: 24px; }
@@ -115,10 +115,10 @@ input[type=range] { width: 100%; accent-color: var(--amber); }
 .mat.done-y { border-color: var(--green); }
 .mat.done-n { border-color: var(--red); }
 canvas.road, canvas.graph { width: 100%; display: block; background: #0f1426; border: 1px solid var(--line); border-radius: 14px; }
-.ans { width: 110px; font: 800 22px "Fredoka", sans-serif; text-align: center; background: #0f1426; color: #fff; border: 2px solid #34406a; border-radius: 12px; padding: 7px; outline: none; }
+.ans { width: 110px; font: 800 22px "Inter", system-ui, sans-serif; text-align: center; background: #0f1426; color: #fff; border: 2px solid #34406a; border-radius: 12px; padding: 7px; outline: none; }
 .ans:focus { border-color: var(--amber); }
 
-.pop { position: fixed; z-index: 60; transform: translate(-50%, -50%); font: 700 23px "Fredoka", sans-serif; text-shadow: 3px 3px 0 #0b0f1c; pointer-events: none; white-space: nowrap; animation: fly 1.2s ease-out forwards; }
+.pop { position: fixed; z-index: 60; transform: translate(-50%, -50%); font: 700 23px "Inter", system-ui, sans-serif; text-shadow: 3px 3px 0 #0b0f1c; pointer-events: none; white-space: nowrap; animation: fly 1.2s ease-out forwards; }
 @keyframes fly { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 18% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); } 35% { transform: translate(-50%, -70%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -200%); } }
 .toast { position: fixed; left: 50%; top: 16px; z-index: 70; opacity: 0; transform: translate(-50%, -120px); background: var(--panel); border: 1px solid var(--accent); color: #fff; font-weight: 900; padding: 11px 18px; border-radius: 14px; transition: transform .4s cubic-bezier(.2,1.4,.4,1), opacity .3s; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -129,7 +129,7 @@ canvas.road, canvas.graph { width: 100%; display: block; background: #0f1426; bo
 .chip.on { color: var(--text); border-color: var(--accent); }
 .chip:disabled { opacity: .45; cursor: default; }
 .seg.locked { opacity: .4; pointer-events: none; }
-.lbl text { font: 700 12.5px "Nunito", sans-serif; fill: #dbe4f5; }
+.lbl text { font: 700 12.5px "Inter", system-ui, sans-serif; fill: #dbe4f5; }
 .lbl line { stroke: #7d8db0; stroke-width: 1; }
 .nolabels .lbl, .lbl .off { display: none; }
 .lbl { pointer-events: none; }
@@ -138,11 +138,18 @@ canvas.road, canvas.graph { width: 100%; display: block; background: #0f1426; bo
 .mat i { display: block; width: 34px; height: 12px; border-radius: 4px; margin-bottom: 4px; }
 .mat.cur { border-color: var(--amber); }
 .mission { border-style: solid !important; }
-h1, h2, h3 { font-family: "Nunito", sans-serif !important; font-weight: 800; }
+h1, h2, h3 { font-family: "Inter", system-ui, sans-serif !important; font-weight: 800; }
 .btn { box-shadow: none !important; border-radius: 10px !important; }
 .btn:active { transform: translateY(1px) !important; }
 .part:hover { filter: brightness(1.15) !important; }
 .part.sel { filter: brightness(1.25) drop-shadow(0 0 6px #ffd84d) !important; }
+.hot, .hot * { fill: transparent; stroke: none; cursor: pointer; transition: fill .2s, stroke .2s; filter: none !important; }
+.hot:hover * { fill: rgba(255,255,255,.18); stroke: #ffffff; stroke-width: 1.5; stroke-dasharray: 4 3; }
+.hot.sys *, .hot.sel * { fill: rgba(255,216,77,.22); stroke: #ffd84d; stroke-width: 2.2; stroke-dasharray: none; }
+.hot.good * { fill: rgba(61,220,151,.38); stroke: #3ddc97; stroke-width: 2.5; }
+.hot.bad * { fill: rgba(240,120,131,.38); stroke: #f07883; stroke-width: 2.5; }
+.body-photo .lbl text { font-size: 12px; }
+.credit { text-align: center; color: #6f7d99; font-size: 11px; font-weight: 700; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -323,14 +330,14 @@ const BANK = {
    ===================================================== */
 const TOOLS = {
   biology: [
-    { id: "cell", icon: "🔬", name: "Cell Explorer", desc: "Zoom into animal and plant cells. Tap each part to learn its job, then take the labelling challenge!", g: 6, color: "#f472b6" },
-    { id: "body", icon: "🫀", name: "Human Body Explorer", desc: "Find the organs, see which system they belong to and learn amazing facts.", g: 6, color: "#ef4444" },
-    { id: "quiz", icon: "🧬", name: "Biology Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#3ddc97" }
+    { id: "cell", icon: "", name: "Cell Explorer", desc: "Zoom into animal and plant cells. Tap each part to learn its job, then take the labelling challenge!", g: 6, color: "#f472b6" },
+    { id: "body", icon: "", name: "Human Body Explorer", desc: "Find the organs, see which system they belong to and learn amazing facts.", g: 6, color: "#ef4444" },
+    { id: "quiz", icon: "", name: "Biology Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#3ddc97" }
   ],
   physics: [
-    { id: "circuit", icon: "⚡", name: "Circuit Lab", desc: "Test which materials conduct electricity, then master Ohm's law with real-time current.", g: 6, color: "#ffb347" },
-    { id: "motion", icon: "🚗", name: "Motion Lab", desc: "Drive a car, watch the distance–time graph draw itself and predict how far it goes.", g: 7, color: "#55cfff" },
-    { id: "quiz", icon: "🧲", name: "Physics Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#7c5cff" }
+    { id: "circuit", icon: "", name: "Circuit Lab", desc: "Test which materials conduct electricity, then master Ohm's law with real-time current.", g: 6, color: "#ffb347" },
+    { id: "motion", icon: "", name: "Motion Lab", desc: "Drive a car, watch the distance–time graph draw itself and predict how far it goes.", g: 7, color: "#55cfff" },
+    { id: "quiz", icon: "", name: "Physics Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#7c5cff" }
   ]
 };
 
@@ -515,7 +522,7 @@ const ORGANS = {
   stomach: { name: "Stomach", sys: "digestive", job: "Churns food and mixes it with acid and enzymes to begin digesting proteins.", fact: "Its hydrochloric acid kills most germs in food." },
   smallInt: { name: "Small intestine", sys: "digestive", job: "Completes digestion and absorbs nutrients into the blood through tiny finger-like villi.", fact: "It is about 6 metres long." },
   largeInt: { name: "Large intestine", sys: "digestive", job: "Absorbs water from undigested food and forms faeces.", fact: "It is wider but much shorter than the small intestine, about 1.5 metres." },
-  kidneys: { name: "Kidneys", sys: "excretory", job: "Filter waste and extra water out of the blood to make urine.", fact: "Each kidney is about the size of your fist and contains about a million nephrons." },
+  trachea: { name: "Trachea (windpipe)", sys: "respiratory", job: "A tube held open by rings of cartilage. It carries air from the throat down to the lungs.", fact: "The rings are C-shaped, so the food pipe behind it can stretch when you swallow." },
   bladder: { name: "Urinary bladder", sys: "excretory", job: "A stretchy, muscular bag that stores urine until it leaves the body.", fact: "It can hold around 400 to 500 mL." }
 };
 const SYSTEMS = { all: "All", digestive: "Digestive", respiratory: "Respiratory", circulatory: "Circulatory", nervous: "Nervous", excretory: "Excretory" };
@@ -524,68 +531,33 @@ const SYS_INFO = {
   respiratory: "Brings oxygen into the body and removes carbon dioxide.",
   circulatory: "Moves blood around the body, carrying oxygen and nutrients to every cell.",
   nervous: "Controls and coordinates the body using electrical signals.",
-  excretory: "Removes waste products from the blood and out of the body."
+  excretory: "Removes waste from the blood and out of the body. The kidneys filter the blood; they sit behind the intestines, so they are hidden in this picture."
 };
+const BODY_IMG = "https://upload.wikimedia.org/wikipedia/commons/0/00/202403_human_anatomy_organs.svg";
+const BODY_HOT = {
+  brain: '<ellipse cx="286" cy="52" rx="46" ry="40"/>',
+  trachea: '<rect x="277" y="132" width="22" height="80" rx="8"/>',
+  lungs: '<ellipse cx="247" cy="264" rx="27" ry="62"/><ellipse cx="328" cy="262" rx="30" ry="62"/>',
+  heart: '<ellipse cx="291" cy="258" rx="18" ry="38"/>',
+  liver: '<ellipse cx="268" cy="334" rx="44" ry="28"/>',
+  stomach: '<ellipse cx="318" cy="334" rx="26" ry="21"/>',
+  largeInt: '<path d="M222 346 H358 V470 H330 V378 H252 V470 H222 Z"/>',
+  smallInt: '<rect x="252" y="378" width="78" height="104" rx="12"/>',
+  bladder: '<ellipse cx="290" cy="507" rx="18" ry="21"/>'
+};
+// [organ, anchor x, anchor y, side, label y]
+const BODY_LBL = [["brain", 252, 46, "l", 46], ["trachea", 280, 170, "l", 150], ["lungs", 232, 240, "l", 240], ["liver", 240, 330, "l", 330], ["largeInt", 236, 420, "l", 420],
+  ["heart", 296, 250, "r", 196], ["stomach", 330, 330, "r", 300], ["smallInt", 310, 440, "r", 440], ["bladder", 300, 507, "r", 507]];
 function bodySVG() {
-  return `<svg class="dia" viewBox="-80 0 560 610" style="max-width:520px;margin:0 auto">
-<defs>
- <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2740"/><stop offset=".5" stop-color="#24314f"/><stop offset="1" stop-color="#1c2740"/></linearGradient>
- <radialGradient id="gBrain" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#f6c4cf"/><stop offset="1" stop-color="#d98a9d"/></radialGradient>
- <linearGradient id="gLung" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2a7b0"/><stop offset="1" stop-color="#cf6f7e"/></linearGradient>
- <radialGradient id="gHeart" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e2505f"/><stop offset="1" stop-color="#9e1f31"/></radialGradient>
- <linearGradient id="gLiver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a5503c"/><stop offset="1" stop-color="#6e2b20"/></linearGradient>
- <linearGradient id="gStom" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0b48c"/><stop offset="1" stop-color="#cf8358"/></linearGradient>
- <radialGradient id="gKid" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#b8465a"/><stop offset="1" stop-color="#7c1f33"/></radialGradient>
- <linearGradient id="gSmall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3c39f"/><stop offset="1" stop-color="#dc9c72"/></linearGradient>
- <radialGradient id="gBlad" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#f6e08a"/><stop offset="1" stop-color="#d6b44a"/></radialGradient>
-</defs>
-<path d="M186 100 L183 124 C170 132 148 134 130 142 C114 148 106 162 105 184 C104 222 100 256 98 292 C96 326 92 356 90 384 C84 398 84 414 94 418 C104 420 108 404 108 386 C110 354 116 322 119 294 C122 260 128 226 136 200 C138 240 148 286 146 322 C144 346 132 360 132 384 C132 430 142 480 148 524 C152 556 152 574 150 588 C160 598 186 598 188 588 C190 560 190 520 192 480 C194 452 196 428 200 414 C204 428 206 452 208 480 C210 520 210 560 212 588 C214 598 240 598 250 588 C248 574 248 556 252 524 C258 480 268 430 268 384 C268 360 256 346 254 322 C252 286 262 240 264 200 C272 226 278 260 281 294 C284 322 290 354 292 386 C292 404 296 420 306 418 C316 414 316 398 310 384 C308 356 304 326 302 292 C300 256 296 222 295 184 C294 162 286 148 270 142 C252 134 230 132 217 124 L214 100 Z" fill="url(#skin)" stroke="#3b4d74" stroke-width="2.5" stroke-linejoin="round"/>
-<ellipse cx="200" cy="60" rx="38" ry="46" fill="url(#skin)" stroke="#3b4d74" stroke-width="2.5"/>
-<!-- ureters (behind) -->
-<path d="M158 348 C172 364 186 380 195 394 M242 348 C228 364 214 380 205 394" fill="none" stroke="#c9a54c" stroke-width="2.5" opacity=".8"/>
-<g class="part" data-part="brain">
- <path d="M166 54 C164 30 182 18 200 18 C220 18 238 30 236 54 C236 70 226 80 212 82 C204 84 196 84 188 82 C174 80 166 70 166 54 Z" fill="url(#gBrain)" stroke="#f9dce3" stroke-width="1.5"/>
- <path d="M200 20 C198 40 202 60 200 82" fill="none" stroke="#a8566c" stroke-width="1.6"/>
- <path d="M174 44 C180 38 186 46 192 40 M172 58 C180 52 186 62 194 56 M178 72 C184 66 190 74 196 68 M208 40 C214 46 220 36 228 44 M206 56 C214 62 220 52 230 58 M204 70 C212 76 218 66 226 72" fill="none" stroke="#a8566c" stroke-width="1.4" stroke-linecap="round"/>
-</g>
-<g class="part" data-part="lungs">
- <path d="M200 106 L200 160 M200 160 C192 166 186 170 180 178 M200 160 C208 166 214 170 220 178" fill="none" stroke="#e4b3bb" stroke-width="7" stroke-linecap="round"/>
- <path d="M200 112 L200 156" stroke="#b97b86" stroke-width="7" stroke-dasharray="2 5"/>
- <path d="M188 166 C176 150 152 156 146 190 C140 226 140 256 150 270 C164 278 182 272 192 262 C194 230 194 196 188 166 Z" fill="url(#gLung)" stroke="#f7ccd2" stroke-width="1.5"/>
- <path d="M212 166 C224 150 248 156 254 190 C260 226 260 256 250 270 C238 276 226 272 220 266 C228 252 226 236 214 228 C210 210 210 186 212 166 Z" fill="url(#gLung)" stroke="#f7ccd2" stroke-width="1.5"/>
- <path d="M146 214 C160 210 176 214 190 204 M150 244 C162 236 176 238 192 232 M254 206 C242 212 230 214 216 210" fill="none" stroke="#a9505f" stroke-width="1.3"/>
-</g>
-<g class="part" data-part="heart">
- <path d="M204 214 C202 200 214 190 226 196" fill="none" stroke="#b8293d" stroke-width="7" stroke-linecap="round"/>
- <path d="M194 222 C192 206 208 200 218 206 C230 200 246 208 244 224 C242 240 232 254 240 266 C222 264 198 250 194 234 Z" fill="url(#gHeart)" stroke="#f3a5ae" stroke-width="1.5"/>
- <path d="M216 210 C214 228 220 246 236 262" fill="none" stroke="#7a1424" stroke-width="1.6"/>
-</g>
-
-<g class="part" data-part="liver">
- <path d="M144 282 C152 268 196 266 222 272 C232 276 230 286 220 292 C200 304 172 316 154 318 C144 316 140 296 144 282 Z" fill="url(#gLiver)" stroke="#d58b78" stroke-width="1.5"/>
- <path d="M196 274 C192 286 188 296 180 308" fill="none" stroke="#4f1c14" stroke-width="1.4"/>
-</g>
-<g class="part" data-part="stomach">
- <path d="M222 282 C230 270 252 270 258 290 C264 312 250 332 230 334 C214 336 206 326 208 316 C216 318 230 316 236 306 C240 296 236 288 228 292 C224 292 220 288 222 282 Z" fill="url(#gStom)" stroke="#f6d0b5" stroke-width="1.5"/>
- <path d="M244 290 C248 304 244 318 230 326" fill="none" stroke="#a9603a" stroke-width="1.3"/>
-</g>
-<g class="part" data-part="kidneys">
- <path d="M154 306 C142 306 136 320 138 332 C140 346 150 352 158 350 C165 348 164 340 160 334 C157 328 163 320 166 314 C167 309 162 306 154 306 Z" fill="url(#gKid)" stroke="#e48a9b" stroke-width="1.5"/>
- <path d="M246 306 C258 306 264 320 262 332 C260 346 250 352 242 350 C235 348 236 340 240 334 C243 328 237 320 234 314 C233 309 238 306 246 306 Z" fill="url(#gKid)" stroke="#e48a9b" stroke-width="1.5"/>
-</g>
-<g class="part" data-part="largeInt">
- <path d="M164 400 C158 388 158 368 160 350 C162 340 168 338 178 338 L222 338 C234 338 240 342 240 352 C242 370 242 386 236 396 C228 404 214 404 206 400" fill="none" stroke="#b9774a" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
- <path d="M164 400 C158 388 158 368 160 350 C162 340 168 338 178 338 L222 338 C234 338 240 342 240 352 C242 370 242 386 236 396 C228 404 214 404 206 400" fill="none" stroke="#e0a77c" stroke-width="15" stroke-dasharray="3 9" stroke-linecap="butt"/>
-</g>
-<g class="part" data-part="smallInt">
- <rect x="172" y="350" width="56" height="42" rx="16" fill="url(#gSmall)" stroke="#f7d9c2" stroke-width="1.2"/>
- <path d="M180 360 C186 354 192 366 198 360 C204 354 210 366 216 360 C220 356 224 360 222 366 M178 372 C184 366 190 378 196 372 C202 366 208 378 214 372 C218 368 222 372 220 378 M180 384 C186 378 192 390 198 384 C204 378 210 390 216 384" fill="none" stroke="#b46a43" stroke-width="2" stroke-linecap="round"/>
-</g>
-<g class="part" data-part="bladder">
- <path d="M188 398 C188 390 212 390 212 398 C212 410 206 414 200 414 C194 414 188 410 188 398 Z" fill="url(#gBlad)" stroke="#fbeeb8" stroke-width="1.5"/>
-</g>
-<g class="lbl"><g data-for="brain"><line x1="168" y1="48" x2="40" y2="48"/><text x="34" y="52" text-anchor="end">Brain</text></g><g data-for="lungs"><line x1="150" y1="210" x2="40" y2="210"/><text x="34" y="214" text-anchor="end">Lungs</text></g><g data-for="liver"><line x1="156" y1="296" x2="40" y2="296"/><text x="34" y="300" text-anchor="end">Liver</text></g><g data-for="kidneys"><line x1="142" y1="330" x2="40" y2="330"/><text x="34" y="334" text-anchor="end">Kidneys</text></g><g data-for="largeInt"><line x1="160" y1="376" x2="40" y2="376"/><text x="34" y="380" text-anchor="end">Large intestine</text></g><g data-for="heart"><line x1="232" y1="226" x2="360" y2="226"/><text x="366" y="230">Heart</text></g><g data-for="stomach"><line x1="256" y1="300" x2="360" y2="300"/><text x="366" y="304">Stomach</text></g><g data-for="smallInt"><line x1="226" y1="368" x2="360" y2="368"/><text x="366" y="372">Small intestine</text></g><g data-for="bladder"><line x1="210" y1="404" x2="360" y2="404"/><text x="366" y="408">Bladder</text></g></g>
-</svg>`;
+  const lbl = BODY_LBL.map(([id, ax, ay, side, ly]) => {
+    const t = ORGANS[id].name.replace(" (windpipe)", ""), w = t.length * 6.9 + 16, lx = side === "l" ? 200 : 376, bx = side === "l" ? lx - w : lx;
+    return `<g data-for="${id}"><polyline points="${ax},${ay} ${side === "l" ? lx + 10 : lx - 10},${ly} ${lx},${ly}" fill="none" stroke="#1d2a44" stroke-width="1.4"/><circle cx="${ax}" cy="${ay}" r="2.6" fill="#1d2a44"/><rect x="${bx}" y="${ly - 11}" width="${w}" height="22" rx="7" fill="#141b2d" stroke="#3b4d74"/><text x="${bx + w / 2}" y="${ly + 4.5}" text-anchor="middle">${t}</text></g>`;
+  }).join("");
+  return `<svg class="dia body-photo" viewBox="70 0 440 548" style="max-width:560px;margin:0 auto">
+    <image href="${BODY_IMG}" x="0" y="0" width="600" height="1000"/>
+    ${Object.entries(BODY_HOT).map(([id, sh]) => `<g class="part hot" data-part="${id}">${sh}</g>`).join("")}
+    <g class="lbl">${lbl}</g></svg>
+    <div class="credit">Illustration: DBCLS TogoTV, CC BY 4.0</div>`;
 }
 function bodyTool() {
   let sys = "all", ch = null, labels = true;
@@ -602,7 +574,7 @@ function bodyTool() {
     $("#body-lbl").classList.toggle("on", labels); $("#body-lbl").disabled = inChallenge();
     $("#sys").classList.toggle("locked", inChallenge());
   };
-  const filter = () => { all().forEach(p => p.classList.toggle("dim", sys !== "all" && ORGANS[p.dataset.part].sys !== sys)); syncLabels(); };
+  const filter = () => { all().forEach(p => p.classList.toggle("sys", sys !== "all" && ORGANS[p.dataset.part].sys === sys)); syncLabels(); };
   const setSys = s => { sys = s; document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x.dataset.s === s)); filter(); };
   const infoDefault = () => {
     $("#body-info").innerHTML = `<div class="label">HUMAN BODY</div><h3>Explore the organs</h3><p>Your body is made of organ systems that work together. Tap an organ to learn its job, or choose a system to highlight its organs.</p>${startBtn}`;
@@ -666,7 +638,7 @@ function bodyTool() {
   infoDefault(); syncLabels();
 }
 
-/* ---------- 🧬🧲 QUIZ ---------- */
+/* ---------- QUIZ ---------- */
 function quizTool() {
   const g = GRADE();
   const near = shuffle(BANK[SUBJECT].filter(q => q.g <= g && q.g >= g - 1));
@@ -870,7 +842,7 @@ function circuitTool() {
   cleanup = () => cancelAnimationFrame(raf);
 }
 
-/* ---------- 🚗 MOTION LAB ---------- */
+/* ---------- MOTION LAB ---------- */
 function motionTool() {
   const g = GRADE();
   $("#t-body").innerHTML = `<div class="grid2"><div class="card"><canvas class="road" id="road" width="720" height="170"></canvas><div class="row" style="margin:10px 0 6px;justify-content:space-between"><div class="label" style="margin:0">DISTANCE–TIME GRAPH</div><div class="label" style="margin:0;color:var(--muted)" id="graph-note"></div></div><canvas class="graph" id="gr" width="720" height="260"></canvas></div>
