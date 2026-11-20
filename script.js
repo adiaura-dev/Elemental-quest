@@ -677,7 +677,7 @@ const bossLives = document.getElementById("boss-lives");
 const bossQuestionCount = document.getElementById("boss-question-count");
 
 /* =========================================
-   BOSS PIXEL MONSTER 👾
+   BOSS PIXEL MONSTER 
    An original pixel-art "Element Guardian" drawn with code.
    It flashes when hit, laughs when you miss, gets angry
    when its health is low, and spins away when defeated.
@@ -746,7 +746,7 @@ function bossSpriteSVG() {
   document.head.appendChild(style);
 })();
 
-// Monster on the intro screen (replaces the ☄ icon)
+// Monster on the intro screen (replaces the icon)
 const bossIntroIcon = document.querySelector("#boss-intro .boss-icon");
 if (bossIntroIcon) bossIntroIcon.innerHTML = `<span class="boss-sprite">${bossSpriteSVG()}</span>`;
 
@@ -836,8 +836,8 @@ function updateBossStats() {
   bossHealthText.textContent = `${shown}%`;
 
   bossLives.textContent =
-    "❤️ ".repeat(bossLifeCount) +
-    "🖤 ".repeat(3 - bossLifeCount);
+    "♥ ".repeat(bossLifeCount) +
+    "♡ ".repeat(3 - bossLifeCount);
 }
 
 function showBossQuestion() {
@@ -876,7 +876,7 @@ function answerBossQuestion(selectedIndex, selectedButton) {
     bossHealth = Math.max(0, bossHealth - BOSS_DAMAGE);
     selectedButton.classList.add("correct");
     bossFeedback.textContent = `✓ Direct hit! ${question.explanation}`;
-    bossSpriteAnimate(bossHealth <= 0 ? "defeated" : "hit", "💥 HIT!");
+    bossSpriteAnimate(bossHealth <= 0 ? "defeated" : "hit", "HIT!");
   } else {
     bossLifeCount--;
     selectedButton.classList.add("wrong");
@@ -890,7 +890,7 @@ function answerBossQuestion(selectedIndex, selectedButton) {
   bossNextButton.hidden = false;
 
   if (bossHealth <= 0) {
-    bossNextButton.textContent = "Claim Victory 🏆";
+    bossNextButton.textContent = "Claim Victory ";
     bossNextButton.onclick = finishBossFight;
   } else if (bossLifeCount <= 0) {
     bossNextButton.textContent = "See Result";
@@ -926,20 +926,20 @@ function finishBossFight() {
 
   if (won) {
     bossResult.innerHTML = `
-      <h2>🏆 YOU DEFEATED THE BOSS!</h2>
+      <h2>YOU DEFEATED THE BOSS!</h2>
       <p>You answered ${bossCorrectAnswers} out of ${bossQuestionsAnswered} correctly in the "${currentBossSet.name}" battle.</p>
       <p>You have mastered this challenge!</p>
     `;
   } else {
     bossResult.innerHTML = `
-      <h2>⚔ BATTLE OVER</h2>
+      <h2>BATTLE OVER</h2>
       <p>You answered ${bossCorrectAnswers} out of ${bossQuestionsAnswered} correctly in the "${currentBossSet.name}" battle.</p>
       <p>You need 8 correct answers to win. Review the elements and try again!</p>
     `;
   }
 
   startBossButton.hidden = false;
-  startBossButton.textContent = "Fight Again ⚔";
+  startBossButton.textContent = "Fight Again ";
 }
 
 startBossButton.addEventListener("click", startBossFight);
@@ -1061,7 +1061,7 @@ async function askVerity(message) {
 
     if (window.location.protocol === "file:") {
       explanation =
-        "I couldn't reach my AI brain on your live website. 🔌 " +
+        "I couldn't reach my AI brain on your live website. " +
         "Make sure the site is deployed from GitHub and your internet is on, then try again.";
     } else if (error.message === "Failed to fetch") {
       explanation =
@@ -1111,7 +1111,7 @@ if (document.getElementById("periodic-section")) {
 console.log("ELEMENT QUEST loaded successfully.");
 console.log(`${elements.length} elements available.`);
 /* =========================================
-   12. BOSS FX UPGRADE 💥😂
+   12. BOSS FX UPGRADE 
    Better HIT and LAUGH animations:
    - HIT: X-eyes face, white flash, knockback, screen shake,
      pixel explosion, damage number and combo counter
@@ -1320,8 +1320,8 @@ function fxPlayHit(defeated) {
   fxAdd("fx-ring", "", {}, 520);
   fxPixelBurst();
   fxAdd("fx-damage", `-${BOSS_DAMAGE}%`, {}, 1000);
-  fxAdd("boss-pop", "💥 HIT!", {}, 900);
-  if (bossHitStreak >= 2) fxAdd("fx-combo", `🔥 COMBO x${bossHitStreak}!`, {}, 1100);
+  fxAdd("boss-pop", "HIT!", {}, 900);
+  if (bossHitStreak >= 2) fxAdd("fx-combo", `COMBO x${bossHitStreak}!`, {}, 1100);
 
   if (defeated) {
     bossSprite.classList.add("defeated");
