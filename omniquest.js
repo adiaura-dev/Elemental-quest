@@ -560,7 +560,7 @@
     const frame = $("oq-labframe"), load = $("oq-stage-load");
     if (!navigator.onLine) { load.innerHTML = `<b>You're offline</b><small>This ${L.kind === "phet" ? "simulation" : "3D model"} needs the internet. Lessons you've opened before still work offline.</small>`; }
     else {
-      frame.addEventListener("load", () => setTimeout(() => load.classList.add("done"), L.kind === "phet" ? 400 : 1200), { once: true });
+      frame.addEventListener("load", () => setTimeout(() => load.classList.add("done"), L.kind === "phet" ? 4500 : 1500), { once: true });
       frame.src = labURL(L);
     }
     $("oq-lab-lesson").addEventListener("click", () => openLesson(t, true));
@@ -676,10 +676,11 @@
     "A googol is 1 followed by 100 zeros."
   ];
 
-  const EXAMPLES = ["Photosynthesis", "Periodic table", "Ohm's law", "Linear equations", "Human heart", "Acids and bases", "Fractions", "Newton's laws", "Quadratic equations", "Food chains", "Magnets", "Pythagoras theorem"];
   function renderHome() {
     const d = read(), g = Number(d.grade) || 7, word = d.board === "IGCSE" ? "Grade" : "Class";
-    const tries = EXAMPLES.slice().sort(() => Math.random() - .5).slice(0, 4);
+    // one suggestion per subject, picked from topics in this class's syllabus
+    const shuffle = a => a.slice().sort(() => Math.random() - .5);
+    const tries = Object.keys(SUBJECTS).map(sk => shuffle(CATALOG.filter(t => t.s === sk && g >= t.a && g <= t.b && !/quiz|boss|practice/i.test(t.name)))[0]).filter(Boolean).map(t => t.name.replace(/ in 3D$/, ""));
     home.innerHTML = `<div class="oq-center">
       <span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}${d.lang && d.lang !== "English" ? ` · ${esc(LANG_NATIVE[d.lang] || d.lang).toUpperCase()}` : ""}</span>
       <h1>What do you want to <span>learn</span> today?</h1>
@@ -923,15 +924,24 @@
     hwPage.innerHTML = `<div class="oq-page"><span class="oq-label">VERITY · HOMEWORK CHECK</span><h1>Check my homework</h1>
       <p>Type the question and your working (or add a photo). Verity finds the step that went wrong and gives you a hint to fix it.</p>
       <div class="oq-field"><span class="oq-label">SUBJECT</span><div class="oq-row">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-chip ${st.s === k ? "on" : ""}" style="--c:${s.color}" data-hs="${k}">${s.name}</button>`).join("")}</div></div>
-      <div class="oq-field"><span class="oq-label">QUESTION</span><textarea id="hw-q" rows="2" placeholder="e.g. Solve 3x + 5 = 20"></textarea></div>
-      <div class="oq-field"><span class="oq-label">YOUR ANSWER AND WORKING</span><textarea id="hw-w" rows="5" placeholder="e.g.
-3x = 20 + 5
-3x = 25
-x = 8.33"></textarea></div>
+      <div class="oq-field"><span class="oq-label">QUESTION</span><textarea id="hw-q" rows="2"></textarea></div>
+      <div class="oq-field"><span class="oq-label">YOUR ANSWER AND WORKING</span><textarea id="hw-w" rows="5"></textarea></div>
       <div class="oq-field oq-photo"><div class="oq-row"><label class="oq-btn" for="hw-file">Add a photo</label><input id="hw-file" type="file" accept="image/*" capture="environment" hidden><button type="button" class="oq-btn" id="hw-clear" ${st.image ? "" : "hidden"}>Remove photo</button></div><div id="hw-prev">${st.image ? `<img src="${st.image}" alt="Your homework photo">` : ""}</div></div>
       <div class="oq-actions" style="margin-top:4px"><button type="button" class="oq-btn primary" id="hw-go">Check it</button></div>
       <div id="hw-out" style="margin-top:18px"></div></div>`;
-    hwPage.querySelectorAll("[data-hs]").forEach(b => b.addEventListener("click", () => { st.s = b.dataset.hs; hwPage.querySelectorAll("[data-hs]").forEach(x => x.classList.toggle("on", x === b)); }));
+    const setExample = () => {
+      const g = Number(read().grade) || 7, hi = g >= 9;
+      const EX = {
+        maths: hi ? ["Solve x² − 5x + 6 = 0", "x² − 5x + 6 = 0\n(x − 2)(x + 3) = 0\nx = 2 or x = −3"] : ["Solve 3x + 5 = 20", "3x = 20 + 5\n3x = 25\nx = 8.33"],
+        phy: hi ? ["A bulb draws 0.5 A from a 6 V battery. Find its resistance.", "R = I ÷ V\nR = 0.5 ÷ 6\nR = 0.083 Ω"] : ["A car travels 120 km in 2 hours. What is its speed?", "Speed = time ÷ distance\n= 2 ÷ 120\n= 0.017 km/h"],
+        chem: hi ? ["Balance the equation: H₂ + O₂ → H₂O", "H₂ + O₂ → 2H₂O"] : ["Is rusting of iron a physical or a chemical change?", "It is a physical change because the iron is still iron."],
+        bio: hi ? ["Why do plants need sunlight?", "Plants use sunlight to breathe. They take in oxygen in the day and give out carbon dioxide."] : ["What is the function of the heart?", "The heart cleans the blood and removes waste from it."]
+      }[st.s] || ["Type the question here", "Type your answer and working here"];
+      $("hw-q").placeholder = "e.g. " + EX[0];
+      $("hw-w").placeholder = "e.g.\n" + EX[1];
+    };
+    setExample();
+    hwPage.querySelectorAll("[data-hs]").forEach(b => b.addEventListener("click", () => { st.s = b.dataset.hs; hwPage.querySelectorAll("[data-hs]").forEach(x => x.classList.toggle("on", x === b)); setExample(); }));
     $("hw-file").addEventListener("change", e => {
       const f = e.target.files[0]; if (!f) return;
       const img = new Image(), url = URL.createObjectURL(f);
