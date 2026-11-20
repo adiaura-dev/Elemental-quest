@@ -57,6 +57,9 @@ module.exports = async (req, res) => {
   if (body.mode === "translate") return translateUI(body, apiKey, res);
   // ---- Flashcards for a chapter or topic ----
   if (body.mode === "cards") return writeCards(body, apiKey, res);
+  // ---- Formula sheet for a subject, and concept maps for a chapter ----
+  if (body.mode === "formulas") return writeFormulas(body, apiKey, res);
+  if (body.mode === "conceptmap") return writeConceptMap(body, apiKey, res);
 
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   if (!message) return res.status(400).json({ error: "Message is empty." });
@@ -392,5 +395,58 @@ async function writeCards(body, apiKey, res) {
     return res.status(200).json({ cards });
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message || "Couldn't make flashcards right now." });
+  }
+}
+
+// A formula sheet (or key terms for Biology) for the student's subject, board and class
+async function writeFormulas(body, apiKey, res) {
+  const subject = ["Maths", "Physics", "Chemistry", "Biology"].includes(body.subject) ? body.subject : null;
+  if (!subject) return res.status(400).json({ error: "Unknown subject." });
+  const chapters = (Array.isArray(body.chapters) ? body.chapters : []).filter(c => typeof c === "string").slice(0, 30).map(c => c.slice(0, 90));
+  const { board, grade, word } = levelOf(body);
+  const what = subject === "Biology"
+    ? "the key terms and definitions (and any important equations, such as photosynthesis and respiration)"
+    : subject === "Chemistry" ? "the formulas, laws and key chemical equations" : "every formula, law and identity";
+  const system =
+    `You are an expert ${board} teacher. List ${what} that a ${word} ${grade} ${board} ${subject} student must know for exams, grouped by chapter. ` +
+    (chapters.length ? `Use these chapters, in this order, and skip any chapter that has nothing to list: ${chapters.join("; ")}. ` : "") +
+    "Only include what is in that syllabus, and make sure every formula is exactly correct. " +
+    "Write formulas as plain text with Unicode symbols (², ³, √, ×, ÷, π, Δ, θ, →, ≤, ≥, subscripts like H₂O), never LaTeX. " +
+    "For each item give a short name, the formula (or the term), and a short meaning that says what each letter stands for, with SI units where useful (under 25 words). " +
+    `Write names and meanings in ${langOf(body)}; keep formulas and symbols as they are. ` +
+    'Reply with ONLY a JSON object: {"groups": [{"chapter": string, "items": [{"name": string, "formula": string, "meaning": string}]}]}. Up to 14 chapters, up to 10 items each.';
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `${subject} formula sheet` }], 9000);
+    const groups = (out && Array.isArray(out.groups) ? out.groups : []).filter(g => g && typeof g.chapter === "string" && Array.isArray(g.items)).slice(0, 14)
+      .map(g => ({ chapter: clip(g.chapter, 90), items: g.items.filter(i => i && typeof i.formula === "string").slice(0, 12).map(i => ({ name: clip(i.name, 80), formula: String(i.formula).trim().slice(0, 160), meaning: clip(i.meaning, 220) })) }))
+      .filter(g => g.items.length);
+    if (!groups.length) return res.status(502).json({ error: "Verity couldn't make the formula sheet. Please try again." });
+    return res.status(200).json({ groups });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message || "Couldn't make the formula sheet right now." });
+  }
+}
+
+// A concept map: the main idea in the middle, branches for sub-ideas, and leaves for details
+async function writeConceptMap(body, apiKey, res) {
+  const topic = typeof body.topic === "string" ? body.topic.trim().slice(0, 160) : "";
+  if (!topic) return res.status(400).json({ error: "Type a chapter or topic first." });
+  const subject = typeof body.subject === "string" ? body.subject.slice(0, 30) : "General";
+  const { board, grade, word } = levelOf(body);
+  const system =
+    `You are an expert teacher. Make a concept map of the topic below for a ${word} ${grade} ${board} ${subject} student, covering what that syllabus expects. ` +
+    "Put the topic in the centre, 4 to 6 main branches (the big ideas of the chapter), and 2 to 4 short details under each branch. " +
+    "Every label must be short: at most 5 words, no full sentences, no emojis. Everything must be accurate. " +
+    "If the topic is not a real school topic, or is unsafe for a child, use the closest suitable school topic instead. " +
+    `Write all labels in ${langOf(body)}; keep scientific symbols and formulas as they are. ` +
+    'Reply with ONLY a JSON object: {"center": string, "branches": [{"label": string, "leaves": [string]}]}.';
+  try {
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `Topic: ${topic}` }], 2500);
+    const branches = (out && Array.isArray(out.branches) ? out.branches : []).filter(b => b && typeof b.label === "string").slice(0, 6)
+      .map(b => ({ label: clip(b.label, 48), leaves: (Array.isArray(b.leaves) ? b.leaves : []).filter(l => typeof l === "string").slice(0, 4).map(l => clip(l, 48)) }));
+    if (branches.length < 2) return res.status(502).json({ error: "Verity couldn't map that topic. Try a chapter name." });
+    return res.status(200).json({ map: { center: clip(out.center || topic, 48), branches } });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message || "Couldn't make the concept map right now." });
   }
 }
