@@ -1,5 +1,5 @@
 /* =========================================
-   VERITY VOICE 🔊  (v3 — Fish Audio voice + browser backup)
+   VERITY VOICE  (v3 — Fish Audio voice + browser backup)
    Adds a speaker button to every Verity answer and a voice chooser.
    1st choice: Fish Audio's natural AI voice (through /api/speak on Vercel).
    Backup: the browser's built-in voices, so Verity never goes silent.
@@ -11,6 +11,11 @@
   const synth = window.speechSynthesis;
 
   /* ---------- Styles ---------- */
+  const VV_ICON = {
+    play: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
+    stop: '<svg width="12" height="12" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg>',
+    wait: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>'
+  };
   const style = document.createElement("style");
   style.textContent = `
     .verity-speak {
@@ -144,7 +149,7 @@
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     if (currentButton) {
       currentButton.classList.remove("speaking");
-      currentButton.textContent = currentButton.dataset.label || "🔊";
+      if (currentButton.dataset.label) currentButton.textContent = currentButton.dataset.label; else currentButton.innerHTML = VV_ICON.play;
       currentButton = null;
     }
   }
@@ -194,12 +199,12 @@
   }
 
   async function speakWithFish(text, button, mySession) {
-    button.textContent = "⏳";
+    if (button.dataset.label) button.textContent = "…"; else button.innerHTML = VV_ICON.wait;
     const url = await fishAudioUrl(text);
     if (mySession !== session) return;
     const audio = new Audio(url);
     currentAudio = audio;
-    button.textContent = "⏹";
+    if (button.dataset.label) button.textContent = "Stop"; else button.innerHTML = VV_ICON.stop;
     audio.onended = () => { if (mySession === session) stopSpeaking(); };
     await audio.play();
   }
@@ -218,7 +223,7 @@
     const browserSpeak = () => {
       if (mySession !== session) return;
       queue = toChunks(clean);
-      button.textContent = "⏹";
+      if (button.dataset.label) button.textContent = "Stop"; else button.innerHTML = VV_ICON.stop;
       speakNext(mySession, lang, voice);
     };
 
@@ -241,7 +246,7 @@
     const button = document.createElement("button");
     button.type = "button";
     button.className = "verity-speak";
-    button.textContent = "🔊";
+    button.innerHTML = VV_ICON.play;
     button.title = "Read aloud";
     button.setAttribute("aria-label", "Read this answer aloud");
     button.addEventListener("click", e => {
@@ -266,7 +271,7 @@
   /* ---------- Voice chooser bar ---------- */
   const bar = document.createElement("div");
   bar.className = "verity-voice-bar";
-  bar.innerHTML = `<span>🎙️ Voice</span><select aria-label="Choose Verity's voice"></select><button type="button">Test</button>`;
+  bar.innerHTML = `<span>Voice</span><select aria-label="Choose Verity's voice"></select><button type="button">Test</button>`;
   const select = bar.querySelector("select");
   const testBtn = bar.querySelector("button");
   testBtn.dataset.label = "Test";
@@ -278,9 +283,9 @@
     const sorted = voices
       .map(v => ({ v, s: Math.max(scoreVoice(v, "en-IN"), scoreVoice(v, "hi-IN")) }))
       .sort((a, b) => b.s - a.s || a.v.name.localeCompare(b.v.name));
-    select.innerHTML = `<option value="">🐟 Fish Audio voice (most natural)</option>` +
+    select.innerHTML = `<option value="">Fish Audio voice (most natural)</option>` +
       sorted.map(({ v }) => {
-        const nice = /natural|neural|google|premium|enhanced/i.test(v.name) ? "⭐ " : "";
+        const nice = /natural|neural|google|premium|enhanced/i.test(v.name) ? "" : "";
         const name = v.name.replace(/</g, "&lt;");
         return `<option value="${name}"${v.name === saved ? " selected" : ""}>${nice}${name} (${v.lang})</option>`;
       }).join("");
