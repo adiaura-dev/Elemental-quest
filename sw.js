@@ -3,7 +3,7 @@
    - Never waits more than 3 seconds for a slow connection.
    - Also saves the fonts and the human body picture so they work offline.
    AI features (Verity, lessons, tests) still need the internet. */
-const CACHE = "omniquest-v3";
+const CACHE = "omniquest-v4";
 const BODY_IMG = "https://upload.wikimedia.org/wikipedia/commons/0/00/202403_human_anatomy_organs.svg";
 const FILES = ["/", "/style.css", "/script.js", "/atom-lab.js", "/verity-voice.js", "/omniquest.js", "/maths.html", "/science.html", "/manifest.json", "/icon.svg"];
 const OUTSIDE = ["fonts.googleapis.com", "fonts.gstatic.com", "upload.wikimedia.org"];
@@ -43,10 +43,9 @@ self.addEventListener("fetch", event => {
 
   if (url.origin !== location.origin || url.pathname.startsWith("/api/") || url.pathname.includes("/.netlify/")) return;
 
-  // our own files: answer instantly from the saved copy, update it in the background
-  event.respondWith(caches.open(CACHE).then(cache => cache.match(req, { ignoreSearch: true }).then(hit => {
-    const update = fetch(req).then(res => { if (res && res.ok) cache.put(req, res.clone()); return res; });
-    if (hit) { event.waitUntil(update.catch(() => null)); return hit; }
-    return fetchWithin(req, 3000).catch(() => update).catch(() => req.mode === "navigate" ? cache.match("/") : new Response("", { status: 504 }));
-  })));
+  // our own files: get the newest version, but never wait more than 3 seconds; use the saved copy if offline or slow
+  event.respondWith(caches.open(CACHE).then(cache => fetchWithin(req, 3000).then(res => {
+    if (res && res.ok) cache.put(req, res.clone());
+    return res;
+  }).catch(() => cache.match(req, { ignoreSearch: true }).then(hit => hit || (req.mode === "navigate" ? cache.match("/") : fetch(req))))));
 });
