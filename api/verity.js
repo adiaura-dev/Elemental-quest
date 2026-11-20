@@ -293,7 +293,7 @@ async function writeExam(body, apiKey, res) {
   if (!subject) return res.status(400).json({ error: "Unknown subject." });
   const chapters = (Array.isArray(body.chapters) ? body.chapters : []).filter(c => typeof c === "string").slice(0, 30).map(c => c.slice(0, 90));
   if (!chapters.length) return res.status(400).json({ error: "Pick at least one chapter." });
-  const count = [10, 15, 20].includes(body.count) ? body.count : 10;
+  const count = Number.isInteger(body.count) ? Math.min(40, Math.max(5, body.count)) : 10;
   const { board, grade, word } = levelOf(body);
   const system =
     `You are an experienced ${board} examiner. Write a ${count}-question multiple-choice test for a ${word} ${grade} ${subject} student, in the style and difficulty of real ${board} school exams. ` +
@@ -302,7 +302,7 @@ async function writeExam(body, apiKey, res) {
     `Write all text in ${langOf(body)} (keep scientific symbols and formulas as they are). ` +
     'Reply with ONLY a JSON object: {"questions": [{"q": string, "options": [string, string, string, string], "answer": number (0-3), "explain": string (1-2 sentences), "chapter": string (one of the given chapter names)}]}.';
   try {
-    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `${subject} test` }], 6000);
+    const out = await askGroq(apiKey, [{ role: "system", content: system }, { role: "user", content: `${subject} test` }], Math.min(16000, 1500 + count * 320));
     const qs = (out && Array.isArray(out.questions) ? out.questions : [])
       .filter(q => q && typeof q.q === "string" && Array.isArray(q.options) && q.options.length === 4 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer <= 3)
       .slice(0, count)
