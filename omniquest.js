@@ -289,7 +289,7 @@
     .oq-note { color: #7d8fa8; font-size: 12.5px; font-weight: 700; margin-top: 14px; }
     .oq-hook { font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px; }
     .oq-funfact { border-left: 3px solid #ffb347; }
-    .oq-extra { margin-top: 22px; display: flex; gap: 10px; align-items: center; color: #4b5d76; }
+    .oq-extra { margin-top: 22px; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; color: #4b5d76; }
     .oq-extra button { border: 0; background: transparent; color: #8aa0b8; font: 800 14px "Inter", system-ui, sans-serif; cursor: pointer; padding: 4px 6px; border-bottom: 1px dashed #3a4b62; }
     .oq-extra button:hover { color: #fff; border-color: #55cfff; }
     .oq-steps { display: flex; gap: 6px; margin-bottom: 14px; }
@@ -564,6 +564,7 @@
       frame.src = labURL(L);
     }
     $("oq-lab-lesson").addEventListener("click", () => openLesson(t, true));
+    bump("labsOpened");
     $("oq-lab-full").addEventListener("click", () => { const el = labPage.querySelector(".oq-stage"); (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); });
     activate("oq-lab");
   }
@@ -687,10 +688,14 @@
       <div class="oq-slot" id="oq-slot"></div>
       <div class="oq-try">Try: ${tries.map(t => `<button type="button" data-try="${esc(t)}">${esc(t)}</button>`).join("")}</div>
       <div class="oq-subjects4">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-subj" style="--c:${s.color}" data-subj="${k}"><i>→</i><b>${s.name}</b><span>${s.blurb}</span></button>`).join("")}</div>
-      <div class="oq-extra"><button type="button" id="oq-go-hw">Check my homework</button>·<button type="button" id="oq-go-exam">Exam mode</button></div>
+      <div class="oq-extra"><button type="button" id="oq-go-hw">Check my homework</button>·<button type="button" id="oq-go-exam">Exam mode</button>·<button type="button" id="oq-go-cards">Flashcards</button>·<button type="button" id="oq-go-mis">Mistakes</button>·<button type="button" id="oq-go-prog">Progress</button></div>
     </div>`;
     $("oq-go-hw").addEventListener("click", openHomework);
     $("oq-go-exam").addEventListener("click", () => openExam());
+    $("oq-go-cards").addEventListener("click", () => openCards());
+    $("oq-go-mis").addEventListener("click", openMistakes);
+    $("oq-go-prog").addEventListener("click", openProgress);
+    try { refreshLinks(); } catch (_) { /* study tools load a moment later */ }
     if (home.classList.contains("active") || !document.querySelector(".page-section.active")) placeSearch(true);
     home.querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => { q.value = b.dataset.try; q.focus(); drawResults(); }));
     home.querySelectorAll("[data-subj]").forEach(b => b.addEventListener("click", () => openSubject(b.dataset.subj)));
@@ -829,10 +834,12 @@
       ${(data.sections || []).map((s, i) => `<div class="oq-sec" style="animation-delay:${i * .08}s"><h3>${esc(s.heading)}</h3><p>${esc(s.text)}</p></div>`).join("")}
       ${data.keyPoints && data.keyPoints.length ? `<div class="oq-sec"><span class="oq-label">KEY POINTS</span><ul class="oq-keys">${data.keyPoints.map(k => `<li>${esc(k)}</li>`).join("")}</ul></div>` : ""}
       ${data.funFact ? `<div class="oq-sec oq-funfact"><span class="oq-label">FUN FACT</span><p>${esc(data.funFact)}</p></div>` : ""}
-      ${data.quiz && data.quiz.length ? `<div class="oq-sec"><span class="oq-label">QUICK CHECK · +10 XP EACH</span>${data.quiz.map((qq, i) => `<div class="oq-q" data-q="${i}"><p>${i + 1}. ${esc(qq.q)}</p><div class="oq-opts">${qq.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(qq.explain || "")}</div></div>`).join("")}</div>` : ""}
+      ${data.quiz && data.quiz.length ? `<div class="oq-sec oq-quizsec"><span class="oq-label">QUICK CHECK · +10 XP EACH</span>${data.quiz.map((qq, i) => `<div class="oq-q" data-q="${i}"><p>${i + 1}. ${esc(qq.q)}</p><div class="oq-opts">${qq.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(qq.explain || "")}</div></div>`).join("")}</div>` : ""}
       <div class="oq-actions">
         <button type="button" class="oq-btn primary" id="oq-ask">Ask Verity a question about this</button>
         ${lab && lab.open ? `<button type="button" class="oq-btn" id="oq-lab">Open the interactive lab</button>` : ""}
+        <button type="button" class="oq-btn" id="oq-notes">Download notes (PDF)</button>
+        ${t.s ? `<button type="button" class="oq-btn" id="oq-cards">Make flashcards</button>` : ""}
         <button type="button" class="oq-btn" id="oq-new">Write it again</button>
       </div>
       ${t.s ? `<div class="oq-actions"><button type="button" class="oq-btn" id="oq-allch">See all ${subj.name} chapters</button></div>` : ""}
@@ -844,6 +851,7 @@
         const k = Number(b.dataset.k);
         box.querySelectorAll(".oq-opt").forEach(x => { x.disabled = true; if (Number(x.dataset.k) === qq.answer) x.classList.add("right"); });
         if (k === qq.answer) giveXP(10); else b.classList.add("wrong");
+        if (t.s) record({ s: t.s, topic: t.inChapter || t.name, q: qq.q, options: qq.options, answer: qq.answer, picked: k, explain: qq.explain });
         box.querySelector(".oq-exp").classList.add("show");
       }));
     });
@@ -855,6 +863,9 @@
     if ($("oq-lab")) $("oq-lab").addEventListener("click", () => openTopic(lab));
     if ($("oq-allch")) $("oq-allch").addEventListener("click", () => openSubject(t.s));
     $("oq-new").addEventListener("click", () => openLesson(t, fromLab, true));
+    $("oq-notes").addEventListener("click", () => printNotes(data.title || t.name));
+    if ($("oq-cards")) $("oq-cards").addEventListener("click", () => openCards({ s: t.s, topic: t.inChapter ? `${t.name} (${t.inChapter})` : t.name, auto: true }));
+    bump("lessonsRead");
     lesson.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => openTopic(CATALOG[b.dataset.t])));
   }
 
@@ -1059,6 +1070,7 @@
     qs.forEach((q, i) => { const c = by[q.chapter] || (by[q.chapter] = { r: 0, n: 0 }); c.n++; if (picks[i] === q.answer) c.r++; });
     const weak = Object.entries(by).filter(([, v]) => v.r / v.n < .6).map(([k]) => k);
     if (right) giveXP(right * 5);
+    qs.forEach((q, i) => record({ s: sk, topic: q.chapter, q: q.q, options: q.options, answer: q.answer, picked: picks[i], explain: q.explain }));
     window.scrollTo({ top: 0, behavior: "smooth" });
     examPage.innerHTML = `<div class="oq-page">
       <div class="oq-sec oq-score"><span class="oq-label">${s.name.toUpperCase()} TEST RESULT</span><b>${right} / ${qs.length}</b><p>${pct}% · ${pct >= 85 ? "Excellent! " : pct >= 60 ? "Good work! " : "Keep practising, you'll get there! "} · +${right * 5} XP</p></div>
@@ -1231,6 +1243,378 @@
   document.addEventListener("load", e => { if (e.target && e.target.tagName === "IFRAME") trSoon(); }, true);
   window.addEventListener("storage", trSoon);
   trSoon();
+
+  /* ---------- 13. study tools: mistake notebook, progress, flashcards, notes, voice ---------- */
+  const MKEY = "omniQuestMistakes", PKEY = "omniQuestProgress", CKEY = "omniQuestCards";
+  const getJ = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null || v === undefined ? def : v; } catch (_) { return def; } };
+  const putJ = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* storage full */ } };
+  const DAY = 864e5;
+  const pct = (r, n) => (n ? Math.round(r / n * 100) : 0);
+  const barColor = p => (p >= 75 ? "#25c58a" : p >= 50 ? "#f5b544" : "#f07883");
+
+  // every answered question goes through here
+  function record(a) {
+    if (!a || !a.q || !Array.isArray(a.options) || !SUBJECTS[a.s]) return;
+    const ok = a.picked === a.answer, topic = String(a.topic || "Practice").slice(0, 80);
+    const P = getJ(PKEY, {}), sp = P[a.s] = P[a.s] || {}, t = sp[topic] = sp[topic] || { r: 0, n: 0 };
+    t.n++; if (ok) t.r++; t.last = Date.now();
+    putJ(PKEY, P);
+    let M = getJ(MKEY, []);
+    const i = M.findIndex(m => m.q === a.q);
+    if (!ok) {
+      const m = { s: a.s, topic, q: String(a.q).slice(0, 400), options: a.options.map(o => String(o).slice(0, 200)), answer: a.answer, picked: a.picked, explain: String(a.explain || "").slice(0, 500), when: Date.now(), fixed: 0 };
+      if (i >= 0) M.splice(i, 1);
+      M.unshift(m);
+      M = M.slice(0, 200);
+    } else if (i >= 0 && a.review) {
+      M[i].fixed = (M[i].fixed || 0) + 1;
+      if (M[i].fixed >= 2) M.splice(i, 1);
+    }
+    putJ(MKEY, M);
+    refreshLinks();
+  }
+  const bump = field => { const d = read(); write({ [field]: (d[field] || 0) + 1 }); };
+
+  // answers from the Biology and Physics quizzes (science.html)
+  window.addEventListener("message", e => { if (e.data && e.data.oq === "answer") record(e.data); });
+  // answers from the Chemistry quiz and the Element Boss Fight
+  document.addEventListener("click", e => {
+    const b = e.target.closest("#quiz-options .quiz-option, #boss-options button");
+    if (!b || b.dataset.oqRec) return;
+    const boss = !!b.closest("#boss-options");
+    setTimeout(() => {
+      const opts = [...b.parentElement.querySelectorAll(boss ? "button" : ".quiz-option")];
+      const answer = opts.findIndex(x => x.classList.contains("correct"));
+      if (answer < 0) return;
+      opts.forEach(x => { x.dataset.oqRec = "1"; });
+      record({ s: "chem", topic: boss ? "Element Boss Fight" : "Chemistry quiz", q: ($(boss ? "boss-question" : "quiz-question")?.textContent || "").trim(), options: opts.map(x => x.textContent.trim()), answer, picked: opts.indexOf(b), explain: ($(boss ? "boss-feedback" : "quiz-feedback")?.textContent || "").replace(/^[✓✗]\s*/, "").trim() });
+    }, 50);
+  });
+
+  const toolPage = id => { const sec = document.createElement("section"); sec.id = id; sec.className = "page-section"; main.appendChild(sec); return sec; };
+  const mistakesPage = toolPage("oq-mistakes"), progressPage = toolPage("oq-progress"), cardsPage = toolPage("oq-cards");
+  function refreshLinks() {
+    const n = getJ(MKEY, []).length, due = dueCount();
+    const m = $("oq-go-mis"), c = $("oq-go-cards");
+    if (m) m.innerHTML = `Mistakes${n ? ` <span class="oq-count">${n}</span>` : ""}`;
+    if (c) c.innerHTML = `Flashcards${due ? ` <span class="oq-count">${due}</span>` : ""}`;
+  }
+
+  /* --- mistake notebook --- */
+  let misFilter = "all";
+  function openMistakes() {
+    current = { page: "Mistake notebook" };
+    setCrumb({ name: "Mistake notebook" });
+    activate("oq-mistakes");
+    const all = getJ(MKEY, []), list = all.filter(m => misFilter === "all" || m.s === misFilter);
+    const counts = {}; all.forEach(m => { counts[m.s] = (counts[m.s] || 0) + 1; });
+    mistakesPage.innerHTML = `<div class="oq-page">
+      <div class="oq-pagehead"><div><span class="oq-label">STUDY TOOLS</span><h1>Mistake notebook</h1><p>Every question you get wrong is saved here. Answer it correctly twice in practice and it's cleared.</p></div>
+        ${list.length ? `<button type="button" class="oq-btn primary" id="mis-go">Practise ${Math.min(10, list.length)} mistakes</button>` : ""}</div>
+      ${all.length ? `<div class="oq-row" style="margin-bottom:14px"><button type="button" class="oq-chip ${misFilter === "all" ? "on" : ""}" data-mf="all">All · ${all.length}</button>${Object.keys(SUBJECTS).filter(k => counts[k]).map(k => `<button type="button" class="oq-chip ${misFilter === k ? "on" : ""}" style="--c:${SUBJECTS[k].color}" data-mf="${k}">${SUBJECTS[k].name} · ${counts[k]}</button>`).join("")}</div>` : ""}
+      ${list.length ? `<div class="oq-mislist">${list.map(m => `<div class="oq-sec oq-mis" style="--c:${SUBJECTS[m.s].color}">
+          <div class="oq-mis-top"><span class="oq-label">${SUBJECTS[m.s].name.toUpperCase()} · ${esc(m.topic).toUpperCase()}</span><button type="button" class="oq-x" data-del="${esc(m.q)}" aria-label="Remove">Remove</button></div>
+          <p class="q">${esc(m.q)}</p>
+          <div class="oq-ans">${m.picked !== null && m.picked !== undefined && m.options[m.picked] !== undefined ? `<span class="bad">Your answer: ${esc(m.options[m.picked])}</span>` : `<span class="bad">Not answered</span>`}<span class="good">Correct: ${esc(m.options[m.answer])}</span></div>
+          ${m.explain ? `<p class="exp">${esc(m.explain)}</p>` : ""}</div>`).join("")}</div>`
+        : `<div class="oq-empty-box"><h3>${all.length ? "No mistakes in this subject" : "No mistakes yet"}</h3><p>Answer questions in lessons, quizzes and tests. Anything you get wrong will appear here so you can fix it.</p><button type="button" class="oq-btn primary" id="mis-test">Take a test</button></div>`}
+    </div>`;
+    mistakesPage.querySelectorAll("[data-mf]").forEach(b => b.addEventListener("click", () => { misFilter = b.dataset.mf; openMistakes(); }));
+    mistakesPage.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { putJ(MKEY, getJ(MKEY, []).filter(m => m.q !== b.dataset.del)); refreshLinks(); openMistakes(); }));
+    if ($("mis-go")) $("mis-go").addEventListener("click", () => practiseMistakes(list.slice(0, 10)));
+    if ($("mis-test")) $("mis-test").addEventListener("click", () => openExam());
+  }
+  function practiseMistakes(qs) {
+    let i = 0, right = 0;
+    const show = () => {
+      if (i >= qs.length) {
+        const left = getJ(MKEY, []).length;
+        mistakesPage.innerHTML = `<div class="oq-page"><div class="oq-sec oq-score"><span class="oq-label">PRACTICE COMPLETE</span><b>${right} / ${qs.length}</b><p>${left ? `${left} mistake${left === 1 ? "" : "s"} still to fix.` : "Your notebook is clear. Great work."}</p></div>
+          <div class="oq-actions"><button type="button" class="oq-btn primary" id="mis-back">Back to notebook</button></div></div>`;
+        $("mis-back").addEventListener("click", openMistakes);
+        return;
+      }
+      const m = qs[i];
+      mistakesPage.innerHTML = `<div class="oq-page"><span class="oq-label">PRACTISING MISTAKES · ${i + 1} OF ${qs.length}</span>
+        <div class="oq-prog">${qs.map((_, k) => `<i class="${k < i ? "done" : k === i ? "now" : ""}"></i>`).join("")}</div>
+        <div class="oq-sec oq-q" style="--c:${SUBJECTS[m.s].color}"><span class="oq-label">${SUBJECTS[m.s].name.toUpperCase()} · ${esc(m.topic).toUpperCase()}</span><p>${esc(m.q)}</p>
+          <div class="oq-opts">${m.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(m.explain)}</div></div>
+        <div class="oq-actions" id="mis-next"></div></div>`;
+      mistakesPage.querySelectorAll(".oq-opt").forEach(b => b.addEventListener("click", () => {
+        const k = Number(b.dataset.k), ok = k === m.answer;
+        mistakesPage.querySelectorAll(".oq-opt").forEach(x => { x.disabled = true; if (Number(x.dataset.k) === m.answer) x.classList.add("right"); });
+        if (ok) { right++; giveXP(5); } else b.classList.add("wrong");
+        record({ ...m, picked: k, review: true });
+        mistakesPage.querySelector(".oq-exp").classList.add("show");
+        $("mis-next").innerHTML = `<button type="button" class="oq-btn primary" id="mis-n">${i + 1 >= qs.length ? "See result" : "Next question"}</button>`;
+        $("mis-n").addEventListener("click", () => { i++; show(); });
+      }));
+    };
+    show();
+  }
+
+  /* --- progress --- */
+  function openProgress() {
+    current = { page: "My progress" };
+    setCrumb({ name: "My progress" });
+    activate("oq-progress");
+    const d = read(), P = getJ(PKEY, {}), M = getJ(MKEY, []);
+    let R = 0, N = 0;
+    Object.values(P).forEach(sp => Object.values(sp).forEach(t => { R += t.r; N += t.n; }));
+    const tiles = [["QUESTIONS ANSWERED", N], ["ACCURACY", N ? pct(R, N) + "%" : "–"], ["LESSONS READ", d.lessonsRead || 0], ["LABS EXPLORED", d.labsOpened || 0]];
+    progressPage.innerHTML = `<div class="oq-page">
+      <div class="oq-pagehead"><div><span class="oq-label">STUDY TOOLS</span><h1>My progress</h1><p>How you're doing in each subject, based on every quiz, test and lesson question you answer.</p></div></div>
+      <div class="oq-tiles">${tiles.map(([l, v]) => `<div class="oq-tile"><span>${l}</span><b>${v}</b></div>`).join("")}</div>
+      <div class="oq-subgrid">${Object.entries(SUBJECTS).map(([k, s]) => {
+        const topics = Object.entries(P[k] || {}), r = topics.reduce((a, [, t]) => a + t.r, 0), n = topics.reduce((a, [, t]) => a + t.n, 0), p = pct(r, n);
+        const weakest = topics.sort((x, y) => (x[1].r / x[1].n) - (y[1].r / y[1].n) || y[1].n - x[1].n).slice(0, 5);
+        const mis = M.filter(m => m.s === k).length;
+        return `<div class="oq-sec oq-subprog" style="--c:${s.color}">
+          <div class="oq-subprog-top"><h3>${s.name}</h3><b style="color:${n ? barColor(p) : "#7d8fa8"}">${n ? p + "%" : "–"}</b></div>
+          <div class="oq-meter"><div style="width:${p}%;background:${barColor(p)}"></div></div>
+          <small>${n} answered${mis ? ` · ${mis} to fix` : ""}</small>
+          ${weakest.length ? `<div class="oq-topics">${weakest.map(([name, t]) => { const tp = pct(t.r, t.n); return `<div class="oq-topic"><span>${esc(name)}</span><span class="t"><div style="width:${tp}%;background:${barColor(tp)}"></div></span><span class="v">${t.r}/${t.n}</span>${tp < 75 && !/quiz|boss fight|practice/i.test(name) ? `<button type="button" class="oq-mini" data-rev="${esc(name)}" data-s="${k}">Revise</button>` : `<span></span>`}</div>`; }).join("")}</div>`
+            : `<p class="oq-muted">No answers yet. Try a lesson quiz or take a ${s.name} test.</p>`}
+          <div class="oq-row" style="margin-top:12px"><button type="button" class="oq-btn sm" data-test="${k}">Take a test</button><button type="button" class="oq-btn sm" data-ch="${k}">Chapters</button></div>
+        </div>`;
+      }).join("")}</div>
+      ${N ? `<div class="oq-actions"><button type="button" class="oq-btn" id="pr-reset">Reset my progress</button></div>` : ""}
+    </div>`;
+    progressPage.querySelectorAll("[data-rev]").forEach(b => b.addEventListener("click", () => openLesson({ name: b.dataset.rev, s: b.dataset.s, chapter: true })));
+    progressPage.querySelectorAll("[data-test]").forEach(b => b.addEventListener("click", () => openExam(b.dataset.test)));
+    progressPage.querySelectorAll("[data-ch]").forEach(b => b.addEventListener("click", () => openSubject(b.dataset.ch)));
+    if ($("pr-reset")) $("pr-reset").addEventListener("click", e => {
+      if (e.target.dataset.sure) { putJ(PKEY, {}); openProgress(); return; }
+      e.target.dataset.sure = "1"; e.target.textContent = "Click again to reset"; setTimeout(() => { if (e.target.isConnected) { delete e.target.dataset.sure; e.target.textContent = "Reset my progress"; } }, 4000);
+    });
+  }
+
+  /* --- flashcards (spaced repetition: cards you know come back later, cards you miss come back soon) --- */
+  const BOX_DAYS = [0, 1, 3, 7, 14, 30];
+  const decks = () => getJ(CKEY, []);
+  const saveDecks = v => { putJ(CKEY, v); refreshLinks(); };
+  function dueCount() { const now = Date.now(); return decks().reduce((a, dk) => a + dk.cards.filter(c => c.due <= now).length, 0); }
+  let cardSubj = "bio";
+  function openCards(prefill) {
+    current = { page: "Flashcards" };
+    setCrumb({ name: "Flashcards" });
+    activate("oq-cards");
+    if (prefill && prefill.s) cardSubj = prefill.s;
+    const all = decks(), now = Date.now();
+    const syl = sylCached(cardSubj), chapters = syl ? syl.chapters.map(c => c.name) : [];
+    cardsPage.innerHTML = `<div class="oq-page">
+      <div class="oq-pagehead"><div><span class="oq-label">STUDY TOOLS</span><h1>Flashcards</h1><p>Verity makes a deck for any chapter or topic. Cards you know come back later; cards you miss come back sooner.</p></div></div>
+      <div class="oq-sec oq-make">
+        <span class="oq-label">MAKE A NEW DECK</span>
+        <div class="oq-row" style="margin:8px 0 12px">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-chip ${cardSubj === k ? "on" : ""}" style="--c:${s.color}" data-cs="${k}">${s.name}</button>`).join("")}</div>
+        <div class="oq-makerow"><input id="cd-topic" list="cd-list" type="text" placeholder="Chapter or topic, e.g. ${esc(chapters[0] || "Photosynthesis")}" value="${esc((prefill && prefill.topic) || "")}" autocomplete="off"><datalist id="cd-list">${chapters.map(c => `<option value="${esc(c)}">`).join("")}</datalist><button type="button" class="oq-btn primary" id="cd-make">Make flashcards</button></div>
+        <div id="cd-msg"></div>
+      </div>
+      ${all.length ? `<span class="oq-label" style="margin-top:20px;display:block">YOUR DECKS</span><div class="oq-decks">${all.map((dk, i) => {
+        const due = dk.cards.filter(c => c.due <= now).length, known = dk.cards.filter(c => c.box >= 3).length;
+        return `<div class="oq-deck" style="--c:${SUBJECTS[dk.s] ? SUBJECTS[dk.s].color : "#55cfff"}"><div><b>${esc(dk.topic)}</b><small>${SUBJECTS[dk.s] ? SUBJECTS[dk.s].name : ""} · ${dk.cards.length} cards · ${known} learnt</small></div>
+          <div class="oq-row"><span class="oq-due ${due ? "on" : ""}">${due ? `${due} due` : "All done"}</span><button type="button" class="oq-btn sm ${due ? "primary" : ""}" data-study="${i}">${due ? "Study" : "Study again"}</button><button type="button" class="oq-x" data-deldeck="${i}" aria-label="Delete deck">Delete</button></div></div>`;
+      }).join("")}</div>` : ""}
+    </div>`;
+    cardsPage.querySelectorAll("[data-cs]").forEach(b => b.addEventListener("click", () => { cardSubj = b.dataset.cs; openCards({ topic: $("cd-topic").value }); if (!sylCached(cardSubj)) getSyllabus(cardSubj).then(() => { if (current.page === "Flashcards") openCards({ topic: $("cd-topic")?.value }); }).catch(() => {}); }));
+    cardsPage.querySelectorAll("[data-study]").forEach(b => b.addEventListener("click", () => studyDeck(Number(b.dataset.study))));
+    cardsPage.querySelectorAll("[data-deldeck]").forEach(b => b.addEventListener("click", e => {
+      if (!e.target.dataset.sure) { e.target.dataset.sure = "1"; e.target.textContent = "Sure?"; return; }
+      const v = decks(); v.splice(Number(b.dataset.deldeck), 1); saveDecks(v); openCards();
+    }));
+    const make = async () => {
+      const topic = $("cd-topic").value.trim();
+      if (!topic) { $("cd-topic").focus(); return; }
+      const btn = $("cd-make"); btn.disabled = true;
+      $("cd-msg").innerHTML = `<div class="oq-loading" style="margin-top:12px"><span class="oq-dots"><span></span><span></span><span></span></span>Verity is making your flashcards…</div>`;
+      try {
+        const j = await askAI({ mode: "cards", topic, subject: SUBJECTS[cardSubj].name });
+        const cards = (j.cards || []).filter(c => c && c.front && c.back).slice(0, 16);
+        if (cards.length < 3) throw new Error("Verity couldn't make cards for that. Try a chapter name.");
+        const v = decks();
+        v.unshift({ s: cardSubj, topic, made: Date.now(), cards: cards.map(c => ({ f: String(c.front).slice(0, 200), b: String(c.back).slice(0, 400), box: 0, due: 0 })) });
+        saveDecks(v.slice(0, 30));
+        studyDeck(0);
+      } catch (err) {
+        btn.disabled = false;
+        $("cd-msg").innerHTML = `<p class="oq-err">${esc(err.message)}</p>`;
+      }
+    };
+    $("cd-make").addEventListener("click", make);
+    $("cd-topic").addEventListener("keydown", e => { if (e.key === "Enter") make(); });
+    if (prefill && prefill.auto && prefill.topic) make();
+  }
+  function studyDeck(idx) {
+    const all = decks(), dk = all[idx]; if (!dk) return openCards();
+    const now = Date.now();
+    let queue = dk.cards.map((c, i) => i).filter(i => dk.cards[i].due <= now);
+    if (!queue.length) queue = dk.cards.map((c, i) => i);
+    queue = queue.sort(() => Math.random() - .5);
+    const total = queue.length; let done = 0, again = 0;
+    const color = SUBJECTS[dk.s] ? SUBJECTS[dk.s].color : "#55cfff";
+    const show = () => {
+      if (!queue.length) {
+        cardsPage.innerHTML = `<div class="oq-page"><div class="oq-sec oq-score"><span class="oq-label">${esc(dk.topic).toUpperCase()}</span><b>${total} cards</b><p>${again ? `${again} card${again === 1 ? "" : "s"} needed another look. They'll come back sooner.` : "You knew every card. They'll come back in a few days."}</p></div>
+          <div class="oq-actions"><button type="button" class="oq-btn primary" id="cd-back">Back to decks</button></div></div>`;
+        $("cd-back").addEventListener("click", () => openCards());
+        giveXP(Math.min(20, total));
+        return;
+      }
+      const c = dk.cards[queue[0]];
+      cardsPage.innerHTML = `<div class="oq-page oq-study" style="--c:${color}">
+        <div class="oq-studyhead"><span class="oq-label">${esc(dk.topic).toUpperCase()}</span><span class="oq-muted">${done} of ${total} done</span></div>
+        <div class="oq-meter" style="margin-bottom:18px"><div style="width:${done / total * 100}%;background:${color}"></div></div>
+        <button type="button" class="oq-flash" id="cd-card" aria-label="Flip card"><div class="in"><div class="face front"><span class="oq-label">QUESTION</span><p>${esc(c.f)}</p><small>Click or press Space to flip</small></div><div class="face back"><span class="oq-label">ANSWER</span><p>${esc(c.b)}</p></div></div></button>
+        <div class="oq-studybtns" id="cd-btns" hidden><button type="button" class="oq-btn" id="cd-again">Again</button><button type="button" class="oq-btn primary" id="cd-got">Got it</button></div>
+        <div class="oq-actions" style="justify-content:center"><button type="button" class="oq-linkbtn" id="cd-stop">Stop studying</button></div>
+      </div>`;
+      const flip = () => { $("cd-card").classList.toggle("flipped"); $("cd-btns").hidden = false; };
+      $("cd-card").addEventListener("click", flip);
+      const grade = ok => {
+        const v = decks(), card = v[idx] && v[idx].cards[queue[0]];
+        if (card) {
+          if (ok) { card.box = Math.min(BOX_DAYS.length - 1, card.box + 1); card.due = Date.now() + BOX_DAYS[card.box] * DAY; }
+          else { card.box = 0; card.due = 0; }
+          saveDecks(v); dk.cards[queue[0]] = card;
+        }
+        const id = queue.shift();
+        if (ok) done++; else { again++; queue.push(id); }
+        show();
+      };
+      $("cd-again").addEventListener("click", () => grade(false));
+      $("cd-got").addEventListener("click", () => grade(true));
+      $("cd-stop").addEventListener("click", () => openCards());
+    };
+    show();
+  }
+  document.addEventListener("keydown", e => {
+    if (!cardsPage.classList.contains("active") || !$("cd-card") || /INPUT|TEXTAREA/.test(document.activeElement?.tagName || "")) return;
+    if (e.code === "Space") { e.preventDefault(); $("cd-card").click(); }
+    else if (!$("cd-btns").hidden && (e.key === "1" || e.key === "ArrowLeft")) $("cd-again").click();
+    else if (!$("cd-btns").hidden && (e.key === "2" || e.key === "ArrowRight")) $("cd-got").click();
+  });
+
+  /* --- notes as PDF: prints only the lesson, in a clean black-on-white layout --- */
+  function printNotes(title) {
+    const old = document.title;
+    document.title = `${title} - OmniQuest notes`;
+    document.body.classList.add("oq-printing");
+    const done = () => { document.body.classList.remove("oq-printing"); document.title = old; window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    window.print();
+    setTimeout(done, 1500);
+  }
+
+  /* --- talk to Verity: microphone button in the chat --- */
+  (function addMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition, form = $("chatbot-form"), input = $("chatbot-input");
+    if (!SR || !form || !input || $("oq-mic")) return;
+    const LOC = { English: "en-IN", Hindi: "hi-IN", Bengali: "bn-IN", Marathi: "mr-IN", Telugu: "te-IN", Tamil: "ta-IN", Gujarati: "gu-IN", Urdu: "ur-IN", Kannada: "kn-IN", Odia: "or-IN", Malayalam: "ml-IN", Punjabi: "pa-IN", French: "fr-FR", German: "de-DE", Spanish: "es-ES", Arabic: "ar-SA", Chinese: "zh-CN", Japanese: "ja-JP" };
+    const mic = document.createElement("button");
+    mic.type = "button"; mic.id = "oq-mic"; mic.className = "oq-mic"; mic.setAttribute("aria-label", "Speak your question"); mic.title = "Speak your question";
+    mic.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+    form.insertBefore(mic, form.querySelector('button[type="submit"]'));
+    let rec = null;
+    mic.addEventListener("click", () => {
+      if (rec) { rec.stop(); return; }
+      rec = new SR();
+      rec.lang = LOC[read().lang] || "en-IN";
+      rec.interimResults = true;
+      const before = input.value;
+      rec.onresult = ev => { input.value = (before ? before + " " : "") + [...ev.results].map(r => r[0].transcript).join(""); if (ev.results[ev.results.length - 1].isFinal) { rec.stop(); } };
+      rec.onend = () => { mic.classList.remove("on"); const said = input.value.trim(); rec = null; if (said && said !== before.trim()) form.requestSubmit ? form.requestSubmit() : form.querySelector('button[type="submit"]').click(); };
+      rec.onerror = () => { mic.classList.remove("on"); rec = null; };
+      mic.classList.add("on");
+      try { rec.start(); } catch (_) { mic.classList.remove("on"); rec = null; }
+    });
+  })();
+
+  const studyCss = document.createElement("style");
+  studyCss.textContent = `
+    .oq-extra .oq-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px; background: #f07883; color: #fff; font-size: 11px; font-weight: 800; vertical-align: 1px; }
+    .oq-pagehead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .oq-pagehead h1 { margin: 2px 0 6px; font-size: clamp(28px, 3.4vw, 40px); color: #fff; }
+    .oq-pagehead p { margin: 0; color: #a9b8cc; max-width: 640px; line-height: 1.55; }
+    .oq-muted { color: #7d8fa8; font-size: 13.5px; font-weight: 600; }
+    .oq-empty-box { text-align: center; padding: 46px 20px; border: 1px dashed #334155; border-radius: 16px; }
+    .oq-empty-box h3 { color: #fff; margin: 0 0 6px; }
+    .oq-empty-box p { color: #8195ad; margin: 0 auto 16px; max-width: 460px; line-height: 1.55; }
+    .oq-mislist { display: grid; gap: 10px; }
+    .oq-mis { border-left: 3px solid var(--c); margin: 0 !important; }
+    .oq-mis-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .oq-mis .q { color: #fff; font-weight: 700; margin: 4px 0 10px; white-space: normal; }
+    .oq-ans { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .oq-ans span { font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 8px; }
+    .oq-ans .bad { background: #3d1c25; color: #ffb3bd; }
+    .oq-ans .good { background: #10392e; color: #8ff0c4; }
+    .oq-mis .exp { color: #a9b8cc; font-size: 13.5px; margin: 0; }
+    .oq-x { border: 0; background: transparent; color: #7d8fa8; font: 700 12.5px "Inter", system-ui, sans-serif; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+    .oq-x:hover { color: #f07883; background: #2a1a22; }
+    .oq-prog { display: flex; gap: 5px; margin: 8px 0 14px; }
+    .oq-prog i { flex: 1; height: 5px; border-radius: 4px; background: #22324a; }
+    .oq-prog i.done { background: #55cfff; } .oq-prog i.now { background: #a78bfa; }
+    .oq-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .oq-tile { background: linear-gradient(160deg, #1b2639, #141e30); border: 1px solid #2c3d53; border-radius: 14px; padding: 14px 16px; }
+    .oq-tile span { display: block; color: #7d8fa8; font-size: 11px; font-weight: 800; letter-spacing: 1.1px; }
+    .oq-tile b { font-size: 26px; color: #fff; }
+    .oq-subgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .oq-subprog { margin: 0 !important; border-top: 3px solid var(--c); }
+    .oq-subprog-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .oq-subprog-top h3 { margin: 0; }
+    .oq-subprog-top b { font-size: 22px; }
+    .oq-meter { height: 7px; background: #1e293b; border-radius: 6px; overflow: hidden; margin: 8px 0 6px; }
+    .oq-meter div { height: 100%; border-radius: 6px; transition: width .5s; }
+    .oq-subprog small { color: #7d8fa8; font-weight: 700; }
+    .oq-topics { display: grid; gap: 7px; margin-top: 12px; }
+    .oq-topic { display: grid; grid-template-columns: minmax(0, 1fr) 90px 42px 64px; gap: 8px; align-items: center; font-size: 13px; color: #dbe7f3; font-weight: 600; }
+    .oq-topic > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .oq-topic .t { height: 6px; background: #1e293b; border-radius: 6px; overflow: hidden; }
+    .oq-topic .t div { height: 100%; }
+    .oq-topic .v { color: #7d8fa8; font-size: 12px; text-align: right; }
+    .oq-mini { border: 1px solid #334155; background: #172337; color: #dbe7f3; border-radius: 8px; padding: 4px 8px; font: 700 12px "Inter", system-ui, sans-serif; cursor: pointer; }
+    .oq-mini:hover { border-color: var(--c); }
+    .oq-btn.sm { padding: 7px 12px; font-size: 13px; }
+    .oq-makerow { display: flex; gap: 10px; }
+    .oq-makerow input { flex: 1; background: #0f1726; border: 1px solid #334155; border-radius: 11px; padding: 11px 14px; color: #fff; font: 600 15px "Inter", system-ui, sans-serif; outline: none; }
+    .oq-makerow input:focus { border-color: #55cfff; box-shadow: 0 0 0 4px #55cfff22; }
+    .oq-err { color: #ffb3bd; font-weight: 700; margin: 10px 0 0; }
+    .oq-decks { display: grid; gap: 8px; margin-top: 8px; }
+    .oq-deck { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: linear-gradient(160deg, #1b2639, #141e30); border: 1px solid #2c3d53; border-left: 3px solid var(--c); border-radius: 13px; padding: 12px 14px; }
+    .oq-deck b { color: #fff; display: block; }
+    .oq-deck small { color: #7d8fa8; font-weight: 700; }
+    .oq-due { font-size: 12.5px; font-weight: 800; color: #7d8fa8; }
+    .oq-due.on { color: #f5b544; }
+    .oq-study { max-width: 720px; margin: 0 auto; }
+    .oq-studyhead { display: flex; justify-content: space-between; align-items: center; }
+    .oq-flash { display: block; width: 100%; height: 300px; border: 0; padding: 0; background: transparent; perspective: 1400px; cursor: pointer; font: inherit; }
+    .oq-flash .in { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
+    .oq-flash.flipped .in { transform: rotateY(180deg); }
+    .oq-flash .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 26px; border-radius: 18px; border: 1px solid #2c3d53; background: linear-gradient(160deg, #1d2a40, #141e30); box-shadow: 0 18px 40px #0005; text-align: center; }
+    .oq-flash .face p { margin: 0; color: #fff; font-size: 21px; font-weight: 700; line-height: 1.45; }
+    .oq-flash .back { transform: rotateY(180deg); border-color: var(--c); }
+    .oq-flash .back p { font-size: 18px; font-weight: 600; color: #e2ebf6; }
+    .oq-flash small { color: #7d8fa8; font-weight: 600; }
+    .oq-studybtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .oq-studybtns[hidden] { display: none; }
+    .oq-studybtns .oq-btn { padding: 13px; font-size: 15px; }
+    .oq-linkbtn { border: 0; background: none; color: #7d8fa8; font: 700 13px "Inter", system-ui, sans-serif; cursor: pointer; text-decoration: underline; }
+    .oq-mic { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 50%; border: 1px solid #334155; background: #172337; color: #cfe0f1; cursor: pointer; margin-right: 6px; }
+    .oq-mic:hover { border-color: #55cfff; color: #fff; }
+    .oq-mic.on { background: #f07883; border-color: #f07883; color: #fff; animation: oqMic 1.2s ease-in-out infinite; }
+    @keyframes oqMic { 50% { box-shadow: 0 0 0 7px rgba(240, 120, 131, .25); } }
+    @media (max-width: 900px) { .oq-tiles { grid-template-columns: repeat(2, 1fr); } .oq-subgrid { grid-template-columns: 1fr; } .oq-makerow { flex-direction: column; } .oq-topic { grid-template-columns: minmax(0, 1fr) 60px 40px 60px; } }
+    @media print {
+      body.oq-printing * { visibility: hidden !important; }
+      body.oq-printing #oq-lesson, body.oq-printing #oq-lesson * { visibility: visible !important; }
+      body.oq-printing #oq-lesson { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+      body.oq-printing { background: #fff !important; }
+      body.oq-printing #oq-lesson * { color: #111 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; animation: none !important; }
+      body.oq-printing #oq-lesson .oq-sec { border: 1px solid #ccc !important; break-inside: avoid; }
+      body.oq-printing #oq-lesson .oq-noprint, body.oq-printing #oq-lesson .oq-quizsec, body.oq-printing #oq-lesson .oq-actions, body.oq-printing #oq-lesson .oq-block { display: none !important; }
+      body.oq-printing #oq-lesson h1 { font-size: 26pt; }
+    }
+  `;
+  document.head.appendChild(studyCss);
 
   /* ---------- 12. start ---------- */
   if (sidebar) sidebar.setAttribute("aria-hidden", "true");
