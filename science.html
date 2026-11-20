@@ -657,6 +657,7 @@ function quizTool() {
       <div class="opts">${opts.map((o, k) => `<button class="opt" data-k="${k}"><span class="l">${"ABCD"[k]}</span>${o}</button>`).join("")}</div><div class="fb" id="fb"></div><div class="row" style="justify-content:flex-end;margin-top:14px" id="nx"></div>`;
     document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
       const ok = opts[b.dataset.k] === q.a;
+      try { if (parent !== window) parent.postMessage({ oq: "answer", s: SUBJECT === "physics" ? "phy" : "bio", topic: q.t || `${SUBJECT === "physics" ? "Physics" : "Biology"} quiz`, q: q.q.replace(/<[^>]+>/g, ""), options: opts.map(o => String(o).replace(/<[^>]+>/g, "")), answer: opts.indexOf(q.a), picked: Number(b.dataset.k), explain: q.e }, location.origin); } catch (_) { /* not embedded */ }
       document.querySelectorAll(".opt").forEach(x => { x.disabled = true; if (opts[x.dataset.k] === q.a) x.classList.add("right"); else if (x !== b) x.classList.add("dim"); });
       const fb = $("#fb");
       if (ok) { b.classList.add("right"); right(b); xp += 10; fb.className = "fb show good"; fb.innerHTML = `✓ Correct! ${q.e}`; res[i] = "good"; }
