@@ -125,6 +125,24 @@ canvas.road, canvas.graph { width: 100%; display: block; background: #0f1426; bo
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 65; }
 @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { main { padding: 6px 10px 40px; } .opts { grid-template-columns: 1fr; } .card { padding: 15px; } .mats { grid-template-columns: repeat(2, 1fr); } .meters { grid-template-columns: repeat(3, 1fr); } .meter b { font-size: 17px; } }
+.chip { border: 1px solid var(--line); background: var(--panel2); color: var(--muted); border-radius: 10px; padding: 8px 13px; font-weight: 800; font-size: 13px; }
+.chip.on { color: var(--text); border-color: var(--accent); }
+.chip:disabled { opacity: .45; cursor: default; }
+.seg.locked { opacity: .4; pointer-events: none; }
+.lbl text { font: 700 12.5px "Nunito", sans-serif; fill: #dbe4f5; }
+.lbl line { stroke: #7d8db0; stroke-width: 1; }
+.nolabels .lbl, .lbl .off { display: none; }
+.lbl { pointer-events: none; }
+.target { color: var(--yellow); }
+.btn.sm { padding: 7px 12px; font-size: 13px; }
+.mat i { display: block; width: 34px; height: 12px; border-radius: 4px; margin-bottom: 4px; }
+.mat.cur { border-color: var(--amber); }
+.mission { border-style: solid !important; }
+h1, h2, h3 { font-family: "Nunito", sans-serif !important; font-weight: 800; }
+.btn { box-shadow: none !important; border-radius: 10px !important; }
+.btn:active { transform: translateY(1px) !important; }
+.part:hover { filter: brightness(1.15) !important; }
+.part.sel { filter: brightness(1.25) drop-shadow(0 0 6px #ffd84d) !important; }
 </style>
 </head>
 <body>
@@ -175,7 +193,7 @@ function right(el, base = 10) {
   patch(d => { d.bestStreak = Math.max(d.bestStreak || 0, streak); });
   sfx.good();
   addXP(base + Math.min(10, (streak - 1) * 2), el);
-  if ([3, 5, 10].includes(streak)) setTimeout(() => pop(`🔥 ${streak} IN A ROW!`, "#ff9f43", null, true), 250);
+  if ([3, 5, 10].includes(streak)) setTimeout(() => pop(`${streak} in a row!`, "#ff9f43", null, true), 250);
 }
 function wrong(card) { streak = 0; sfx.bad(); if (card) { card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake"); } }
 
@@ -322,7 +340,7 @@ function renderHome() {
   $("#h-eyebrow").textContent = bio ? "BIOLOGY · THE SCIENCE OF LIFE" : "PHYSICS · HOW THE UNIVERSE WORKS";
   $("#h-title").textContent = bio ? "Biology" : "Physics";
   $("#h-sub").textContent = `Labs and quizzes for Class ${g}. Pick one to start!`;
-  $("#tools").innerHTML = TOOLS[SUBJECT].map(t => `<button class="tool" style="--c:${t.color}" data-tool="${t.id}"><span class="ic">${t.icon}</span><h3>${t.name}</h3><p>${t.desc}</p>${g >= t.g ? '<span class="tag rec">✓ FOR YOUR CLASS</span>' : `<span class="tag">CLASS ${t.g}+</span>`}</button>`).join("");
+  $("#tools").innerHTML = TOOLS[SUBJECT].map(t => `<button class="tool" style="--c:${t.color}" data-tool="${t.id}"><h3>${t.name}</h3><p>${t.desc}</p>${g >= t.g ? '<span class="tag rec">✓ FOR YOUR CLASS</span>' : `<span class="tag">CLASS ${t.g}+</span>`}</button>`).join("");
   document.querySelectorAll("[data-tool]").forEach(b => b.addEventListener("click", () => { sfx.click(); location.hash = b.dataset.tool; }));
 }
 let cleanup = null;
@@ -338,185 +356,314 @@ function openTool(id) {
 $("#back").addEventListener("click", () => { sfx.click(); location.hash = ""; });
 window.addEventListener("hashchange", () => openTool(location.hash.slice(1)));
 
-/* ---------- 🔬 CELL EXPLORER ---------- */
+/* ---------- CELL EXPLORER ---------- */
 const CELL_PARTS = {
-  membrane: { name: "Cell membrane", g: 6, job: "A thin, flexible skin around the cell. It controls what goes in and out.", like: "🛂 Like the security gate of a city." },
-  wall: { name: "Cell wall", g: 6, job: "A strong, stiff layer outside the membrane of PLANT cells. It gives shape and support.", like: "🧱 Like the brick wall around a fort." },
-  nucleus: { name: "Nucleus", g: 6, job: "The control centre. It holds DNA, the instructions for everything the cell does.", like: "🏛 Like the city hall that makes all the rules." },
-  cytoplasm: { name: "Cytoplasm", g: 6, job: "The jelly-like fluid that fills the cell. All the organelles float in it and many reactions happen here.", like: "🍮 Like the jelly in a jelly dessert." },
-  vacuole: { name: "Vacuole", g: 6, job: "A storage sac for water, food and waste. Plant cells have one BIG vacuole that keeps them firm.", like: "🛢 Like a water tank." },
-  chloroplast: { name: "Chloroplast", g: 6, job: "Found only in plant cells. It has chlorophyll and makes food from sunlight (photosynthesis).", like: "☀️ Like a solar-powered kitchen." },
-  mito: { name: "Mitochondria", g: 8, job: "The powerhouse! It releases energy from food during respiration.", like: "⚡ Like the city's power station." },
-  er: { name: "Endoplasmic reticulum", g: 9, job: "A network of tubes that carries materials around the cell.", like: "🛣 Like the city's roads." },
-  golgi: { name: "Golgi apparatus", g: 9, job: "Packs and labels materials and sends them where they're needed.", like: "📦 Like the post office." },
-  ribo: { name: "Ribosomes", g: 9, job: "Tiny dots that build proteins.", like: "🏭 Like little factories." },
-  lyso: { name: "Lysosome", g: 9, job: "Contains enzymes that break down waste and worn-out parts. Mostly found in animal cells.", like: "♻️ Like the recycling and clean-up crew." }
+  membrane: { name: "Cell membrane", g: 6, job: "A thin, flexible layer around the cell. It controls what enters and leaves.", like: "Think of it as the security gate of a city." },
+  wall: { name: "Cell wall", g: 6, job: "A strong, rigid layer outside the membrane of plant cells. It gives the cell shape and support. It is made of cellulose.", like: "Think of it as the brick wall around a fort." },
+  nucleus: { name: "Nucleus", g: 6, job: "The control centre of the cell. It holds DNA, the instructions for everything the cell does.", like: "Think of it as the city hall that makes the rules." },
+  cytoplasm: { name: "Cytoplasm", g: 6, job: "The jelly-like fluid that fills the cell. Organelles are suspended in it and many reactions happen here.", like: "Think of it as the jelly in a jelly dessert." },
+  vacuole: { name: "Vacuole", g: 6, job: "A sac that stores water, food and waste. Plant cells have one large central vacuole that keeps them firm.", like: "Think of it as a water tank." },
+  chloroplast: { name: "Chloroplast", g: 6, job: "Found only in plant cells. It contains chlorophyll and makes food from sunlight by photosynthesis.", like: "Think of it as a solar-powered kitchen." },
+  mito: { name: "Mitochondria", g: 8, job: "The powerhouse of the cell. It releases energy from food during respiration.", like: "Think of it as the city's power station." },
+  er: { name: "Endoplasmic reticulum", g: 9, job: "A network of membranes that carries materials through the cell. Rough ER is covered in ribosomes.", like: "Think of it as the city's road network." },
+  golgi: { name: "Golgi apparatus", g: 9, job: "Packages and sorts materials such as proteins and sends them where they are needed.", like: "Think of it as the post office." },
+  ribo: { name: "Ribosomes", g: 9, job: "Tiny structures that build proteins.", like: "Think of them as small factories." },
+  lyso: { name: "Lysosome", g: 9, job: "Contains enzymes that break down waste and worn-out parts. Found mainly in animal cells.", like: "Think of it as the recycling and clean-up crew." }
 };
 function cellSVG(kind) {
   const P = (id, inner) => `<g class="part" data-part="${id}">${inner}</g>`;
-  const ribos = pts => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.2" fill="#fde68a"/>`).join("");
-  const mito = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="34" ry="16" fill="#fb923c" stroke="#fdba74" stroke-width="2"/><path d="M-24 0 l6 -8 l6 16 l6 -16 l6 16 l6 -16 l6 16 l6 -8" fill="none" stroke="#7c2d12" stroke-width="2"/></g>`;
-  const chloro = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="30" ry="15" fill="#16a34a" stroke="#86efac" stroke-width="2"/><path d="M-18 -5 h36 M-20 0 h40 M-18 5 h36" stroke="#14532d" stroke-width="3"/></g>`;
-  if (kind === "animal") return `<svg class="dia" viewBox="0 0 520 360">
-    ${P("cytoplasm", `<ellipse cx="260" cy="180" rx="232" ry="152" fill="#3a2550"/>`)}
-    ${P("membrane", `<ellipse cx="260" cy="180" rx="232" ry="152" fill="none" stroke="#f472b6" stroke-width="7"/><ellipse cx="260" cy="180" rx="232" ry="152" fill="none" stroke="transparent" stroke-width="22"/>`)}
-    ${P("er", `<path d="M300 130 q30 10 20 35 q-10 25 20 35 q30 10 15 35 M285 230 q20 15 45 5 q25 -10 40 10" fill="none" stroke="#a78bfa" stroke-width="7" stroke-linecap="round"/>`)}
-    ${P("ribo", ribos([[318, 150], [336, 190], [350, 222], [300, 248], [338, 236], [190, 270], [215, 95], [380, 150], [120, 205]]))}
-    ${P("nucleus", `<circle cx="245" cy="175" r="58" fill="#7c3aed" stroke="#c4b5fd" stroke-width="4"/><circle cx="235" cy="165" r="17" fill="#4c1d95"/>`)}
-    ${P("mito", mito(400, 115, 20) + mito(135, 255, -25))}
-    ${P("golgi", `<g fill="none" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"><path d="M385 240 q30 -18 60 0"/><path d="M380 258 q35 -18 70 0"/><path d="M385 276 q30 -18 60 0"/></g>`)}
-    ${P("lyso", `<circle cx="150" cy="120" r="14" fill="#ef4444" stroke="#fca5a5" stroke-width="2"/><circle cx="330" cy="300" r="11" fill="#ef4444" stroke="#fca5a5" stroke-width="2"/>`)}
-    ${P("vacuole", `<circle cx="120" cy="170" r="20" fill="#38bdf855" stroke="#38bdf8" stroke-width="2"/>`)}
-  </svg>`;
-  return `<svg class="dia" viewBox="0 0 520 360">
-    ${P("wall", `<rect x="14" y="14" width="492" height="332" rx="24" fill="#0f2a1c" stroke="#22c55e" stroke-width="12"/>`)}
-    ${P("cytoplasm", `<rect x="30" y="30" width="460" height="300" rx="16" fill="#1d3a2a"/>`)}
-    ${P("membrane", `<rect x="30" y="30" width="460" height="300" rx="16" fill="none" stroke="#a3e635" stroke-width="4"/><rect x="30" y="30" width="460" height="300" rx="16" fill="none" stroke="transparent" stroke-width="16"/>`)}
-    ${P("vacuole", `<rect x="160" y="85" width="220" height="185" rx="60" fill="#38bdf833" stroke="#38bdf8" stroke-width="3"/>`)}
-    ${P("er", `<path d="M140 95 q15 20 0 40 q-15 20 0 40" fill="none" stroke="#a78bfa" stroke-width="6" stroke-linecap="round"/>`)}
-    ${P("ribo", ribos([[150, 105], [130, 150], [150, 192], [410, 300], [60, 300], [300, 55]]))}
-    ${P("nucleus", `<circle cx="90" cy="110" r="42" fill="#7c3aed" stroke="#c4b5fd" stroke-width="4"/><circle cx="84" cy="102" r="13" fill="#4c1d95"/>`)}
-    ${P("chloro", chloro(445, 85, 25) + chloro(450, 250, -20) + chloro(80, 255, 15) + chloro(265, 305, 0) + chloro(270, 55, 5))}
-    ${P("mito", mito(420, 170, 80))}
-    ${P("golgi", `<g fill="none" stroke="#22d3ee" stroke-width="5" stroke-linecap="round"><path d="M70 190 q22 -14 44 0"/><path d="M66 204 q26 -14 52 0"/></g>`)}
+  const arc = (cx, cy, r, a0, a1) => { const p = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)].map(v => v.toFixed(1)); const [x0, y0] = p(a0), [x1, y1] = p(a1); return `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`; };
+  const dotsOnArc = (cx, cy, r, a0, a1, step) => { let s = ""; for (let a = a0; a <= a1; a += step) s += `<circle cx="${(cx + r * Math.cos(a * Math.PI / 180)).toFixed(1)}" cy="${(cy + r * Math.sin(a * Math.PI / 180)).toFixed(1)}" r="2.6" fill="#f2d27a"/>`; return s; };
+  const mito = (x, y, r, s = 1) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><rect x="-34" y="-15" width="68" height="30" rx="15" fill="#d9773d" stroke="#f6b88a" stroke-width="2"/><rect x="-28" y="-9" width="56" height="18" rx="9" fill="#b85a26"/><path d="M-22 -9 v11 M-13 9 v-11 M-4 -9 v11 M5 9 v-11 M14 -9 v11 M22 9 v-10" stroke="#f6b88a" stroke-width="2.4" stroke-linecap="round"/></g>`;
+  const chloro = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="31" ry="14" fill="#2f9a4c" stroke="#9be3ae" stroke-width="2"/><path d="M-24 0 H24" stroke="#1d6b33" stroke-width="1.5"/>${[-15, 0, 15].map(gx => `<g fill="#14532d">${[-6, -2, 2, 6].map(gy => `<rect x="${gx - 4}" y="${gy - 1.3}" width="8" height="2.6" rx="1"/>`).join("")}</g>`).join("")}</g>`;
+  const golgi = (x, y, w) => `<g>${[0, 1, 2, 3].map(k => { const ww = w - k * 8, x0 = x - ww / 2 + k * 2; return `<path d="M${x0} ${y + k * 9} q${ww / 2} -15 ${ww} 0 q-${ww / 2} -7 -${ww} 0z" fill="#3fb3c9" stroke="#9fe6f2" stroke-width="1.3"/>`; }).join("")}<circle cx="${x + w / 2 + 6}" cy="${y + 4}" r="4" fill="#3fb3c9" stroke="#9fe6f2"/><circle cx="${x - w / 2 - 4}" cy="${y + 20}" r="3.5" fill="#3fb3c9" stroke="#9fe6f2"/></g>`;
+  const lyso = (x, y, r) => `<g><circle cx="${x}" cy="${y}" r="${r}" fill="#b83a52" stroke="#f29aac" stroke-width="2"/><circle cx="${x - r / 3}" cy="${y - r / 4}" r="2" fill="#f29aac"/><circle cx="${x + r / 3}" cy="${y + r / 4}" r="2" fill="#f29aac"/><circle cx="${x + r / 4}" cy="${y - r / 2.5}" r="1.6" fill="#f29aac"/></g>`;
+  const nucleus = (x, y, r) => `<g><circle cx="${x}" cy="${y}" r="${r}" fill="url(#gNuc)"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#c8b6ff" stroke-width="3.5" stroke-dasharray="14 4"/><path d="M${x - r * .55} ${y + r * .2} c8 -10 16 6 24 -4 s14 8 20 -2 M${x - r * .2} ${y + r * .55} c8 -8 14 6 22 -2 M${x + r * .1} ${y - r * .55} c6 8 14 -4 20 4" fill="none" stroke="#9a83e8" stroke-width="1.6" stroke-linecap="round" opacity=".8"/><circle cx="${x - r * .12}" cy="${y - r * .12}" r="${r * .28}" fill="#3b2382"/></g>`;
+  const ribos = pts => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#f2d27a"/>`).join("");
+  const defs = `<defs>
+    <radialGradient id="gNuc" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#8e6cf0"/><stop offset="1" stop-color="#5a38bf"/></radialGradient>
+    <radialGradient id="gCytoA" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#3a2d55"/><stop offset="1" stop-color="#271d3c"/></radialGradient>
+    <radialGradient id="gCytoP" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#23402f"/><stop offset="1" stop-color="#18301f"/></radialGradient>
+    <linearGradient id="gVac" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5fb4ea" stop-opacity=".35"/><stop offset="1" stop-color="#2f7fbf" stop-opacity=".22"/></linearGradient>
+  </defs>`;
+  const LBL = list => `<g class="lbl">${list.map(([id, ax, ay, side, ly, text]) => { const lx = side === "l" ? 96 : 524; return `<g data-for="${id}"><polyline points="${ax},${ay} ${side === "l" ? lx + 14 : lx - 14},${ly} ${lx},${ly}" fill="none" stroke="#7d8db0" stroke-width="1"/><circle cx="${ax}" cy="${ay}" r="2.2" fill="#dbe4f5"/><text x="${side === "l" ? lx - 6 : lx + 6}" y="${ly + 4}" text-anchor="${side === "l" ? "end" : "start"}">${text}</text></g>`; }).join("")}</g>`;
+  if (kind === "animal") {
+    const blob = "M310 36 C392 34 470 72 500 138 C526 196 516 262 478 312 C436 366 360 376 296 370 C220 364 152 340 124 286 C98 236 102 168 136 112 C170 60 238 38 310 36 Z";
+    return `<svg class="dia" viewBox="-40 0 720 400">${defs}
+      ${P("cytoplasm", `<path d="${blob}" fill="url(#gCytoA)"/>`)}
+      ${P("membrane", `<path d="${blob}" fill="none" stroke="#e79ac0" stroke-width="5"/><path d="${blob}" fill="none" stroke="#f6c9de" stroke-width="1.2" transform="translate(310 203) scale(.985) translate(-310 -203)"/><path d="${blob}" fill="none" stroke="transparent" stroke-width="22"/>`)}
+      ${P("er", `<g fill="none" stroke="#8f7fe6" stroke-width="5" stroke-linecap="round">${[80, 93, 106].map(r => `<path d="${arc(296, 200, r, -70, 60)}"/>`).join("")}</g>${[80, 93, 106].map(r => dotsOnArc(296, 200, r + 4, -64, 56, 14)).join("")}`)}
+      ${P("nucleus", nucleus(296, 200, 62))}
+      ${P("mito", mito(196, 116, 28) + mito(186, 286, -22) + mito(452, 148, 40, .9))}
+      ${P("golgi", golgi(430, 284, 70))}
+      ${P("lyso", lyso(352, 334, 12) + lyso(150, 206, 10))}
+      ${P("vacuole", `<circle cx="244" cy="330" r="15" fill="url(#gVac)" stroke="#7cc4f0" stroke-width="2"/><circle cx="470" cy="226" r="12" fill="url(#gVac)" stroke="#7cc4f0" stroke-width="2"/>`)}
+      ${P("ribo", ribos([[240, 70], [262, 92], [168, 170], [220, 240], [410, 330], [300, 352], [140, 250], [372, 70], [480, 270]]))}
+      ${LBL([["membrane", 126, 160, "l", 70, "Cell membrane"], ["mito", 196, 116, "l", 124, "Mitochondria"], ["lyso", 150, 206, "l", 190, "Lysosome"], ["cytoplasm", 160, 252, "l", 250, "Cytoplasm"], ["vacuole", 244, 330, "l", 330, "Vacuole"],
+        ["nucleus", 330, 170, "r", 50, "Nucleus"], ["er", 400, 168, "r", 110, "Endoplasmic reticulum"], ["ribo", 480, 270, "r", 250, "Ribosomes"], ["golgi", 450, 290, "r", 320, "Golgi apparatus"]])}
+    </svg>`;
+  }
+  return `<svg class="dia" viewBox="-40 0 720 400">${defs}
+    ${P("wall", `<rect x="108" y="22" width="404" height="356" rx="18" fill="#2c6b3a" stroke="#7dcf8f" stroke-width="2"/><rect x="108" y="22" width="404" height="356" rx="18" fill="none" stroke="#1d4a28" stroke-width="5" stroke-dasharray="2 10" transform="translate(310 200) scale(.985) translate(-310 -200)"/>`)}
+    ${P("cytoplasm", `<rect x="122" y="36" width="376" height="328" rx="12" fill="url(#gCytoP)"/>`)}
+    ${P("membrane", `<rect x="122" y="36" width="376" height="328" rx="12" fill="none" stroke="#c4ea8a" stroke-width="3"/><rect x="122" y="36" width="376" height="328" rx="12" fill="none" stroke="transparent" stroke-width="14"/>`)}
+    ${P("vacuole", `<rect x="226" y="92" width="244" height="214" rx="56" fill="url(#gVac)" stroke="#7cc4f0" stroke-width="2.5"/>`)}
+    ${P("er", `<g fill="none" stroke="#8f7fe6" stroke-width="4.5" stroke-linecap="round">${[52, 62].map(r => `<path d="${arc(172, 112, r, 10, 100)}"/>`).join("")}</g>${[52, 62].map(r => dotsOnArc(172, 112, r + 4, 16, 96, 16)).join("")}`)}
+    ${P("nucleus", nucleus(172, 112, 42))}
+    ${P("chloro", chloro(172, 236, 82) + chloro(176, 330, 4) + chloro(300, 62, 0) + chloro(410, 62, -4) + chloro(320, 340, 3) + chloro(430, 338, -2))}
+    ${P("mito", mito(484, 200, 90, .7) + mito(250, 340, 0, .7))}
+    ${P("golgi", golgi(178, 186, 52))}
+    ${P("ribo", ribos([[150, 160], [214, 300], [360, 82], [470, 110], [480, 300], [262, 82], [140, 290]]))}
+    ${LBL([["wall", 112, 56, "l", 50, "Cell wall"], ["nucleus", 140, 104, "l", 104, "Nucleus"], ["membrane", 123, 158, "l", 156, "Cell membrane"], ["golgi", 156, 190, "l", 202, "Golgi apparatus"], ["chloro", 166, 236, "l", 248, "Chloroplast"], ["cytoplasm", 134, 296, "l", 298, "Cytoplasm"],
+      ["ribo", 470, 110, "r", 70, "Ribosomes"], ["er", 222, 132, "r", 132, "Endoplasmic reticulum"], ["vacuole", 440, 196, "r", 196, "Vacuole"], ["mito", 490, 214, "r", 254, "Mitochondria"]])}
   </svg>`;
 }
-// make the plant cell's chloroplast id match the parts list
+
+// shared challenge panel used by the cell and body labs
+function challengePanel(el, title, text, score, total, onStop) {
+  el.innerHTML = `<div class="label">CHALLENGE</div><h3>${title}</h3><p>${text}</p><div class="box">Score: <b>${score}</b> of ${total}</div><button class="btn ghost" id="ch-stop">Stop challenge</button>`;
+  $("#ch-stop").addEventListener("click", onStop);
+}
+const partId = p => (p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part);
+
 function cellTool() {
-  let kind = "animal", mode = "explore", sel = null, ch = null;
-  $("#t-extra").innerHTML = `<div class="seg"><button data-k="animal" class="on">🐾 Animal cell</button><button data-k="plant">🌿 Plant cell</button></div>`;
-  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="cell-card"><div class="mission" id="cell-mission" hidden></div><div id="cell-svg"></div><div class="hint" id="cell-hint">👆 Tap any part of the cell</div></div>
+  let kind = "animal", ch = null, labels = true;
+  $("#t-extra").innerHTML = `<div class="row"><div class="seg" id="cell-kind"><button data-k="animal" class="on">Animal cell</button><button data-k="plant">Plant cell</button></div><button class="chip on" id="cell-lbl">Labels</button></div>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="cell-card"><div class="mission" id="cell-mission" hidden></div><div id="cell-svg"></div><div class="hint" id="cell-hint">Tap any part of the cell to learn what it does.</div></div>
     <div class="card info" id="cell-info"></div></div>`;
-  const parts = () => [...$("#cell-svg").querySelectorAll(".part")].map(p => p.dataset.part.replace("chloro", "chloroplast")).filter((v, i, a) => a.indexOf(v) === i);
+  const inChallenge = () => ch && !ch.done;
+  const parts = () => [...new Set([...$("#cell-svg").querySelectorAll(".part")].map(partId))];
+  const syncLabels = () => { $("#cell-svg").classList.toggle("nolabels", !labels || inChallenge()); $("#cell-lbl").classList.toggle("on", labels); $("#cell-lbl").disabled = inChallenge(); };
+  const startBtn = `<button class="btn" id="cell-start">Start labelling challenge</button>`;
+  const bindStart = () => $("#cell-start").addEventListener("click", startChallenge);
   const infoDefault = () => {
-    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL CELL" : "PLANT CELL"}</div><h3>Tap a part!</h3><p>Cells are the building blocks of every living thing. Tap any coloured part to find out what it does.</p>
-      <div class="box"><b>Plant vs animal:</b> only plant cells have a <b>cell wall</b>, <b>chloroplasts</b> and one <b>big vacuole</b>.</div>
-      <button class="btn alt" id="cell-start">🎯 Start labelling challenge</button>`;
-    $("#cell-start").addEventListener("click", startChallenge);
+    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL CELL" : "PLANT CELL"}</div><h3>Explore the cell</h3><p>Cells are the building blocks of every living thing. Tap any part of the diagram to find out what it does.</p>
+      <div class="box"><b>Plant vs animal:</b> only plant cells have a <b>cell wall</b>, <b>chloroplasts</b> and one <b>large vacuole</b>.</div>${startBtn}`;
+    bindStart();
   };
   const draw = () => {
     $("#cell-svg").innerHTML = cellSVG(kind);
-    $("#cell-svg").querySelectorAll(".part").forEach(p => p.addEventListener("click", () => clickPart(p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part, p)));
+    $("#cell-svg").querySelectorAll(".part").forEach(p => p.addEventListener("click", () => clickPart(partId(p), p)));
+    syncLabels();
   };
   const showInfo = id => {
     const d = CELL_PARTS[id], g = GRADE();
-    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL" : "PLANT"} CELL PART ${d.g > g ? `<span class="tag">CLASS ${d.g}+</span>` : ""}</div><h3>${d.name}</h3><p>${d.job}</p><div class="box">${d.like}</div>
-      <button class="btn alt" id="cell-start">🎯 Start labelling challenge</button>`;
-    $("#cell-start").addEventListener("click", startChallenge);
+    $("#cell-info").innerHTML = `<div class="label">${kind === "animal" ? "ANIMAL" : "PLANT"} CELL ${d.g > g ? `<span class="tag">CLASS ${d.g}+</span>` : ""}</div><h3>${d.name}</h3><p>${d.job}</p><div class="box">${d.like}</div>${startBtn}`;
+    bindStart();
   };
-  const highlight = id => $("#cell-svg").querySelectorAll(".part").forEach(p => p.classList.toggle("sel", (p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part) === id));
+  const highlight = id => $("#cell-svg").querySelectorAll(".part").forEach(p => p.classList.toggle("sel", partId(p) === id));
   function clickPart(id, el) {
     sfx.click();
-    if (mode === "explore") { sel = id; highlight(id); showInfo(id); return; }
-    if (ch.done) return;
+    if (!inChallenge()) { highlight(id); showInfo(id); return; }
+    if (ch.wait) return;
     if (id === ch.target) {
       el.classList.add("good"); setTimeout(() => el.classList.remove("good"), 900);
       ch.score++; right(el, 8); ch.next();
     } else {
+      ch.wait = true;
       el.classList.add("bad"); setTimeout(() => el.classList.remove("bad"), 600);
-      wrong($("#cell-card")); toast(`That's the ${CELL_PARTS[id].name}!`);
-      const t = [...$("#cell-svg").querySelectorAll(".part")].find(p => (p.dataset.part === "chloro" ? "chloroplast" : p.dataset.part) === ch.target);
-      if (t) { t.classList.add("sel"); setTimeout(() => t.classList.remove("sel"), 1200); }
-      setTimeout(() => ch.next(), 1300);
+      wrong($("#cell-card")); toast(`That's the ${CELL_PARTS[id].name}.`);
+      highlight(ch.target);
+      const cur = ch;
+      setTimeout(() => { if (ch !== cur) return; highlight(null); cur.wait = false; cur.next(); }, 1300);
     }
   }
+  function stopChallenge() { ch = null; $("#cell-mission").hidden = true; $("#cell-hint").textContent = "Tap any part of the cell to learn what it does."; syncLabels(); infoDefault(); }
   function startChallenge() {
-    mode = "challenge"; highlight(null);
+    highlight(null);
     const pool = parts().filter(id => CELL_PARTS[id].g <= Math.max(GRADE(), 6));
     const list = shuffle(pool).concat(shuffle(pool)).slice(0, 8);
     let i = -1;
-    ch = { score: 0, done: false, target: null, next() {
-      if (!$("#cell-mission")) return;
+    ch = { score: 0, done: false, wait: false, target: null, next() {
+      if (!$("#cell-mission") || ch !== this) return;
       i++;
       if (i >= list.length) {
-        ch.done = true; mode = "explore";
-        $("#cell-mission").innerHTML = `<span>🏁 Challenge done: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost" id="cell-again">Again</button>`;
+        ch.done = true; syncLabels();
+        $("#cell-mission").innerHTML = `<span>Challenge complete: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost sm" id="cell-again">Try again</button>`;
         $("#cell-again").addEventListener("click", startChallenge);
-        if (ch.score >= 6) { sfx.win(); burst(120); }
+        $("#cell-info").innerHTML = `<div class="label">CHALLENGE COMPLETE</div><h3>${ch.score} out of ${list.length}</h3><p>${ch.score >= 7 ? "Excellent. You know your cell parts." : ch.score >= 5 ? "Good work. Explore the parts you missed, then try again." : "Keep practising. Tap each part to revise it, then try again."}</p>${startBtn}`;
+        bindStart();
+        if (ch.score >= 6) { sfx.win(); burst(100); }
         return;
       }
       ch.target = list[i];
       $("#cell-mission").hidden = false;
-      $("#cell-mission").innerHTML = `<span>🎯 Tap the <b style="color:var(--yellow)">${CELL_PARTS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+      $("#cell-mission").innerHTML = `<span>Find the <b class="target">${CELL_PARTS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+      challengePanel($("#cell-info"), "Label the cell", "Tap the part named at the top of the diagram. Labels are hidden until you finish.", ch.score, list.length, stopChallenge);
     } };
-    $("#cell-hint").textContent = "Find the part named above!";
+    $("#cell-hint").textContent = "Find the part named above.";
+    syncLabels();
     ch.next();
   }
-  document.querySelectorAll("#t-extra [data-k]").forEach(b => b.addEventListener("click", () => {
-    kind = b.dataset.k; mode = "explore";
-    document.querySelectorAll("#t-extra [data-k]").forEach(x => x.classList.toggle("on", x === b));
-    $("#cell-mission").hidden = true; $("#cell-hint").textContent = "👆 Tap any part of the cell";
+  $("#cell-lbl").addEventListener("click", () => { labels = !labels; sfx.click(); syncLabels(); });
+  document.querySelectorAll("#cell-kind [data-k]").forEach(b => b.addEventListener("click", () => {
+    if (b.dataset.k === kind) return;
+    kind = b.dataset.k; ch = null;
+    document.querySelectorAll("#cell-kind [data-k]").forEach(x => x.classList.toggle("on", x === b));
+    $("#cell-mission").hidden = true; $("#cell-hint").textContent = "Tap any part of the cell to learn what it does.";
     draw(); infoDefault();
   }));
   draw(); infoDefault();
 }
 
-/* ---------- 🫀 HUMAN BODY EXPLORER ---------- */
+/* ---------- HUMAN BODY EXPLORER ---------- */
 const ORGANS = {
-  brain: { name: "Brain", sys: "nervous", job: "Controls everything you think, feel and do. It sends messages through nerves.", fact: "It has about 86 billion nerve cells and uses about 20% of your body's energy!" },
-  lungs: { name: "Lungs", sys: "respiratory", job: "Take oxygen from the air into your blood and remove carbon dioxide.", fact: "The left lung is a bit smaller to make room for your heart." },
-  heart: { name: "Heart", sys: "circulatory", job: "Pumps blood through your body, carrying oxygen and food to every cell.", fact: "It beats about 100,000 times every day!" },
-  liver: { name: "Liver", sys: "digestive", job: "Makes bile to help digest fat, stores energy and removes poisons from the blood.", fact: "It's the largest organ inside your body, and it can regrow!" },
-  stomach: { name: "Stomach", sys: "digestive", job: "Churns food and mixes it with acid and enzymes to start digesting proteins.", fact: "Its acid is strong enough to kill most germs in your food." },
-  smallInt: { name: "Small intestine", sys: "digestive", job: "Finishes digestion and absorbs nutrients into the blood through tiny finger-like villi.", fact: "It's about 6 metres long, longer than a car!" },
-  largeInt: { name: "Large intestine", sys: "digestive", job: "Absorbs water from leftover food and forms waste (faeces).", fact: "It's wider but much shorter than the small intestine, about 1.5 m." },
-  kidneys: { name: "Kidneys", sys: "excretory", job: "Filter waste and extra water out of the blood to make urine.", fact: "Each kidney is about the size of your fist." },
-  bladder: { name: "Urinary bladder", sys: "excretory", job: "A stretchy bag that stores urine until you go to the toilet.", fact: "It can stretch to hold around 400–500 mL." }
+  brain: { name: "Brain", sys: "nervous", job: "Controls everything you think, feel and do. It sends and receives messages through nerves.", fact: "It has about 86 billion nerve cells and uses about 20% of your body's energy." },
+  lungs: { name: "Lungs", sys: "respiratory", job: "Take oxygen from the air into the blood and remove carbon dioxide.", fact: "The left lung is slightly smaller to make room for the heart." },
+  heart: { name: "Heart", sys: "circulatory", job: "Pumps blood around the body, carrying oxygen and nutrients to every cell.", fact: "It beats about 100,000 times every day." },
+  liver: { name: "Liver", sys: "digestive", job: "Makes bile to help digest fats, stores energy as glycogen and removes harmful substances from the blood.", fact: "It is the largest internal organ, and it can regrow damaged tissue." },
+  stomach: { name: "Stomach", sys: "digestive", job: "Churns food and mixes it with acid and enzymes to begin digesting proteins.", fact: "Its hydrochloric acid kills most germs in food." },
+  smallInt: { name: "Small intestine", sys: "digestive", job: "Completes digestion and absorbs nutrients into the blood through tiny finger-like villi.", fact: "It is about 6 metres long." },
+  largeInt: { name: "Large intestine", sys: "digestive", job: "Absorbs water from undigested food and forms faeces.", fact: "It is wider but much shorter than the small intestine, about 1.5 metres." },
+  kidneys: { name: "Kidneys", sys: "excretory", job: "Filter waste and extra water out of the blood to make urine.", fact: "Each kidney is about the size of your fist and contains about a million nephrons." },
+  bladder: { name: "Urinary bladder", sys: "excretory", job: "A stretchy, muscular bag that stores urine until it leaves the body.", fact: "It can hold around 400 to 500 mL." }
 };
-const SYSTEMS = { all: "All", digestive: "🍎 Digestive", respiratory: "🌬 Respiratory", circulatory: "❤️ Circulatory", nervous: "🧠 Nervous", excretory: "💧 Excretory" };
+const SYSTEMS = { all: "All", digestive: "Digestive", respiratory: "Respiratory", circulatory: "Circulatory", nervous: "Nervous", excretory: "Excretory" };
+const SYS_INFO = {
+  digestive: "Breaks food down into nutrients that the body can absorb, and removes what is left.",
+  respiratory: "Brings oxygen into the body and removes carbon dioxide.",
+  circulatory: "Moves blood around the body, carrying oxygen and nutrients to every cell.",
+  nervous: "Controls and coordinates the body using electrical signals.",
+  excretory: "Removes waste products from the blood and out of the body."
+};
 function bodySVG() {
-  const P = (id, inner) => `<g class="part" data-part="${id}">${inner}</g>`;
-  return `<svg class="dia" viewBox="0 0 300 520" style="max-width:360px;margin:0 auto">
-    <g fill="#1e2a44" stroke="#3a4b70" stroke-width="3">
-      <circle cx="150" cy="62" r="44"/><rect x="132" y="100" width="36" height="26" rx="8"/>
-      <path d="M78 130 Q150 112 222 130 L232 300 Q230 352 196 372 L104 372 Q70 352 68 300 Z"/>
-      <path d="M80 136 L44 250 L56 330 L70 328 L64 255 L92 180 Z"/><path d="M220 136 L256 250 L244 330 L230 328 L236 255 L208 180 Z"/>
-      <path d="M106 366 L98 510 L134 510 L146 380 Z"/><path d="M194 366 L202 510 L166 510 L154 380 Z"/>
-    </g>
-    ${P("brain", `<path d="M116 58 q0 -34 34 -34 q34 0 34 34 q0 20 -14 26 h-40 q-14 -6 -14 -26z" fill="#f9a8d4" stroke="#fbcfe8" stroke-width="2"/><path d="M130 45 q8 8 0 16 M150 32 q-6 12 4 22 M168 44 q-8 8 2 18" fill="none" stroke="#be185d" stroke-width="2"/>`)}
-    ${P("lungs", `<path d="M136 148 q-30 -6 -36 34 q-6 40 6 62 q16 6 30 -6 z" fill="#fda4af" stroke="#fecdd3" stroke-width="2"/><path d="M164 148 q30 -6 36 34 q6 40 -6 62 q-16 6 -30 -6 z" fill="#fda4af" stroke="#fecdd3" stroke-width="2"/>`)}
-    ${P("heart", `<path d="M160 214 q-18 -14 -18 -28 q0 -12 12 -12 q8 0 10 8 q2 -8 10 -8 q12 0 12 12 q0 14 -26 28z" fill="#ef4444" stroke="#fecaca" stroke-width="2"/>`)}
-    ${P("liver", `<path d="M92 252 q4 -22 40 -18 q38 4 46 18 q-30 22 -82 22 q-8 -8 -4 -22z" fill="#b45309" stroke="#fdba74" stroke-width="2"/>`)}
-    ${P("stomach", `<path d="M178 250 q22 -8 30 12 q6 26 -18 36 q-22 6 -30 -8 q12 -4 16 -14 q2 -12 2 -26z" fill="#fb923c" stroke="#fed7aa" stroke-width="2"/>`)}
-    ${P("kidneys", `<path d="M100 278 q-16 0 -16 15 q0 15 16 15 q7 0 5 -7 q-5 -8 0 -16 q2 -7 -5 -7z" fill="#be123c" stroke="#fda4af" stroke-width="2"/><path d="M200 278 q16 0 16 15 q0 15 -16 15 q-7 0 -5 -7 q5 -8 0 -16 q-2 -7 5 -7z" fill="#be123c" stroke="#fda4af" stroke-width="2"/>`)}
-    ${P("largeInt", `<path d="M110 362 L110 322 Q110 312 122 312 L178 312 Q190 312 190 322 L190 362" fill="none" stroke="#f59e0b" stroke-width="13" stroke-linecap="round"/>`)}
-    ${P("smallInt", `<rect x="122" y="320" width="56" height="40" rx="15" fill="#fdba74"/><path d="M128 330 q10 -8 20 0 t20 0 M128 341 q10 -8 20 0 t20 0 M128 352 q10 -8 20 0 t20 0" fill="none" stroke="#c2410c" stroke-width="2.5"/>`)}
-    ${P("bladder", `<ellipse cx="150" cy="378" rx="15" ry="11" fill="#fde047" stroke="#fef9c3" stroke-width="2"/>`)}
-  </svg>`;
+  return `<svg class="dia" viewBox="-80 0 560 610" style="max-width:520px;margin:0 auto">
+<defs>
+ <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2740"/><stop offset=".5" stop-color="#24314f"/><stop offset="1" stop-color="#1c2740"/></linearGradient>
+ <radialGradient id="gBrain" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#f6c4cf"/><stop offset="1" stop-color="#d98a9d"/></radialGradient>
+ <linearGradient id="gLung" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2a7b0"/><stop offset="1" stop-color="#cf6f7e"/></linearGradient>
+ <radialGradient id="gHeart" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e2505f"/><stop offset="1" stop-color="#9e1f31"/></radialGradient>
+ <linearGradient id="gLiver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a5503c"/><stop offset="1" stop-color="#6e2b20"/></linearGradient>
+ <linearGradient id="gStom" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0b48c"/><stop offset="1" stop-color="#cf8358"/></linearGradient>
+ <radialGradient id="gKid" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#b8465a"/><stop offset="1" stop-color="#7c1f33"/></radialGradient>
+ <linearGradient id="gSmall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3c39f"/><stop offset="1" stop-color="#dc9c72"/></linearGradient>
+ <radialGradient id="gBlad" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#f6e08a"/><stop offset="1" stop-color="#d6b44a"/></radialGradient>
+</defs>
+<path d="M186 100 L183 124 C170 132 148 134 130 142 C114 148 106 162 105 184 C104 222 100 256 98 292 C96 326 92 356 90 384 C84 398 84 414 94 418 C104 420 108 404 108 386 C110 354 116 322 119 294 C122 260 128 226 136 200 C138 240 148 286 146 322 C144 346 132 360 132 384 C132 430 142 480 148 524 C152 556 152 574 150 588 C160 598 186 598 188 588 C190 560 190 520 192 480 C194 452 196 428 200 414 C204 428 206 452 208 480 C210 520 210 560 212 588 C214 598 240 598 250 588 C248 574 248 556 252 524 C258 480 268 430 268 384 C268 360 256 346 254 322 C252 286 262 240 264 200 C272 226 278 260 281 294 C284 322 290 354 292 386 C292 404 296 420 306 418 C316 414 316 398 310 384 C308 356 304 326 302 292 C300 256 296 222 295 184 C294 162 286 148 270 142 C252 134 230 132 217 124 L214 100 Z" fill="url(#skin)" stroke="#3b4d74" stroke-width="2.5" stroke-linejoin="round"/>
+<ellipse cx="200" cy="60" rx="38" ry="46" fill="url(#skin)" stroke="#3b4d74" stroke-width="2.5"/>
+<!-- ureters (behind) -->
+<path d="M158 348 C172 364 186 380 195 394 M242 348 C228 364 214 380 205 394" fill="none" stroke="#c9a54c" stroke-width="2.5" opacity=".8"/>
+<g class="part" data-part="brain">
+ <path d="M166 54 C164 30 182 18 200 18 C220 18 238 30 236 54 C236 70 226 80 212 82 C204 84 196 84 188 82 C174 80 166 70 166 54 Z" fill="url(#gBrain)" stroke="#f9dce3" stroke-width="1.5"/>
+ <path d="M200 20 C198 40 202 60 200 82" fill="none" stroke="#a8566c" stroke-width="1.6"/>
+ <path d="M174 44 C180 38 186 46 192 40 M172 58 C180 52 186 62 194 56 M178 72 C184 66 190 74 196 68 M208 40 C214 46 220 36 228 44 M206 56 C214 62 220 52 230 58 M204 70 C212 76 218 66 226 72" fill="none" stroke="#a8566c" stroke-width="1.4" stroke-linecap="round"/>
+</g>
+<g class="part" data-part="lungs">
+ <path d="M200 106 L200 160 M200 160 C192 166 186 170 180 178 M200 160 C208 166 214 170 220 178" fill="none" stroke="#e4b3bb" stroke-width="7" stroke-linecap="round"/>
+ <path d="M200 112 L200 156" stroke="#b97b86" stroke-width="7" stroke-dasharray="2 5"/>
+ <path d="M188 166 C176 150 152 156 146 190 C140 226 140 256 150 270 C164 278 182 272 192 262 C194 230 194 196 188 166 Z" fill="url(#gLung)" stroke="#f7ccd2" stroke-width="1.5"/>
+ <path d="M212 166 C224 150 248 156 254 190 C260 226 260 256 250 270 C238 276 226 272 220 266 C228 252 226 236 214 228 C210 210 210 186 212 166 Z" fill="url(#gLung)" stroke="#f7ccd2" stroke-width="1.5"/>
+ <path d="M146 214 C160 210 176 214 190 204 M150 244 C162 236 176 238 192 232 M254 206 C242 212 230 214 216 210" fill="none" stroke="#a9505f" stroke-width="1.3"/>
+</g>
+<g class="part" data-part="heart">
+ <path d="M204 214 C202 200 214 190 226 196" fill="none" stroke="#b8293d" stroke-width="7" stroke-linecap="round"/>
+ <path d="M194 222 C192 206 208 200 218 206 C230 200 246 208 244 224 C242 240 232 254 240 266 C222 264 198 250 194 234 Z" fill="url(#gHeart)" stroke="#f3a5ae" stroke-width="1.5"/>
+ <path d="M216 210 C214 228 220 246 236 262" fill="none" stroke="#7a1424" stroke-width="1.6"/>
+</g>
+
+<g class="part" data-part="liver">
+ <path d="M144 282 C152 268 196 266 222 272 C232 276 230 286 220 292 C200 304 172 316 154 318 C144 316 140 296 144 282 Z" fill="url(#gLiver)" stroke="#d58b78" stroke-width="1.5"/>
+ <path d="M196 274 C192 286 188 296 180 308" fill="none" stroke="#4f1c14" stroke-width="1.4"/>
+</g>
+<g class="part" data-part="stomach">
+ <path d="M222 282 C230 270 252 270 258 290 C264 312 250 332 230 334 C214 336 206 326 208 316 C216 318 230 316 236 306 C240 296 236 288 228 292 C224 292 220 288 222 282 Z" fill="url(#gStom)" stroke="#f6d0b5" stroke-width="1.5"/>
+ <path d="M244 290 C248 304 244 318 230 326" fill="none" stroke="#a9603a" stroke-width="1.3"/>
+</g>
+<g class="part" data-part="kidneys">
+ <path d="M154 306 C142 306 136 320 138 332 C140 346 150 352 158 350 C165 348 164 340 160 334 C157 328 163 320 166 314 C167 309 162 306 154 306 Z" fill="url(#gKid)" stroke="#e48a9b" stroke-width="1.5"/>
+ <path d="M246 306 C258 306 264 320 262 332 C260 346 250 352 242 350 C235 348 236 340 240 334 C243 328 237 320 234 314 C233 309 238 306 246 306 Z" fill="url(#gKid)" stroke="#e48a9b" stroke-width="1.5"/>
+</g>
+<g class="part" data-part="largeInt">
+ <path d="M164 400 C158 388 158 368 160 350 C162 340 168 338 178 338 L222 338 C234 338 240 342 240 352 C242 370 242 386 236 396 C228 404 214 404 206 400" fill="none" stroke="#b9774a" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M164 400 C158 388 158 368 160 350 C162 340 168 338 178 338 L222 338 C234 338 240 342 240 352 C242 370 242 386 236 396 C228 404 214 404 206 400" fill="none" stroke="#e0a77c" stroke-width="15" stroke-dasharray="3 9" stroke-linecap="butt"/>
+</g>
+<g class="part" data-part="smallInt">
+ <rect x="172" y="350" width="56" height="42" rx="16" fill="url(#gSmall)" stroke="#f7d9c2" stroke-width="1.2"/>
+ <path d="M180 360 C186 354 192 366 198 360 C204 354 210 366 216 360 C220 356 224 360 222 366 M178 372 C184 366 190 378 196 372 C202 366 208 378 214 372 C218 368 222 372 220 378 M180 384 C186 378 192 390 198 384 C204 378 210 390 216 384" fill="none" stroke="#b46a43" stroke-width="2" stroke-linecap="round"/>
+</g>
+<g class="part" data-part="bladder">
+ <path d="M188 398 C188 390 212 390 212 398 C212 410 206 414 200 414 C194 414 188 410 188 398 Z" fill="url(#gBlad)" stroke="#fbeeb8" stroke-width="1.5"/>
+</g>
+<g class="lbl"><g data-for="brain"><line x1="168" y1="48" x2="40" y2="48"/><text x="34" y="52" text-anchor="end">Brain</text></g><g data-for="lungs"><line x1="150" y1="210" x2="40" y2="210"/><text x="34" y="214" text-anchor="end">Lungs</text></g><g data-for="liver"><line x1="156" y1="296" x2="40" y2="296"/><text x="34" y="300" text-anchor="end">Liver</text></g><g data-for="kidneys"><line x1="142" y1="330" x2="40" y2="330"/><text x="34" y="334" text-anchor="end">Kidneys</text></g><g data-for="largeInt"><line x1="160" y1="376" x2="40" y2="376"/><text x="34" y="380" text-anchor="end">Large intestine</text></g><g data-for="heart"><line x1="232" y1="226" x2="360" y2="226"/><text x="366" y="230">Heart</text></g><g data-for="stomach"><line x1="256" y1="300" x2="360" y2="300"/><text x="366" y="304">Stomach</text></g><g data-for="smallInt"><line x1="226" y1="368" x2="360" y2="368"/><text x="366" y="372">Small intestine</text></g><g data-for="bladder"><line x1="210" y1="404" x2="360" y2="404"/><text x="366" y="408">Bladder</text></g></g>
+</svg>`;
 }
 function bodyTool() {
-  let sys = "all", ch = null;
-  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="body-card"><div class="mission" id="body-mission" hidden></div><div class="seg" id="sys" style="margin-bottom:12px">${Object.entries(SYSTEMS).map(([k, v]) => `<button data-s="${k}" class="${k === "all" ? "on" : ""}">${v}</button>`).join("")}</div><div id="body-svg">${bodySVG()}</div></div>
-    <div class="card info" id="body-info"><div class="label">HUMAN BODY</div><h3>Tap an organ!</h3><p>Your body is made of organ systems that work as a team. Tap an organ, or pick a system to light it up.</p><button class="btn alt" id="body-start">🎯 Start organ challenge</button></div></div>`;
+  let sys = "all", ch = null, labels = true;
+  $("#t-extra").innerHTML = `<button class="chip on" id="body-lbl">Labels</button>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="body-card"><div class="mission" id="body-mission" hidden></div><div class="seg" id="sys" style="margin-bottom:12px">${Object.entries(SYSTEMS).map(([k, v]) => `<button data-s="${k}" class="${k === "all" ? "on" : ""}">${v}</button>`).join("")}</div><div id="body-svg">${bodySVG()}</div><div class="hint" id="body-hint">Tap any organ, or choose a system to highlight it.</div></div>
+    <div class="card info" id="body-info"></div></div>`;
+  const inChallenge = () => ch && !ch.done;
   const all = () => [...document.querySelectorAll("#body-svg .part")];
-  const filter = () => all().forEach(p => p.classList.toggle("dim", sys !== "all" && ORGANS[p.dataset.part].sys !== sys));
-  document.querySelectorAll("#sys button").forEach(b => b.addEventListener("click", () => { sys = b.dataset.s; document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x === b)); filter(); sfx.click(); }));
+  const startBtn = `<button class="btn" id="body-start">Start organ challenge</button>`;
+  const bindStart = () => $("#body-start").addEventListener("click", start);
+  const syncLabels = () => {
+    $("#body-svg").classList.toggle("nolabels", !labels || inChallenge());
+    document.querySelectorAll("#body-svg .lbl [data-for]").forEach(l => l.classList.toggle("off", sys !== "all" && ORGANS[l.dataset.for].sys !== sys));
+    $("#body-lbl").classList.toggle("on", labels); $("#body-lbl").disabled = inChallenge();
+    $("#sys").classList.toggle("locked", inChallenge());
+  };
+  const filter = () => { all().forEach(p => p.classList.toggle("dim", sys !== "all" && ORGANS[p.dataset.part].sys !== sys)); syncLabels(); };
+  const setSys = s => { sys = s; document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x.dataset.s === s)); filter(); };
+  const infoDefault = () => {
+    $("#body-info").innerHTML = `<div class="label">HUMAN BODY</div><h3>Explore the organs</h3><p>Your body is made of organ systems that work together. Tap an organ to learn its job, or choose a system to highlight its organs.</p>${startBtn}`;
+    bindStart();
+  };
+  const showSystem = s => {
+    const list = Object.entries(ORGANS).filter(([, o]) => o.sys === s);
+    $("#body-info").innerHTML = `<div class="label">ORGAN SYSTEM</div><h3>${SYSTEMS[s]} system</h3><p>${SYS_INFO[s]}</p><div class="box"><b>Organs shown:</b> ${list.map(([, o]) => o.name).join(", ")}</div>${startBtn}`;
+    bindStart();
+  };
+  document.querySelectorAll("#sys button").forEach(b => b.addEventListener("click", () => {
+    if (inChallenge()) return;
+    sfx.click(); all().forEach(x => x.classList.remove("sel")); setSys(b.dataset.s);
+    if (sys === "all") infoDefault(); else showSystem(sys);
+  }));
+  $("#body-lbl").addEventListener("click", () => { labels = !labels; sfx.click(); syncLabels(); });
   all().forEach(p => p.addEventListener("click", () => {
     const id = p.dataset.part, o = ORGANS[id];
     sfx.click();
-    if (ch && !ch.done) {
+    if (inChallenge()) {
+      if (ch.wait) return;
       if (id === ch.target) { p.classList.add("good"); setTimeout(() => p.classList.remove("good"), 900); ch.score++; right(p, 8); ch.next(); }
-      else { p.classList.add("bad"); setTimeout(() => p.classList.remove("bad"), 600); wrong($("#body-card")); toast(`That's the ${o.name}!`); setTimeout(() => ch.next(), 1100); }
+      else {
+        ch.wait = true;
+        p.classList.add("bad"); setTimeout(() => p.classList.remove("bad"), 600); wrong($("#body-card")); toast(`That's the ${o.name}.`);
+        const t = all().find(x => x.dataset.part === ch.target), cur = ch; if (t) t.classList.add("sel");
+        setTimeout(() => { if (t) t.classList.remove("sel"); if (ch !== cur) return; cur.wait = false; cur.next(); }, 1300);
+      }
       return;
     }
+    if (sys !== "all" && o.sys !== sys) setSys("all");
     all().forEach(x => x.classList.toggle("sel", x === p));
-    $("#body-info").innerHTML = `<div class="label">${SYSTEMS[o.sys].toUpperCase()} SYSTEM</div><h3>${o.name}</h3><p>${o.job}</p><div class="box">🤯 <b>Fun fact:</b> ${o.fact}</div><button class="btn alt" id="body-start">🎯 Start organ challenge</button>`;
-    $("#body-start").addEventListener("click", start);
+    $("#body-info").innerHTML = `<div class="label">${SYSTEMS[o.sys].toUpperCase()} SYSTEM</div><h3>${o.name}</h3><p>${o.job}</p><div class="box"><b>Did you know?</b> ${o.fact}</div>${startBtn}`;
+    bindStart();
   }));
+  function stop() { ch = null; $("#body-mission").hidden = true; $("#body-hint").textContent = "Tap any organ, or choose a system to highlight it."; syncLabels(); infoDefault(); }
   function start() {
-    sys = "all"; filter(); document.querySelectorAll("#sys button").forEach(x => x.classList.toggle("on", x.dataset.s === "all"));
     all().forEach(x => x.classList.remove("sel"));
     const list = shuffle(Object.keys(ORGANS)).slice(0, 8); let i = -1;
-    ch = { score: 0, done: false, next() {
-      if (!$("#body-mission")) return;
+    ch = { score: 0, done: false, wait: false, next() {
+      if (!$("#body-mission") || ch !== this) return;
       i++;
-      if (i >= list.length) { ch.done = true; $("#body-mission").innerHTML = `<span>🏁 Done: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost" id="body-again">Again</button>`; $("#body-again").addEventListener("click", start); if (ch.score >= 6) { sfx.win(); burst(120); } return; }
+      if (i >= list.length) {
+        ch.done = true; syncLabels();
+        $("#body-mission").innerHTML = `<span>Challenge complete: <span class="score">${ch.score} / ${list.length}</span></span><button class="btn ghost sm" id="body-again">Try again</button>`;
+        $("#body-again").addEventListener("click", start);
+        $("#body-info").innerHTML = `<div class="label">CHALLENGE COMPLETE</div><h3>${ch.score} out of ${list.length}</h3><p>${ch.score >= 7 ? "Excellent. You know where the organs are." : ch.score >= 5 ? "Good work. Explore the organs you missed, then try again." : "Keep practising. Tap each organ to revise it, then try again."}</p>${startBtn}`;
+        bindStart();
+        $("#body-hint").textContent = "Tap any organ, or choose a system to highlight it.";
+        if (ch.score >= 6) { sfx.win(); burst(100); }
+        return;
+      }
       ch.target = list[i]; $("#body-mission").hidden = false;
-      $("#body-mission").innerHTML = `<span>🎯 Tap the <b style="color:var(--yellow)">${ORGANS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+      $("#body-mission").innerHTML = `<span>Find the <b class="target">${ORGANS[ch.target].name}</b></span><span class="score">${i + 1} / ${list.length}</span>`;
+      challengePanel($("#body-info"), "Organ challenge", "Tap the organ named at the top of the diagram. Labels and system filters are turned off until you finish.", ch.score, list.length, stop);
     } };
-    ch.next();
+    setSys("all");
+    $("#body-hint").textContent = "Find the organ named above.";
+    ch.next(); syncLabels();
   }
-  $("#body-start").addEventListener("click", start);
+  infoDefault(); syncLabels();
 }
 
 /* ---------- 🧬🧲 QUIZ ---------- */
@@ -543,7 +690,7 @@ function quizTool() {
       if (ok) { b.classList.add("right"); right(b); xp += 10; fb.className = "fb show good"; fb.innerHTML = `✓ Correct! ${q.e}`; res[i] = "good"; }
       else { b.classList.add("wrong"); wrong($("#qcard")); fb.className = "fb show bad"; fb.innerHTML = `✗ The answer is <b>${q.a}</b>. ${q.e}`; res[i] = "bad"; }
       i++; prog();
-      $("#nx").innerHTML = `<button class="btn" id="next">${i >= list.length ? "See results 🏁" : "Next →"}</button>`;
+      $("#nx").innerHTML = `<button class="btn" id="next">${i >= list.length ? "See results" : "Next →"}</button>`;
       $("#next").addEventListener("click", () => { sfx.click(); show(); });
       $("#next").focus();
     }));
@@ -553,80 +700,112 @@ function quizTool() {
     const stars = pct >= .85 ? 3 : pct >= .6 ? 2 : pct >= .35 ? 1 : 0;
     if (stars >= 2) { sfx.win(); burst(150); }
     patch(d => { d.sciStars = d.sciStars || {}; d.sciStars[SUBJECT] = Math.max(d.sciStars[SUBJECT] || 0, stars); });
-    $("#qcard").innerHTML = `<div class="results"><div class="label">QUIZ COMPLETE</div><div class="stars">${[1, 2, 3].map(k => `<span class="${k <= stars ? "on" : ""}" style="animation-delay:${k * .25}s">★</span>`).join("")}</div><h2>${["💪 Keep practising!", "👍 Good effort!", "🎉 Great job!", "🌟 Amazing!"][stars]}</h2><p class="sub">You got ${score} out of ${list.length}.</p>
-      <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="q-home">← All</button><button class="btn" id="q-again">🔁 New quiz</button></div></div>`;
+    $("#qcard").innerHTML = `<div class="results"><div class="label">QUIZ COMPLETE</div><div class="stars">${[1, 2, 3].map(k => `<span class="${k <= stars ? "on" : ""}" style="animation-delay:${k * .25}s">★</span>`).join("")}</div><h2>${["Keep practising", "Good effort", "Great job", "Excellent"][stars]}</h2><p class="sub">You got ${score} out of ${list.length}.</p>
+      <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="q-home">← All</button><button class="btn" id="q-again">New quiz</button></div></div>`;
     $("#q-home").addEventListener("click", () => location.hash = "");
     $("#q-again").addEventListener("click", quizTool);
   }
   show();
 }
 
-/* ---------- ⚡ CIRCUIT LAB ---------- */
+/* ---------- CIRCUIT LAB ---------- */
 const MATERIALS = [
-  { n: "Copper wire", i: "🔌", c: true, why: "Copper is a metal, one of the best conductors. It's used in almost all electric wires." },
-  { n: "Iron nail", i: "📌", c: true, why: "Iron is a metal, so it conducts electricity." },
-  { n: "Aluminium foil", i: "🥡", c: true, why: "Aluminium is a metal and conducts well." },
-  { n: "Pencil lead", i: "✏️", c: true, why: "Surprise! Pencil 'lead' is graphite, a form of carbon that conducts electricity." },
-  { n: "Salt water", i: "🧂", c: true, why: "Salt water has ions that can carry charge, so it conducts. Pure water barely conducts." },
-  { n: "Plastic ruler", i: "📏", c: false, why: "Plastic is an insulator. That's why wires are covered in plastic." },
-  { n: "Rubber band", i: "➰", c: false, why: "Rubber is an insulator. Electricians wear rubber gloves for safety." },
-  { n: "Wooden stick", i: "🪵", c: false, why: "Dry wood is an insulator." },
-  { n: "Glass", i: "🥛", c: false, why: "Glass is an insulator. It's used on electric poles to hold wires safely." }
+  { n: "Copper wire", sw: "linear-gradient(90deg,#b8642e,#e09a5f,#b8642e)", fill: "#c97b43", c: true, why: "Copper is a metal and one of the best conductors. It is used in almost all electric wires." },
+  { n: "Iron nail", sw: "linear-gradient(90deg,#6b7280,#b4bac4,#6b7280)", fill: "#9aa1ab", c: true, why: "Iron is a metal, so it conducts electricity." },
+  { n: "Aluminium foil", sw: "linear-gradient(90deg,#aab3bf,#eef1f5,#aab3bf)", fill: "#d5dbe3", c: true, why: "Aluminium is a metal and conducts well." },
+  { n: "Pencil lead", sw: "linear-gradient(90deg,#2b2f36,#5b616b,#2b2f36)", fill: "#4a4f58", c: true, why: "Pencil 'lead' is graphite, a form of carbon that conducts electricity." },
+  { n: "Salt water", sw: "linear-gradient(90deg,#3d8ec4,#8fd0f2,#3d8ec4)", fill: "#5aa9d8", c: true, why: "Salt water contains ions that carry charge, so it conducts. Pure water barely conducts." },
+  { n: "Plastic ruler", sw: "linear-gradient(90deg,#d8a92a,#f3d36b,#d8a92a)", fill: "#e8bf45", c: false, why: "Plastic is an insulator. That is why wires are covered in plastic." },
+  { n: "Rubber band", sw: "linear-gradient(90deg,#8f2c2c,#c65050,#8f2c2c)", fill: "#b04040", c: false, why: "Rubber is an insulator. Electricians wear rubber gloves for safety." },
+  { n: "Wooden stick", sw: "linear-gradient(90deg,#7a4e26,#b07b45,#7a4e26)", fill: "#9a6a3a", c: false, why: "Dry wood is an insulator." },
+  { n: "Glass rod", sw: "linear-gradient(90deg,#8fc7d6,#e3f6fb,#8fc7d6)", fill: "#bfe3ee", c: false, why: "Glass is an insulator. It is used on electric poles to hold wires safely." }
 ];
 function circuitSVG() {
   return `<svg class="dia" id="circ" viewBox="0 0 520 330">
-    <defs><radialGradient id="glow"><stop offset="0" stop-color="#fff7c2"/><stop offset=".4" stop-color="#ffd84d" stop-opacity=".8"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient></defs>
-    <path id="wire" d="M80 165 L80 60 L440 60 L440 270 L80 270 Z" fill="none" stroke="#64748b" stroke-width="6" stroke-linejoin="round"/>
-    <rect x="58" y="128" width="44" height="74" rx="8" fill="#0f1426" stroke="#ffb347" stroke-width="3"/>
-    <line x1="66" y1="150" x2="94" y2="150" stroke="#ffb347" stroke-width="5"/><line x1="72" y1="162" x2="88" y2="162" stroke="#ffb347" stroke-width="3"/><line x1="66" y1="174" x2="94" y2="174" stroke="#ffb347" stroke-width="5"/><line x1="72" y1="186" x2="88" y2="186" stroke="#ffb347" stroke-width="3"/>
-    <text x="80" y="120" text-anchor="middle" fill="#ffb347" font-weight="900" font-size="14" id="batt-label">Battery</text>
-    <rect x="225" y="48" width="70" height="24" fill="#0e1222"/>
-    <circle cx="228" cy="60" r="6" fill="#cbd5e1"/><circle cx="292" cy="60" r="6" fill="#cbd5e1"/>
-    <line id="switch" x1="228" y1="60" x2="290" y2="60" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" style="transform-origin:228px 60px;transition:transform .3s;cursor:pointer"/>
-    <text x="260" y="36" text-anchor="middle" fill="#c3cbe6" font-weight="800" font-size="13" id="switch-label">Switch: ON</text>
-    <circle id="bulb-glow" cx="440" cy="160" r="80" fill="url(#glow)" opacity="0"/>
-    <rect x="425" y="140" width="30" height="40" fill="#0e1222"/>
-    <circle cx="440" cy="150" r="24" fill="#334155" stroke="#e2e8f0" stroke-width="3" id="bulb"/>
-    <path d="M430 152 q5 -10 10 0 q5 10 10 0" fill="none" stroke="#94a3b8" stroke-width="2.5" id="filament"/>
-    <rect x="430" y="172" width="20" height="14" rx="3" fill="#94a3b8"/>
-    <rect x="200" y="252" width="120" height="36" rx="10" fill="#0e1222" stroke="#55cfff" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="260" y="276" text-anchor="middle" font-size="16" font-weight="900" fill="#e8ecf8" id="gap-label">?</text>
+    <defs>
+      <radialGradient id="glow"><stop offset="0" stop-color="#fff7c2"/><stop offset=".35" stop-color="#ffd84d" stop-opacity=".75"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient>
+      <linearGradient id="gBatt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b2133"/><stop offset=".5" stop-color="#2f3852"/><stop offset="1" stop-color="#1b2133"/></linearGradient>
+      <linearGradient id="gCap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a8641f"/><stop offset=".5" stop-color="#f0a95a"/><stop offset="1" stop-color="#a8641f"/></linearGradient>
+      <linearGradient id="gBase" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c8596"/><stop offset=".5" stop-color="#d7dce4"/><stop offset="1" stop-color="#7c8596"/></linearGradient>
+    </defs>
+    <path id="wire" d="M80 165 L80 60 L440 60 L440 270 L80 270 Z" fill="none" stroke="#5d6b86" stroke-width="5" stroke-linejoin="round"/>
     <g id="electrons"></g>
+    <!-- battery -->
+    <g>
+      <rect x="71" y="106" width="18" height="10" rx="2" fill="#c9cfd8"/>
+      <rect x="58" y="114" width="44" height="100" rx="8" fill="url(#gBatt)" stroke="#5d6b86" stroke-width="1.5"/>
+      <rect x="58" y="114" width="44" height="30" rx="8" fill="url(#gCap)"/><rect x="58" y="136" width="44" height="8" fill="url(#gCap)"/>
+      <text x="80" y="134" text-anchor="middle" fill="#3a1d05" font-weight="900" font-size="15">+</text>
+      <text x="80" y="200" text-anchor="middle" fill="#c3cbe6" font-weight="900" font-size="15">−</text>
+      <text x="80" y="176" text-anchor="middle" fill="#e8ecf8" font-weight="800" font-size="12" id="batt-label">1.5 V</text>
+    </g>
+    <text x="50" y="168" text-anchor="end" fill="#8f9bbd" font-weight="800" font-size="12">Battery</text>
+    <!-- switch -->
+    <g id="switch-g" style="cursor:pointer">
+      <rect x="214" y="44" width="92" height="34" rx="8" fill="#151c2f" stroke="#2e3854"/>
+      <circle cx="228" cy="60" r="6" fill="#c9cfd8"/><rect x="284" y="54" width="14" height="12" rx="2" fill="#c9cfd8"/>
+      <line id="switch" x1="228" y1="60" x2="292" y2="60" stroke="#e8ecf8" stroke-width="5" stroke-linecap="round" style="transform-origin:228px 60px;transition:transform .3s"/>
+    </g>
+    <text x="260" y="100" text-anchor="middle" fill="#8f9bbd" font-weight="800" font-size="12" id="switch-label">Switch closed</text>
+    <!-- bulb -->
+    <circle id="bulb-glow" cx="440" cy="142" r="86" fill="url(#glow)" opacity="0"/>
+    <g>
+      <rect x="426" y="168" width="28" height="22" rx="3" fill="url(#gBase)"/>
+      <path d="M426 174 h28 M426 180 h28 M426 186 h28" stroke="#6b7385" stroke-width="1.2"/>
+      <path id="bulb" d="M430 168 C430 160 414 152 414 136 C414 120 426 110 440 110 C454 110 466 120 466 136 C466 152 450 160 450 168 Z" fill="#2a3349" fill-opacity=".85" stroke="#c9d3e4" stroke-width="2"/>
+      <path d="M434 166 L436 146 M446 166 L444 146" stroke="#9aa3b5" stroke-width="1.5"/>
+      <path id="filament" d="M436 146 q2 -8 4 0 q2 8 4 0" fill="none" stroke="#9aa3b5" stroke-width="2"/>
+      <path d="M422 128 C424 120 430 116 436 115" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    <text x="478" y="200" fill="#8f9bbd" font-weight="800" font-size="12">Bulb</text>
+    <!-- test gap -->
+    <g id="gap"></g>
+    <text x="260" y="312" text-anchor="middle" font-size="13" font-weight="800" fill="#c3cbe6" id="gap-label"></text>
   </svg>`;
 }
 function circuitTool() {
   const g = GRADE();
   let mode = g >= 10 ? "ohm" : "test", raf = null, phase = 0, on = true, current = 0, flowing = false;
-  $("#t-extra").innerHTML = `<div class="seg"><button data-m="test">🔍 Conductor test</button><button data-m="ohm">Ω Ohm's law ${g < 10 ? "(Class 10)" : ""}</button></div>`;
+  $("#t-extra").innerHTML = `<div class="seg"><button data-m="test">Conductor test</button><button data-m="ohm">Ohm's law ${g < 10 ? "(Class 10)" : ""}</button></div>`;
   $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="circ-card">${circuitSVG()}<div class="hint" id="circ-hint"></div></div><div class="card info" id="circ-side"></div></div>`;
   const wire = $("#wire"), len = wire.getTotalLength(), dots = 18;
-  $("#electrons").innerHTML = [...Array(dots)].map(() => `<circle r="4.5" fill="#55cfff" opacity="0"/>`).join("");
+  $("#electrons").innerHTML = [...Array(dots)].map(() => `<circle r="3.6" fill="#7dd3fc" opacity="0"/>`).join("");
   const e = [...document.querySelectorAll("#electrons circle")];
-  $("#switch").addEventListener("click", () => { on = !on; sfx.click(); update(); });
+  $("#switch-g").addEventListener("click", () => { on = !on; sfx.click(); update(); });
   function setBulb(level) {
-    $("#bulb-glow").setAttribute("opacity", Math.min(1, level));
-    $("#bulb").setAttribute("fill", level > 0.02 ? `rgb(${255},${Math.round(200 + 50 * Math.min(1, level))},${Math.round(80 + 100 * Math.min(1, level))})` : "#334155");
-    $("#filament").setAttribute("stroke", level > 0.02 ? "#b45309" : "#94a3b8");
+    const l = Math.min(1, level);
+    $("#bulb-glow").setAttribute("opacity", l);
+    $("#bulb").setAttribute("fill", l > 0.02 ? `rgb(255,${Math.round(214 + 30 * l)},${Math.round(120 + 90 * l)})` : "#2a3349");
+    $("#filament").setAttribute("stroke", l > 0.02 ? "#b45309" : "#9aa3b5");
   }
   function anim() {
     phase = (phase + (flowing ? Math.max(0.6, Math.min(8, current * 2.2)) : 0)) % len;
-    e.forEach((c, k) => { const pt = wire.getPointAtLength((len - ((phase + k * len / dots) % len)) % len); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); c.setAttribute("opacity", flowing ? 1 : .25); });
+    e.forEach((c, k) => { const pt = wire.getPointAtLength((len - ((phase + k * len / dots) % len)) % len); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); c.setAttribute("opacity", flowing ? .95 : .2); });
     raf = requestAnimationFrame(anim);
+  }
+  function drawGap(fill, text, resistor) {
+    const clips = `<rect x="190" y="262" width="22" height="16" rx="3" fill="#3b4560" stroke="#7d8db0"/><rect x="308" y="262" width="22" height="16" rx="3" fill="#3b4560" stroke="#7d8db0"/>`;
+    let mid;
+    if (resistor) mid = `<rect x="212" y="257" width="96" height="26" rx="8" fill="#d9c08f" stroke="#a88b55"/>${["#8b4513", "#111", "#c0392b", "#d4af37"].map((c, k) => `<rect x="${226 + k * 18 + (k === 3 ? 10 : 0)}" y="257" width="7" height="26" fill="${c}"/>`).join("")}`;
+    else if (fill) mid = `<rect x="208" y="261" width="104" height="18" rx="4" fill="${fill}" stroke="#ffffff33"/>`;
+    else mid = `<rect x="208" y="256" width="104" height="28" rx="6" fill="#151c2f" stroke="#55cfff" stroke-width="1.5" stroke-dasharray="5 4"/><text x="260" y="275" text-anchor="middle" fill="#7dd3fc" font-size="13" font-weight="800">empty gap</text>`;
+    $("#gap").innerHTML = `<rect x="186" y="250" width="148" height="40" fill="#161d31"/>${clips}${mid}`;
+    $("#gap-label").textContent = text;
   }
   let state = {};
   function update() {
-    $("#switch").style.transform = on ? "rotate(0deg)" : "rotate(-35deg)";
-    $("#switch-label").textContent = `Switch: ${on ? "ON" : "OFF"} (tap it)`;
+    $("#switch").style.transform = on ? "rotate(0deg)" : "rotate(-32deg)";
+    $("#switch-label").textContent = on ? "Switch closed · tap to open" : "Switch open · tap to close";
     if (mode === "test") {
       const m = state.mat;
-      $("#gap-label").textContent = m ? `${m.i} ${m.n}` : "?";
+      drawGap(m ? m.fill : null, m ? m.n : "Choose a material to test", false);
       flowing = on && m && m.c && state.revealed; current = flowing ? 1.5 : 0;
       setBulb(flowing ? .9 : 0);
-      $("#batt-label").textContent = "Battery";
+      $("#batt-label").textContent = "1.5 V";
     } else {
       const V = state.V, R = state.R, I = on ? V / R : 0;
       current = I; flowing = on && I > 0;
-      $("#gap-label").textContent = `R = ${R} Ω`;
+      drawGap(null, `Resistor: ${R} Ω`, true);
       $("#batt-label").textContent = `${V} V`;
       setBulb(on ? Math.sqrt(V * I) / 12 : 0);
       $("#m-I").textContent = `${I.toFixed(2)} A`; $("#m-V").textContent = `${V} V`; $("#m-R").textContent = `${R} Ω`;
@@ -635,20 +814,22 @@ function circuitTool() {
   }
   function testSide() {
     state = { mat: null, revealed: false, done: new Set() };
-    $("#circ-hint").textContent = "Pick a material to put in the gap ↓";
-    $("#circ-side").innerHTML = `<div class="label">CONDUCTOR OR INSULATOR?</div><p>Put a material in the gap. Predict: will the bulb glow?</p><div class="mats">${MATERIALS.map((m, k) => `<button class="mat" data-k="${k}"><span>${m.i}</span>${m.n}</button>`).join("")}</div><div id="predict"></div>`;
+    $("#circ-hint").textContent = "Choose a material on the right to place it in the gap.";
+    $("#circ-side").innerHTML = `<div class="label">CONDUCTOR OR INSULATOR?</div><p>Place a material in the gap, then predict whether the bulb will light.</p><div class="mats">${MATERIALS.map((m, k) => `<button class="mat" data-k="${k}"><i style="background:${m.sw}"></i>${m.n}</button>`).join("")}</div><div id="predict"></div>`;
     document.querySelectorAll(".mat").forEach(b => b.addEventListener("click", () => {
-      sfx.click(); state.mat = MATERIALS[b.dataset.k]; state.revealed = false; on = true; update();
-      $("#predict").innerHTML = `<div class="box" style="margin-top:12px"><b>${state.mat.i} ${state.mat.n}</b>: will the bulb glow?</div><div class="row"><button class="btn" id="p-yes">💡 Yes, it glows</button><button class="btn ghost" id="p-no">🌑 No</button></div><div class="fb" id="pfb"></div>`;
+      sfx.click(); state.mat = MATERIALS[b.dataset.k]; state.revealed = false; on = true;
+      document.querySelectorAll(".mat").forEach(x => x.classList.toggle("cur", x === b));
+      update();
+      $("#predict").innerHTML = `<div class="box" style="margin-top:12px">Will the bulb light with <b>${state.mat.n}</b> in the gap?</div><div class="row"><button class="btn" id="p-yes">Yes, it lights</button><button class="btn ghost" id="p-no">No, it stays off</button></div><div class="fb" id="pfb"></div>`;
       const go = guess => {
         state.revealed = true; update();
         const ok = guess === state.mat.c, fb = $("#pfb");
         $("#p-yes").disabled = $("#p-no").disabled = true;
         if (ok) { right($("#p-yes"), 6); fb.className = "fb show good"; } else { wrong($("#circ-card")); fb.className = "fb show bad"; }
-        fb.innerHTML = `${ok ? "✓ Correct!" : "✗ Not quite!"} It's a <b>${state.mat.c ? "conductor" : "insulator"}</b>. ${state.mat.why}`;
+        fb.innerHTML = `${ok ? "Correct." : "Not quite."} It is ${state.mat.c ? "a <b>conductor</b>" : "an <b>insulator</b>"}. ${state.mat.why}`;
         b.classList.add(state.mat.c ? "done-y" : "done-n");
         state.done.add(state.mat.n);
-        if (state.done.size === MATERIALS.length) setTimeout(() => { toast("🏆 You tested every material!"); burst(120); sfx.win(); }, 600);
+        if (state.done.size === MATERIALS.length) setTimeout(() => { toast("You have tested every material."); burst(100); sfx.win(); }, 600);
       };
       $("#p-yes").addEventListener("click", () => go(true)); $("#p-no").addEventListener("click", () => go(false));
     }));
@@ -659,25 +840,25 @@ function circuitTool() {
     if (!$("#target")) return;
     let V, R; do { V = pick([3, 4.5, 6, 9, 12]); R = pick([2, 3, 4, 5, 6, 8, 10, 12]); } while (Math.abs(V / R - state.V / state.R) < 1e-9 || !Number.isInteger(V / R * 100));
     target = Math.round(V / R * 100) / 100;
-    $("#target").innerHTML = `<span>🎯 Mission: make the current exactly <b style="color:var(--yellow)">${target} A</b></span><span class="score">✓ ${solved}</span>`;
+    $("#target").innerHTML = `<span>Mission: make the current exactly <b class="target">${target} A</b></span><span class="score">${solved} solved</span>`;
   }
   function checkTarget(I) {
     if (target === null || !on) return;
     if (Math.abs(I - target) < 0.005) {
-      solved++; right($("#m-I"), 10); burst(70);
-      toast(`⚡ ${target} A! V = I × R → ${state.V} = ${target} × ${state.R}`);
+      solved++; right($("#m-I"), 10); burst(60);
+      toast(`Correct: ${state.V} V ÷ ${state.R} Ω = ${target} A`);
       target = null; setTimeout(newTarget, 1400);
     }
   }
   function ohmSide() {
     state = { V: 6, R: 4 };
-    $("#circ-hint").textContent = "Electrons (blue dots) move faster when the current is bigger";
+    $("#circ-hint").textContent = "The dots show electrons. They move faster when the current is larger.";
     $("#circ-side").innerHTML = `<div class="label">OHM'S LAW · V = I × R ${g < 10 ? '<span class="tag">CLASS 10</span>' : ""}</div>
       <div class="mission" id="target"></div>
-      <div class="slider"><div class="row"><span>🔋 Voltage (V)</span><b id="v-out">6 V</b></div><input type="range" id="v-in" min="1.5" max="12" step="1.5" value="6"></div>
-      <div class="slider"><div class="row"><span>〰 Resistance (R)</span><b id="r-out">4 Ω</b></div><input type="range" id="r-in" min="1" max="12" step="1" value="4"></div>
+      <div class="slider"><div class="row"><span>Voltage (V)</span><b id="v-out">6 V</b></div><input type="range" id="v-in" min="1.5" max="12" step="1.5" value="6"></div>
+      <div class="slider"><div class="row"><span>Resistance (R)</span><b id="r-out">4 Ω</b></div><input type="range" id="r-in" min="1" max="12" step="1" value="4"></div>
       <div class="meters"><div class="meter"><span>VOLTAGE</span><b id="m-V"></b></div><div class="meter"><span>CURRENT</span><b id="m-I"></b></div><div class="meter"><span>RESISTANCE</span><b id="m-R"></b></div></div>
-      <div class="box"><b>I = V ÷ R.</b> More voltage pushes more current. More resistance slows it down.</div>`;
+      <div class="box"><b>I = V ÷ R.</b> More voltage pushes more current. More resistance reduces it.</div>`;
     $("#v-in").addEventListener("input", ev => { state.V = Number(ev.target.value); $("#v-out").textContent = `${state.V} V`; update(); });
     $("#r-in").addEventListener("input", ev => { state.R = Number(ev.target.value); $("#r-out").textContent = `${state.R} Ω`; update(); });
     newTarget(); update();
@@ -694,10 +875,10 @@ function motionTool() {
   const g = GRADE();
   $("#t-body").innerHTML = `<div class="grid2"><div class="card"><canvas class="road" id="road" width="720" height="170"></canvas><div class="row" style="margin:10px 0 6px;justify-content:space-between"><div class="label" style="margin:0">DISTANCE–TIME GRAPH</div><div class="label" style="margin:0;color:var(--muted)" id="graph-note"></div></div><canvas class="graph" id="gr" width="720" height="260"></canvas></div>
     <div class="card info"><div class="mission" id="mm"></div>
-      <div class="slider"><div class="row"><span>🚗 Starting speed (u)</span><b id="u-out">10 m/s</b></div><input type="range" id="u-in" min="0" max="25" step="1" value="10"></div>
-      <div class="slider"><div class="row"><span>🚀 Acceleration (a) ${g < 9 ? '<span class="tag">CLASS 9</span>' : ""}</span><b id="a-out">0 m/s²</b></div><input type="range" id="a-in" min="0" max="4" step="1" value="0"></div>
+      <div class="slider"><div class="row"><span>Starting speed (u)</span><b id="u-out">10 m/s</b></div><input type="range" id="u-in" min="0" max="25" step="1" value="10"></div>
+      <div class="slider"><div class="row"><span>Acceleration (a) ${g < 9 ? '<span class="tag">CLASS 9</span>' : ""}</span><b id="a-out">0 m/s²</b></div><input type="range" id="a-in" min="0" max="4" step="1" value="0"></div>
       <div class="meters"><div class="meter"><span>TIME</span><b id="mt">0 s</b></div><div class="meter"><span>DISTANCE</span><b id="md">0 m</b></div><div class="meter"><span>SPEED</span><b id="mv">0 m/s</b></div></div>
-      <div class="row"><button class="btn" id="go">▶ Drive 10 s</button><button class="btn ghost" id="reset">↺ Reset</button></div>
+      <div class="row"><button class="btn" id="go">Drive for 10 s</button><button class="btn ghost" id="reset">Reset</button></div>
       <div class="box" style="margin-top:12px" id="formula"></div></div></div>`;
   const road = $("#road"), rc = road.getContext("2d"), gr = $("#gr"), gc = gr.getContext("2d");
   let u = 10, a = 0, t = 0, running = false, raf = null, last = 0, pts = [], challenge = null, solved = 0;
@@ -711,9 +892,9 @@ function motionTool() {
     rc.fillStyle = "#8f9bbd"; rc.font = "700 13px Nunito"; rc.textAlign = "center";
     const step = md > 400 ? 100 : md > 150 ? 50 : 10;
     for (let m = 0; m <= md; m += step) { const x = 30 + m / md * (W - 80); rc.fillRect(x - 1, 140, 2, 10); rc.fillText(`${m} m`, x, 166); }
-    if (challenge) { const x = 30 + challenge.answer / md * (W - 80); rc.fillStyle = "#3ddc97"; if (challenge.show) { rc.fillRect(x - 2, 58, 4, 86); rc.fillText("🏁", x, 52); } }
+    if (challenge) { const x = 30 + challenge.answer / md * (W - 80); rc.fillStyle = "#3ddc97"; if (challenge.show) { rc.fillRect(x - 2, 58, 4, 86); rc.fillText("finish", x, 52); } }
     const x = 30 + d / md * (W - 80);
-    rc.font = "44px serif"; rc.save(); rc.translate(x, 106); rc.scale(-1, 1); rc.fillText("🚗", 0, 14); rc.restore();
+    rc.save(); rc.translate(x, 106); rc.fillStyle = "#e5484d"; rc.beginPath(); rc.roundRect(-26, -10, 52, 16, 5); rc.fill(); rc.beginPath(); rc.roundRect(-14, -22, 28, 14, 6); rc.fill(); rc.fillStyle = "#a9d6f5"; rc.fillRect(-10, -19, 9, 9); rc.fillRect(2, -19, 9, 9); rc.fillStyle = "#111"; rc.beginPath(); rc.arc(-14, 7, 6, 0, 7); rc.arc(14, 7, 6, 0, 7); rc.fill(); rc.restore();
   }
   function drawGraph() {
     const W = gr.width, H = gr.height, p = 44, md = maxD();
@@ -744,20 +925,20 @@ function motionTool() {
     const accel = g >= 9 && Math.random() < .4;
     const cu = accel ? 0 : rnd(2, 12) * (Math.random() < .5 ? 1 : 2), ca = accel ? pick([2, 4]) : 0, ct = accel ? pick([2, 4, 6]) : rnd(3, 9);
     challenge = { u: cu, a: ca, t: ct, answer: cu * ct + .5 * ca * ct * ct, run: false, show: false };
-    $("#mm").innerHTML = `<div style="flex:1">🎯 <b>Predict:</b> ${ca ? `starting from rest with a = ${ca} m/s²` : `at ${cu} m/s`}, how far in <b>${ct} s</b>?<div class="row" style="margin-top:8px"><input class="ans" id="pa" inputmode="numeric" placeholder="? m"><button class="btn alt" id="pgo">Check 🏁</button></div></div><span class="score">✓ ${solved}</span>`;
+    $("#mm").innerHTML = `<div style="flex:1"><b>Predict:</b> ${ca ? `starting from rest with a = ${ca} m/s²` : `at ${cu} m/s`}, how far in <b>${ct} s</b>?<div class="row" style="margin-top:8px"><input class="ans" id="pa" inputmode="numeric" placeholder="? m"><button class="btn alt" id="pgo">Check</button></div></div><span class="score">✓ ${solved}</span>`;
     $("#pgo").addEventListener("click", runChallenge);
     $("#pa").addEventListener("keydown", ev => { if (ev.key === "Enter") runChallenge(); });
   }
   function runChallenge() {
     const v = Number(String($("#pa").value).trim());
-    if (!$("#pa").value.trim() || Number.isNaN(v)) { toast("Type a distance first! 🙂"); return; }
+    if (!$("#pa").value.trim() || Number.isNaN(v)) { toast("Type a distance first."); return; }
     challenge.guess = v; challenge.run = true; challenge.show = true;
     u = challenge.u; a = challenge.a; $("#u-in").value = u; $("#a-in").value = a; $("#u-out").textContent = `${u} m/s`; $("#a-out").textContent = `${a} m/s²`;
     $("#pgo").disabled = true; reset(); go();
   }
   function finishChallenge() {
     const c = challenge, ok = Math.abs(c.guess - c.answer) < .01;
-    if (ok) { solved++; right($("#md"), 12); burst(90); toast(`🏁 Spot on! ${c.answer} m`); }
+    if (ok) { solved++; right($("#md"), 12); burst(90); toast(`Spot on: ${c.answer} m`); }
     else { wrong(); toast(`The car went ${c.answer} m, not ${c.guess} m`); }
     $("#formula").innerHTML = c.a ? `s = ½at² = ½ × ${c.a} × ${c.t}² = <b>${c.answer} m</b>` : `distance = speed × time = ${c.u} × ${c.t} = <b>${c.answer} m</b>`;
     setTimeout(() => { if (!$("#mm")) return; challenge.run = false; newChallenge(); drawRoad(); }, 2200);
