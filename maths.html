@@ -6,7 +6,7 @@
 <title>Maths | OmniQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #0e1222;
@@ -32,11 +32,11 @@ body {
   overflow-x: hidden;
 }
 button { font-family: inherit; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-h1, h2, h3, .logo, .fredoka { font-family: "Fredoka", "Nunito", sans-serif; }
+h1, h2, h3, .logo, .fredoka { font-family: "Inter", system-ui, sans-serif; }
 
 /* floating math symbols */
 .bg-symbols { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.bg-symbols span { position: absolute; bottom: -60px; color: #ffffff; opacity: .06; font-family: "Fredoka", sans-serif; font-weight: 700; animation: floatUp linear infinite; }
+.bg-symbols span { position: absolute; bottom: -60px; color: #ffffff; opacity: .06; font-family: "Inter", system-ui, sans-serif; font-weight: 700; animation: floatUp linear infinite; }
 @keyframes floatUp { from { transform: translateY(0) rotate(0); } to { transform: translateY(-120vh) rotate(200deg); } }
 
 /* top bar */
@@ -84,7 +84,7 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 @keyframes tagPulse { 50% { box-shadow: 0 0 0 6px #ffb34733; } }
 .home-foot { margin-top: 26px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
 .mini { background: var(--panel2); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
-.mini b { font-size: 22px; font-family: "Fredoka", sans-serif; }
+.mini b { font-size: 22px; font-family: "Inter", system-ui, sans-serif; }
 .mini span { color: var(--muted); font-size: 13px; font-weight: 700; }
 
 /* play */
@@ -133,7 +133,7 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 .opt.wrong .letter { background: var(--red); color: #fff; }
 .opt.dim { opacity: .45; }
 @keyframes pop { 50% { transform: scale(1.05); } }
-.eqn { font-family: "Fredoka", sans-serif; font-weight: 600; letter-spacing: .5px; white-space: nowrap; }
+.eqn { font-family: "Inter", system-ui, sans-serif; font-weight: 600; letter-spacing: .5px; white-space: nowrap; }
 .eqn i.v { color: var(--yellow); font-style: italic; font-family: Georgia, serif; font-weight: 700; padding: 0 1px; }
 .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.1; margin: 0 2px; }
 .frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 3px; }
@@ -145,9 +145,9 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 .stage2 { margin-top: 20px; padding-top: 18px; border-top: 2px dashed var(--line); animation: screenIn .5s ease-out; }
 .eq-big { font-size: clamp(26px, 4vw, 38px); text-align: center; margin: 4px 0 6px; }
 .answer-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-.answer-row label { font-family: "Fredoka", sans-serif; font-size: 26px; }
+.answer-row label { font-family: "Inter", system-ui, sans-serif; font-size: 26px; }
 .answer-row label i { color: var(--yellow); font-family: Georgia, serif; }
-.ans { width: 110px; font: 800 24px "Fredoka", sans-serif; text-align: center; background: #0f1426; color: #fff; border: 2px solid #34406a; border-radius: 12px; padding: 8px; outline: none; transition: border-color .2s, box-shadow .2s; }
+.ans { width: 110px; font: 800 24px "Inter", system-ui, sans-serif; text-align: center; background: #0f1426; color: #fff; border: 2px solid #34406a; border-radius: 12px; padding: 8px; outline: none; transition: border-color .2s, box-shadow .2s; }
 .ans:focus { border-color: var(--amber); box-shadow: 0 0 0 4px #ffb34733; }
 .btn { border: 0; border-radius: 12px; padding: 12px 20px; font-weight: 900; font-size: 16px; color: #1d1100; background: linear-gradient(135deg, var(--amber), #ff8a3d); box-shadow: 0 6px 0 #a3561a, 0 10px 20px #0006; transition: transform .1s, box-shadow .1s; }
 .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #a3561a; }
@@ -164,7 +164,7 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 /* balance scale */
 .scale-wrap { display: flex; flex-direction: column; align-items: center; }
 .scale { width: 100%; max-width: 440px; height: auto; overflow: visible; }
-.scale .pan-text { font-family: "Fredoka", sans-serif; font-weight: 600; fill: #fff; text-anchor: middle; }
+.scale .pan-text { font-family: "Inter", system-ui, sans-serif; font-weight: 600; fill: #fff; text-anchor: middle; }
 .scale .pan-text tspan.v { fill: var(--yellow); font-style: italic; font-family: Georgia, serif; font-weight: 700; }
 .scale.balanced .beam { fill: var(--green); filter: drop-shadow(0 0 8px #3ddc97); }
 .readout { min-height: 24px; margin-top: 2px; text-align: center; color: var(--muted); font-weight: 800; font-size: 14px; }
@@ -175,14 +175,14 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 .graph .curve { fill: none; stroke: var(--violet); stroke-width: 3.5; stroke-linecap: round; filter: drop-shadow(0 0 6px #7c5cff); }
 .graph .root { fill: var(--yellow); animation: rootPulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes rootPulse { 50% { transform: scale(1.5); } }
-.graph text { fill: #c3cbe6; font: 700 12px "Nunito", sans-serif; }
+.graph text { fill: #c3cbe6; font: 700 12px "Inter", system-ui, sans-serif; }
 
 /* side panel */
 .side h3 { margin: 0 0 12px; font-size: 19px; }
 .side p { color: #c3cbe6; line-height: 1.55; font-size: 14px; margin: 0 0 12px; }
 .dict { display: grid; gap: 6px; margin-bottom: 14px; }
 .dict div { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #10162a; border-radius: 10px; padding: 8px 11px; font-size: 13px; font-weight: 700; color: #c3cbe6; }
-.dict b { font-family: "Fredoka", sans-serif; font-size: 18px; min-width: 30px; text-align: center; border-radius: 8px; padding: 1px 6px; }
+.dict b { font-family: "Inter", system-ui, sans-serif; font-size: 18px; min-width: 30px; text-align: center; border-radius: 8px; padding: 1px 6px; }
 .dict .m b { background: #ff9f4333; color: #ffb36b; }
 .dict .a b { background: #3ddc9733; color: #6ff0b8; }
 .dict .s b { background: #ff5d7333; color: #ff8c9c; }
@@ -203,7 +203,7 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 @keyframes starIn { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: none; } }
 .res-grid { display: flex; justify-content: center; gap: 12px; margin: 18px 0; flex-wrap: wrap; }
 .res-grid div { background: #10162a; border: 1px solid var(--line); border-radius: 14px; padding: 12px 18px; min-width: 120px; }
-.res-grid b { display: block; font-size: 28px; font-family: "Fredoka", sans-serif; }
+.res-grid b { display: block; font-size: 28px; font-family: "Inter", system-ui, sans-serif; }
 .res-grid span { color: var(--muted); font-weight: 800; font-size: 12px; letter-spacing: 1px; }
 .res-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
 
@@ -228,7 +228,7 @@ main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; paddin
 .lives.lost { display: inline-block; animation: bump .5s; }
 
 /* floating text, toast, confetti */
-.pop-text { position: fixed; z-index: 60; transform: translate(-50%, -50%); font: 700 24px "Fredoka", sans-serif; text-shadow: 3px 3px 0 #0b0f1c; pointer-events: none; white-space: nowrap; animation: floatText 1.2s ease-out forwards; }
+.pop-text { position: fixed; z-index: 60; transform: translate(-50%, -50%); font: 700 24px "Inter", system-ui, sans-serif; text-shadow: 3px 3px 0 #0b0f1c; pointer-events: none; white-space: nowrap; animation: floatText 1.2s ease-out forwards; }
 .pop-text.big { font-size: 40px; }
 @keyframes floatText { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 18% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); } 35% { transform: translate(-50%, -70%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -200%); } }
 .toast { position: fixed; left: 50%; top: 80px; z-index: 70; opacity: 0; transform: translate(-50%, -140px); background: var(--panel); border: 1px solid var(--amber); color: #fff; font-weight: 900; padding: 12px 20px; border-radius: 14px; box-shadow: 0 0 30px #ffb34755; transition: transform .4s cubic-bezier(.2,1.4,.4,1), opacity .3s; white-space: nowrap; }
@@ -257,6 +257,7 @@ html.embed .toast { top: 16px; }
   .play-title h2 { font-size: 21px; }
   .opt { font-size: 17px; }
 }
+.bg-symbols { display: none !important; }
 </style>
 </head>
 <body>
@@ -269,8 +270,8 @@ html.embed .toast { top: 16px; }
       <div class="row"><span>LEVEL <b id="lvl">1</b></span><small id="xptext">0 / 100</small></div>
       <div class="xpbar"><div id="xpfill"></div></div>
     </div>
-    <div class="chip" id="streak-chip" title="Correct answers in a row">🔥 <b id="streak">0</b></div>
-    <button class="chip btn-sound" id="sound" title="Sound on/off">🔊</button>
+    <div class="chip" id="streak-chip" title="Correct answers in a row">Streak <b id="streak">0</b></div>
+    <button class="chip btn-sound" id="sound" title="Sound on/off">Sound on</button>
   </div>
 </header>
 
@@ -279,13 +280,13 @@ html.embed .toast { top: 16px; }
     <div class="hero">
       <p class="eyebrow">CHOOSE YOUR QUEST</p>
       <h1>What will you <span class="grad">master</span> today?</h1>
-      <p class="sub">Pick a topic, choose your level and start earning XP. Every right answer makes you stronger! 💪</p>
+      <p class="sub">Pick a topic, choose your level and start earning XP. Every right answer makes you stronger! </p>
     </div>
     <div class="topics" id="topics"></div>
     <div class="home-foot">
-      <div class="mini"><span style="font-size:28px">⭐</span><div><b id="h-xp">0</b><br><span>TOTAL XP</span></div></div>
-      <div class="mini"><span style="font-size:28px">🔥</span><div><b id="h-best">0</b><br><span>BEST STREAK</span></div></div>
-      <div class="mini"><span style="font-size:28px">✅</span><div><b id="h-solved">0</b><br><span>QUESTIONS SOLVED</span></div></div>
+      <div class="mini"><div><b id="h-xp">0</b><br><span>TOTAL XP</span></div></div>
+      <div class="mini"><div><b id="h-best">0</b><br><span>BEST STREAK</span></div></div>
+      <div class="mini"><div><b id="h-solved">0</b><br><span>QUESTIONS SOLVED</span></div></div>
     </div>
   </section>
 
@@ -428,7 +429,7 @@ function refreshStats() {
   $("#xptext").textContent = `${save.xp % XP_PER_LEVEL} / ${XP_PER_LEVEL} XP`;
   $("#xpfill").style.width = `${(save.xp % XP_PER_LEVEL) / XP_PER_LEVEL * 100}%`;
   $("#streak").textContent = streak;
-  $("#sound").textContent = save.sound ? "🔊" : "🔇";
+  $("#sound").textContent = save.sound ? "Sound on" : "Sound off";
   $("#h-xp").textContent = save.xp;
   $("#h-best").textContent = save.bestStreak;
   $("#h-solved").textContent = save.solved;
@@ -440,7 +441,7 @@ function gainXP(amount, el) {
   popText(`+${amount} XP`, "#ffd84d", el);
   replay($("#lvl-chip"), "bump", 450);
   if (Math.floor(save.xp / XP_PER_LEVEL) > before) {
-    setTimeout(() => { sfx.level(); burst(140); toast(`⭐ LEVEL UP! You are now level ${Math.floor(save.xp / XP_PER_LEVEL) + 1}!`); }, 400);
+    setTimeout(() => { sfx.level(); burst(140); toast(`LEVEL UP! You are now level ${Math.floor(save.xp / XP_PER_LEVEL) + 1}!`); }, 400);
   }
   store(); refreshStats();
 }
@@ -454,7 +455,7 @@ function markRight(el, base = 10) {
   gainXP(base + bonus, el);
   replay($("#streak-chip"), "bump", 450);
   if (streak >= 3 && streak % 1 === 0 && [3, 5, 7, 10, 15, 20].includes(streak)) {
-    setTimeout(() => popText(`🔥 ${streak} IN A ROW!`, "#ff9f43", $("#streak-chip"), true), 250);
+    setTimeout(() => popText(`${streak} IN A ROW!`, "#ff9f43", $("#streak-chip"), true), 250);
   }
   refreshStats();
 }
@@ -493,7 +494,7 @@ const BOYS = ["Aman", "Kabir", "Arjun", "Ishaan", "Rohan", "Vihaan"];
 const GIRLS = ["Riya", "Meera", "Zara", "Anaya", "Diya", "Sara"];
 function person() { return Math.random() < .5 ? { name: pick(BOYS), his: "his", he: "he", He: "He" } : { name: pick(GIRLS), his: "her", he: "she", He: "She" }; }
 
-// Sentence templates. {mul|...} etc. mark the keywords that the 💡 button highlights.
+// Sentence templates. {mul|...} etc. mark the keywords that the button highlights.
 const SENTENCES = {
   1: [
     function sum() {
@@ -698,10 +699,10 @@ function makeQuad(level) {
    ===================================================== */
 
 const TOPICS = [
-  { id: "sentence", icon: "✍️", name: "Sentence → Equation", desc: "Turn word problems into equations, then solve them. Learn the secret keywords!", color: "#ffb347", tag: "WE'RE LEARNING THIS!" },
-  { id: "solve", icon: "⚖️", name: "Solve Linear Equations", desc: "Find x and balance the scale. Wrong answers tip it over!", color: "#3ddc97" },
-  { id: "quad", icon: "📈", name: "Quadratic Equations", desc: "Factorise, find both roots and watch the graph cross the x-axis.", color: "#7c5cff", tag: "CLASS 9–10" },
-  { id: "boss", icon: "👾", name: "Boss Battle", desc: "10 mixed questions vs the X-Beast. 3 lives. Can you beat it?", color: "#ff5d73" }
+  { id: "sentence", icon: "", name: "Sentence → Equation", desc: "Turn word problems into equations, then solve them. Learn the secret keywords!", color: "#ffb347", tag: "WE'RE LEARNING THIS!" },
+  { id: "solve", icon: "", name: "Solve Linear Equations", desc: "Find x and balance the scale. Wrong answers tip it over!", color: "#3ddc97" },
+  { id: "quad", icon: "", name: "Quadratic Equations", desc: "Factorise, find both roots and watch the graph cross the x-axis.", color: "#7c5cff", tag: "CLASS 9–10" },
+  { id: "boss", icon: "", name: "Boss Battle", desc: "10 mixed questions vs the X-Beast. 3 lives. Can you beat it?", color: "#ff5d73" }
 ];
 const ROUND = 8;
 
@@ -769,7 +770,7 @@ function finishQuestion(result) {
   const row = document.createElement("div");
   row.className = "next-row";
   const last = R.i >= R.total || (R.topic === "boss" && (R.hp <= 0 || R.lives <= 0));
-  row.innerHTML = `<button class="btn" id="next">${last ? "See results 🏁" : "Next question →"}</button>`;
+  row.innerHTML = `<button class="btn" id="next">${last ? "See results " : "Next question →"}</button>`;
   card.appendChild(row);
   const btn = $("#next");
   btn.addEventListener("click", () => { sfx.click(); nextQuestion(); });
@@ -784,7 +785,7 @@ function renderQuestion() {
   if (q.kind === "sentence") {
     html += `<div class="q-label">${label} · TURN THE SENTENCE INTO AN EQUATION</div>
       <p class="sentence" id="sentence">${q.sentence.replace(/\{(\w+)\|([^}]+)\}/g, '<span class="kw kw-$1">$2</span>')}</p>
-      <div class="tools"><button class="tool" id="hint">💡 Show the keywords</button></div>
+      <div class="tools"><button class="tool" id="hint">Show the keywords</button></div>
       <div class="options">${q.options.map((o, i) => `<button class="opt" data-i="${i}"><span class="letter">${"ABCD"[i]}</span>${fmt(o[0])}</button>`).join("")}</div>
       <div class="feedback" id="fb1"></div>
       <div id="stage2"></div>`;
@@ -793,7 +794,7 @@ function renderQuestion() {
   } else {
     html += `<div class="q-label">${label} · FIND BOTH ROOTS</div>
       <div class="eq-big">${fmt(q.eq)}</div>
-      <div class="answer-row"><label><i>x</i> =</label><input class="ans" id="r1" inputmode="numeric" autocomplete="off" placeholder="?"><label>or</label><input class="ans" id="r2" inputmode="numeric" autocomplete="off" placeholder="?"><button class="btn" id="check">Check ⚡</button></div>
+      <div class="answer-row"><label><i>x</i> =</label><input class="ans" id="r1" inputmode="numeric" autocomplete="off" placeholder="?"><label>or</label><input class="ans" id="r2" inputmode="numeric" autocomplete="off" placeholder="?"><button class="btn" id="check">Check </button></div>
       <div class="feedback" id="fb2"></div><ol class="steps" id="steps"></ol><div id="graph"></div>`;
   }
   card.innerHTML = html;
@@ -826,7 +827,7 @@ function chooseOption(i, btn) {
     opts.forEach((b, k) => { if (k !== i) b.classList.add("dim"); });
     markRight(btn, R.usedHint ? 6 : 10);
     fb.className = "feedback show good";
-    fb.innerHTML = `✓ Correct! ${R.usedHint ? "" : "You didn't even need the hint! 😎 "}See how each coloured keyword turned into a symbol.`;
+    fb.innerHTML = `✓ Correct! ${R.usedHint ? "" : "You didn't even need the hint! "}See how each coloured keyword turned into a symbol.`;
     R.partResults.push(true);
     if (R.topic === "boss") bossHit();
   } else {
@@ -853,14 +854,14 @@ function renderSolveStage(eq, x, steps, into) {
   box.innerHTML = `
     <div class="eq-big">${fmt(eq)}</div>
     <div class="scale-wrap">${scaleSVG(L, Rt)}<div class="readout" id="readout">The scale is waiting… what is <b>x</b>?</div></div>
-    <div class="answer-row"><label><i>x</i> =</label><input class="ans" id="ans" inputmode="numeric" autocomplete="off" placeholder="?"><button class="btn" id="check">Check ⚡</button></div>
+    <div class="answer-row"><label><i>x</i> =</label><input class="ans" id="ans" inputmode="numeric" autocomplete="off" placeholder="?"><button class="btn" id="check">Check </button></div>
     <div class="feedback" id="fb2"></div>
     <ol class="steps" id="steps"></ol>`;
   startScale();
   const input = $("#ans");
   const check = () => {
     const v = parseNum(input.value);
-    if (v === null) { input.focus(); toast("Type a number first! 🙂"); return; }
+    if (v === null) { input.focus(); toast("Type a number first! "); return; }
     R.tries++;
     const lv = evalSide(L, v), rv = evalSide(Rt, v);
     const fb = $("#fb2");
@@ -871,7 +872,7 @@ function renderSolveStage(eq, x, steps, into) {
       const first = R.tries === 1;
       markRight($("#check"), first ? 10 : 5);
       fb.className = "feedback show good";
-      fb.innerHTML = `✓ Balanced! x = ${N(x)} makes both sides equal ${N(round(lv))}. ${first ? "First try! 🎯" : "Got it on the second try! 💪"}`;
+      fb.innerHTML = `✓ Balanced! x = ${N(x)} makes both sides equal ${N(round(lv))}. ${first ? "First try! " : "Got it on the second try! "}`;
       R.partResults.push(first ? true : "half");
       if (R.topic === "boss") bossHit();
       showSteps(steps);
@@ -968,7 +969,7 @@ function setupQuadInputs() {
   const q = R.q, i1 = $("#r1"), i2 = $("#r2");
   const check = () => {
     const a = parseNum(i1.value), b = parseNum(i2.value);
-    if (a === null || b === null) { toast("Type both roots! 🙂"); (a === null ? i1 : i2).focus(); return; }
+    if (a === null || b === null) { toast("Type both roots! "); (a === null ? i1 : i2).focus(); return; }
     R.tries++;
     const ok = (a === q.r1 && b === q.r2) || (a === q.r2 && b === q.r1);
     const fb = $("#fb2");
@@ -1039,7 +1040,7 @@ function drawGraph(q) {
 function renderSide() {
   const side = $("#side");
   if (R.topic === "sentence") side.innerHTML = `
-    <h3>📘 Word → Symbol</h3>
+    <h3>Word → Symbol</h3>
     <div class="dict">
       <div class="x"><span>a number, its age, ₹x</span><b>x</b></div>
       <div class="a"><span>sum, more than, increased by, together</span><b>+</b></div>
@@ -1051,21 +1052,21 @@ function renderSide() {
     <div class="tip"><b>Watch out!</b> "5 less than x" means <b>x − 5</b>, not 5 − x. The number you start with comes first.</div>
     <div class="tip"><b>Step 1:</b> Let the unknown be x.<br><b>Step 2:</b> Change the words into symbols.<br><b>Step 3:</b> Put = where it says "is" or "gives".<br><b>Step 4:</b> Solve it!</div>`;
   if (R.topic === "solve") side.innerHTML = `
-    <h3>⚖️ The Golden Rule</h3>
+    <h3>The Golden Rule</h3>
     <p>An equation is like a balance scale. <b>Whatever you do to one side, do to the other</b>, and it stays balanced.</p>
     <div class="tip"><b>Undo +</b> with −, <b>undo −</b> with +.<br><b>Undo ×</b> with ÷, <b>undo ÷</b> with ×.</div>
     <div class="tip"><b>Do it in reverse order:</b> deal with + and − first, then × and ÷.</div>
     <div class="tip"><b>Check:</b> put your answer back in. If the scale balances, you're right!</div>`;
   if (R.topic === "quad") side.innerHTML = `
-    <h3>📈 Factorising Trick</h3>
+    <h3>Factorising Trick</h3>
     <p>For <b>x² + bx + c = 0</b>, find two numbers that <b>multiply to c</b> and <b>add to b</b>.</p>
     <div class="tip">Example: <span class="eqn">x² + 5x + 6 = 0</span><br>2 × 3 = 6 and 2 + 3 = 5<br><span class="eqn">(x + 2)(x + 3) = 0</span><br>So <b>x = −2</b> or <b>x = −3</b></div>
     <div class="tip"><b>Watch the signs!</b> (x + 2) = 0 gives x = −2.</div>
     <div class="tip"><b>Roots</b> are where the graph crosses the x-axis.</div>`;
   if (R.topic === "boss") side.innerHTML = `
-    <h3>👾 The X-Beast</h3>
+    <h3>The X-Beast</h3>
     <p>It feeds on wrong answers! Mixed questions from every topic.</p>
-    <div class="tip">⚔️ <b>8 correct answers</b> defeat the boss.<br>❤️ You have <b>3 lives</b>.<br>🎯 Only <b>one try</b> per question!</div>
+    <div class="tip"><b>8 correct answers</b> defeat the boss.<br>You have <b>3 lives</b>.<br>Only <b>one try</b> per question!</div>
     <div class="tip">Tip: practise each topic first to get stronger.</div>`;
   if (R.topic !== "boss") side.innerHTML += `<div class="score-line"><span>Level</span><b>${["", "Easy", "Medium", "Hard"][R.level]}</b></div>`;
 }
@@ -1077,14 +1078,14 @@ function showResults() {
   if (R.topic === "boss") {
     const won = R.hp <= 0;
     stars = won ? (R.lives === 3 ? 3 : R.lives === 2 ? 2 : 1) : 0;
-    title = won ? "🏆 YOU DEFEATED THE X-BEAST!" : "💀 The X-Beast wins… this time";
+    title = won ? "YOU DEFEATED THE X-BEAST!" : "The X-Beast wins… this time";
     msg = won ? `You won with ${R.lives} ${R.lives === 1 ? "life" : "lives"} left!` : "Practise the topics and come back stronger!";
     if (won) { sfx.win(); burst(200); }
   } else {
     const score = R.results.reduce((t, r) => t + (r === "good" ? 1 : r === "half" ? .5 : 0), 0);
     const pct = score / R.total;
     stars = pct >= .85 ? 3 : pct >= .6 ? 2 : pct >= .35 ? 1 : 0;
-    title = stars === 3 ? "🌟 AMAZING!" : stars === 2 ? "🎉 GREAT JOB!" : stars === 1 ? "👍 GOOD EFFORT!" : "💪 KEEP PRACTISING!";
+    title = stars === 3 ? "AMAZING!" : stars === 2 ? "GREAT JOB!" : stars === 1 ? "GOOD EFFORT!" : "KEEP PRACTISING!";
     msg = `You scored ${score} out of ${R.total}.`;
     if (stars >= 2) { sfx.win(); burst(160); }
   }
@@ -1102,9 +1103,9 @@ function showResults() {
         <div><b>${save.bestStreak}</b><span>BEST STREAK</span></div>
       </div>
       <div class="res-btns">
-        <button class="btn ghost" id="res-home">🏠 Topics</button>
-        <button class="btn" id="res-again">🔁 Play again</button>
-        ${canHarder ? `<button class="btn alt" id="res-harder">⬆ Try ${["", "", "Medium", "Hard"][R.level + 1]}</button>` : ""}
+        <button class="btn ghost" id="res-home">Topics</button>
+        <button class="btn" id="res-again">Play again</button>
+        ${canHarder ? `<button class="btn alt" id="res-harder">Try ${["", "", "Medium", "Hard"][R.level + 1]}</button>` : ""}
       </div></div>`;
   R.results.length = R.total;
   renderProgress();
@@ -1130,7 +1131,7 @@ function beastSVG(face) {
 }
 function bossArenaHTML() {
   return `<div class="arena" id="arena"><span class="sprite ${R.hp <= 40 ? "angry" : ""}" id="sprite">${beastSVG("normal")}</span>
-    <div class="hp"><span>HP</span><div class="hp-bar"><div id="hpbar" style="width:${R.hp}%"></div></div><span class="lives" id="lives">${"❤️".repeat(R.lives)}${"🖤".repeat(3 - R.lives)}</span></div></div>`;
+    <div class="hp"><span>HP</span><div class="hp-bar"><div id="hpbar" style="width:${R.hp}%"></div></div><span class="lives" id="lives">${"♥".repeat(R.lives)}${"♡".repeat(3 - R.lives)}</span></div></div>`;
 }
 function bossAfterRender() { /* nothing extra needed yet */ }
 let faceTimer;
@@ -1140,11 +1141,11 @@ function bossHit() {
   sfx.hit();
   s.innerHTML = beastSVG("hurt");
   replay(s, R.hp <= 0 ? "dead" : "hit", R.hp <= 0 ? 5000 : 650);
-  popText("💥 HIT!", "#ffd84d", $("#arena"), true);
+  popText("HIT!", "#ffd84d", $("#arena"), true);
   $("#hpbar").style.width = `${R.hp}%`;
   clearTimeout(faceTimer);
   faceTimer = setTimeout(() => { if (R.hp > 0) { s.innerHTML = beastSVG("normal"); s.classList.toggle("angry", R.hp <= 40); } }, 800);
-  if (R.hp <= 0) setTimeout(() => { burst(150); toast("🏆 The X-Beast is defeated!"); }, 600);
+  if (R.hp <= 0) setTimeout(() => { burst(150); toast("The X-Beast is defeated!"); }, 600);
 }
 function bossMiss() {
   R.lives--;
@@ -1152,7 +1153,7 @@ function bossMiss() {
   s.innerHTML = beastSVG("laugh");
   replay(s, "laugh", 1250);
   replay($("#arena"), "ouch", 700);
-  $("#lives").textContent = "❤️".repeat(R.lives) + "🖤".repeat(3 - R.lives);
+  $("#lives").textContent = "♥".repeat(R.lives) + "♡".repeat(3 - R.lives);
   replay($("#lives"), "lost", 500);
   ["HA!", "HA!", "HA!"].forEach((t, i) => setTimeout(() => popText(t, "#ffb347", $("#sprite"), false), i * 220));
   clearTimeout(faceTimer);
