@@ -1,5 +1,5 @@
 /* =========================================
-   ELEMENT QUEST — ATOM LAB 🧪
+   ELEMENT QUEST — ATOM LAB 
    Build atoms (protons, neutrons, electrons) and
    molecules in 3D. Drag the picture to spin it.
    This file adds its own menu button and page section.
@@ -240,7 +240,7 @@
   navButton.className = "nav-button";
   navButton.type = "button";
   navButton.dataset.section = "atomlab-section";
-  navButton.textContent = "🧪 Atom Lab";
+  navButton.textContent = "Atom Lab";
   nav.appendChild(navButton);
 
   const section = document.createElement("section");
@@ -256,8 +256,8 @@
     </header>
 
     <div class="al-tabs">
-      <button type="button" class="al-tab active" data-mode="atom">⚛ Build an Atom</button>
-      <button type="button" class="al-tab" data-mode="molecule">🔗 Build a Molecule</button>
+      <button type="button" class="al-tab active" data-mode="atom">Build an Atom</button>
+      <button type="button" class="al-tab" data-mode="molecule">Build a Molecule</button>
     </div>
 
     <div class="al-layout">
@@ -266,7 +266,7 @@
           <div class="al-wrap" id="al-wrap">
             <canvas class="al-canvas" id="al-canvas" aria-label="3D model"></canvas>
             <div class="al-fx" id="al-fx"></div>
-            <div class="al-hint">🖱 DRAG TO SPIN</div>
+            <div class="al-hint">DRAG TO SPIN</div>
             <div class="al-toast" id="al-toast"></div>
           </div>
         </div>
@@ -300,7 +300,7 @@
             </div>
           </div>
           <div class="al-section-title" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">QUICK BUILD
-            <select class="al-select" id="al-pick" aria-label="Pick any element"><option value="">🔎 Jump to any element…</option></select>
+            <select class="al-select" id="al-pick" aria-label="Pick any element"><option value="">Jump to any element…</option></select>
           </div>
           <div class="al-quick">
             <button type="button" class="al-chip-btn" data-quick="1">H</button>
@@ -311,7 +311,7 @@
             <button type="button" class="al-chip-btn" data-quick="26">Fe</button>
             <button type="button" class="al-chip-btn" data-quick="79">Au</button>
             <button type="button" class="al-chip-btn" data-quick="92">U</button>
-            <button type="button" class="al-chip-btn" id="al-neutral">⚖ Make neutral</button>
+            <button type="button" class="al-chip-btn" id="al-neutral">Make neutral</button>
             <button type="button" class="al-chip-btn" id="al-stable">✓ Most stable</button>
           </div>
         </div>
@@ -321,7 +321,7 @@
           <div class="al-palette" id="al-palette"></div>
           <div class="al-section-title" style="margin-top:14px">YOUR WORKBENCH</div>
           <div class="al-bench" id="al-bench"></div>
-          <div class="al-quick" style="margin-top:10px"><button type="button" class="al-chip-btn" id="al-clear">🧹 Clear all</button></div>
+          <div class="al-quick" style="margin-top:10px"><button type="button" class="al-chip-btn" id="al-clear">Clear all</button></div>
           <div class="al-section-title" style="margin-top:14px">SHOW ME A MOLECULE</div>
           <div class="al-quick" id="al-showme"></div>
         </div>
@@ -344,18 +344,18 @@
           </div>
           <div class="al-badges" id="al-badges"></div>
           <p class="al-explain" id="al-explain"></p>
-          <div class="al-progress"><span id="al-disc-text">🔓 Elements discovered: 0 / 36</span>
+          <div class="al-progress"><span id="al-disc-text">Elements discovered: 0 / 36</span>
             <div class="al-bar"><div id="al-disc-bar" style="width:0%"></div></div>
           </div>
         </div>
 
         <div class="al-card" id="al-missions-card">
-          <div class="al-card-title">🎯 Missions <span id="al-mission-count">0 / 8</span></div>
+          <div class="al-card-title">Missions <span id="al-mission-count">0 / 8</span></div>
           <div class="al-missions" id="al-missions"></div>
         </div>
 
         <div class="al-card al-info" id="al-mol-info" hidden>
-          <div class="al-challenge"><span id="al-challenge-text">🎯 Challenge</span><button type="button" class="al-chip-btn" id="al-skip">Skip ↻</button></div>
+          <div class="al-challenge"><span id="al-challenge-text">Challenge</span><button type="button" class="al-chip-btn" id="al-skip">Skip ↻</button></div>
           <div class="al-mol-head"><div class="al-formula" id="al-formula">?</div><h2 id="al-mol-name">Start building!</h2></div>
           <div class="al-stats" id="al-mol-stats" hidden>
             <div class="al-stat"><span>MOLAR MASS</span><strong id="al-mol-mass">–</strong></div>
@@ -367,7 +367,7 @@
         </div>
 
         <div class="al-card" id="al-col-card" hidden>
-          <div class="al-card-title">🧪 Collection <span><span id="al-col-text">0 / ${MOLECULES.length}</span> · <span id="al-score">⭐ 0</span></span></div>
+          <div class="al-card-title">Collection <span><span id="al-col-text">0 / ${MOLECULES.length}</span> · <span id="al-score">0</span></span></div>
           <div class="al-collection" id="al-collection"></div>
         </div>
       </div>
@@ -593,7 +593,7 @@
     const [lo, hi] = limits[part];
     const v = Math.max(lo, Math.min(hi, value));
     if (v === atom[part]) {
-      if (!quiet) toast(part === "e" && value > hi ? "⚡ That's too many extra electrons!" : "🚫 Can't go further!");
+      if (!quiet) toast(part === "e" && value > hi ? "That's too many extra electrons!" : "Can't go further!");
       return;
     }
     const before = snapshot();
@@ -637,11 +637,11 @@
       fxPop(NAMES[now.p].toUpperCase() + "!", "#55cfff", 50, 48, true, 60);
       d = 300;
     }
-    if (before.stable && !now.stable) { fxShake(); fxPop("☢ UNSTABLE!", "#facc15", 50, 22, false, d); }
+    if (before.stable && !now.stable) { fxShake(); fxPop("UNSTABLE!", "#facc15", 50, 22, false, d); }
     else if (!before.stable && now.stable) fxPop("✓ STABLE!", "#4ade80", 50, 22, false, d);
-    if (before.charge === 0 && now.charge !== 0) fxPop("⚡ ION!", now.charge > 0 ? "#fda4af" : "#c4b5fd", 22, 34, false, d + 150);
-    else if (before.charge !== 0 && now.charge === 0) fxPop("⚖ NEUTRAL!", "#6ee7b7", 78, 34, false, d + 150);
-    if (!before.full && now.full) { fxRing("#fde68a"); fxPop("✨ FULL SHELL!", "#fde68a", 50, 64, false, d + 300); }
+    if (before.charge === 0 && now.charge !== 0) fxPop("ION!", now.charge > 0 ? "#fda4af" : "#c4b5fd", 22, 34, false, d + 150);
+    else if (before.charge !== 0 && now.charge === 0) fxPop("NEUTRAL!", "#6ee7b7", 78, 34, false, d + 150);
+    if (!before.full && now.full) { fxRing("#fde68a"); fxPop("FULL SHELL!", "#fde68a", 50, 64, false, d + 300); }
     checkMissions();
   }
 
@@ -650,12 +650,12 @@
     { id: "o", text: "Build an Oxygen atom", test: s => s.p === 8 },
     { id: "neg", text: "Make a negative ion (extra electrons)", test: s => s.charge < 0 },
     { id: "pos", text: "Make a positive ion (missing electrons)", test: s => s.charge > 0 },
-    { id: "rad", text: "Find a radioactive isotope ☢", test: s => !s.stable },
+    { id: "rad", text: "Find a radioactive isotope ", test: s => !s.stable },
     { id: "noble", text: "Build a noble gas with a full shell", test: s => s.full },
     { id: "c14", text: "Build Carbon-14 (used to date fossils)", test: s => s.p === 6 && s.n === 8 },
     { id: "fe56", text: "Build a neutral Iron-56 atom", test: s => s.p === 26 && s.n === 30 && s.charge === 0 },
-    { id: "au", text: "Build Gold-197 ✨", test: s => s.p === 79 && s.n === 118 },
-    { id: "u238", text: "Build Uranium-238 ☢", test: s => s.p === 92 && s.n === 146 },
+    { id: "au", text: "Build Gold-197 ", test: s => s.p === 79 && s.n === 118 },
+    { id: "u238", text: "Build Uranium-238 ", test: s => s.p === 92 && s.n === 146 },
     { id: "twenty", text: "Discover 20 elements", test: () => discovered.size >= 20 }
   ];
   const missionsDone = new Set(load("atomLabMissions", []));
@@ -676,8 +676,8 @@
       save("atomLabMissions", [...missionsDone]);
       burstConfetti(70);
       const first = MISSIONS.find(m => m.id === newly[0]);
-      setTimeout(() => toast(`🎯 Mission complete: ${first.text.split(" (")[0]}!`), 400);
-      if (missionsDone.size === MISSIONS.length) setTimeout(() => { burstConfetti(150); fxPop("🏆 ALL MISSIONS DONE!", "#facc15", 50, 50, true); }, 900);
+      setTimeout(() => toast(`Mission complete: ${first.text.split(" (")[0]}!`), 400);
+      if (missionsDone.size === MISSIONS.length) setTimeout(() => { burstConfetti(150); fxPop("ALL MISSIONS DONE!", "#facc15", 50, 50, true); }, 900);
     }
     renderMissions(newly);
   }
@@ -704,13 +704,13 @@
   }
   pick.addEventListener("change", () => { if (pick.value) quickBuild(Number(pick.value)); pick.value = ""; });
   $("al-neutral").addEventListener("click", () => {
-    if (atom.e === atom.p) { toast("✅ Already neutral!"); return; }
+    if (atom.e === atom.p) { toast("Already neutral!"); return; }
     setAtom("e", atom.p, true);
-    toast("⚖ Balanced! Now it's a neutral atom.");
+    toast("Balanced! Now it's a neutral atom.");
   });
   $("al-stable").addEventListener("click", () => {
     const noStable = !(STABLE[atom.p] || []).length;
-    if (atom.n === COMMON[atom.p]) { toast(noStable ? "✅ Already the longest-lasting one!" : "✅ Already the most common isotope!"); return; }
+    if (atom.n === COMMON[atom.p]) { toast(noStable ? "Already the longest-lasting one!" : "Already the most common isotope!"); return; }
     setAtom("n", COMMON[atom.p], true);
     toast(`✓ ${NAMES[atom.p]}-${atom.p + atom.n}: the ${noStable ? "longest-lasting" : "most common"} one!`);
   });
@@ -742,7 +742,7 @@
     if (charge === 0) badges.push(`<span class="al-badge good">Neutral atom</span>`);
     else if (charge > 0) badges.push(`<span class="al-badge plus">Positive ion ${sym}${charge > 1 ? sup(charge) : ""}⁺</span>`);
     else badges.push(`<span class="al-badge minus">Negative ion ${sym}${-charge > 1 ? sup(-charge) : ""}⁻</span>`);
-    badges.push(stable ? `<span class="al-badge good">✓ Stable</span>` : `<span class="al-badge warn">☢ Radioactive</span>`);
+    badges.push(stable ? `<span class="al-badge good">✓ Stable</span>` : `<span class="al-badge warn">Radioactive</span>`);
     $("al-badges").innerHTML = badges.join("");
 
     const parts = [];
@@ -753,26 +753,26 @@
     if (!stable) {
       const list = STABLE[p] || [];
       if (p === 83) {
-        parts.push("☢ Bismuth is technically radioactive, but Bismuth-209 decays so slowly that it lasts over a billion times the age of the universe!");
+        parts.push("Bismuth is technically radioactive, but Bismuth-209 decays so slowly that it lasts over a billion times the age of the universe!");
       } else if (!list.length) {
-        parts.push(`☢ Every isotope of ${name} is radioactive. There is no stable version! The longest-lasting one is ${name}-${p + COMMON[p]}.`);
-        if (p >= 99) parts.push("⚗ It is only made in laboratories, often just a few atoms at a time.");
+        parts.push(`Every isotope of ${name} is radioactive. There is no stable version! The longest-lasting one is ${name}-${p + COMMON[p]}.`);
+        if (p >= 99) parts.push("It is only made in laboratories, often just a few atoms at a time.");
       } else {
         const tooMany = n > Math.max(...list);
-        parts.push(`☢ ${name}-${mass} would be radioactive: its nucleus has too ${tooMany ? "many" : "few"} neutrons, so it would break apart over time. The most common one is ${name}-${p + COMMON[p]} (${COMMON[p]} neutrons).`);
+        parts.push(`${name}-${mass} would be radioactive: its nucleus has too ${tooMany ? "many" : "few"} neutrons, so it would break apart over time. The most common one is ${name}-${p + COMMON[p]} (${COMMON[p]} neutrons).`);
       }
     }
-    if (charge === 0 && NOBLE.includes(p)) parts.push("✨ Its outer shell is full. That's why noble gases hardly react with anything!");
+    if (charge === 0 && NOBLE.includes(p)) parts.push("Its outer shell is full. That's why noble gases hardly react with anything!");
     $("al-explain").innerHTML = parts.join(" ");
 
     if (sym !== lastSymbol) {
       popClass($("al-symbol"), "pop");
-      if (lastSymbol !== null && !discovered.has(p)) toast(`🔓 New element discovered: ${name}!`);
+      if (lastSymbol !== null && !discovered.has(p)) toast(`New element discovered: ${name}!`);
       lastSymbol = sym;
     }
     discovered.add(p);
     save("atomLabDiscovered", [...discovered]);
-    $("al-disc-text").textContent = `🔓 Elements discovered: ${discovered.size} / ${MAX_P}`;
+    $("al-disc-text").textContent = `Elements discovered: ${discovered.size} / ${MAX_P}`;
     $("al-disc-bar").style.width = `${discovered.size / MAX_P * 100}%`;
   }
 
@@ -906,7 +906,7 @@
   });
 
   function addMolAtom(sym) {
-    if (molAtoms.length >= MAX_ATOMS) { fxShake(); toast("🧪 Workbench full! Remove some atoms."); return; }
+    if (molAtoms.length >= MAX_ATOMS) { fxShake(); toast("Workbench full! Remove some atoms."); return; }
     molAtoms.push({ sym, ...spawnFar(), seed: atomSeed++ });
     fxPop(`+${sym}`, sym === "C" ? "#d4d4d8" : ATOM_STYLE[sym].color, 25 + Math.random() * 50, 72);
     checkMolecule();
@@ -945,7 +945,7 @@
     const notYet = options.filter(m => !collected.has(m.id));
     const pool = notYet.length ? notYet : options;
     challenge = pool[Math.floor(Math.random() * pool.length)];
-    $("al-challenge-text").textContent = `🎯 Challenge: build ${challenge.name.split(" (")[0]} (${challenge.formula})`;
+    $("al-challenge-text").textContent = `Challenge: build ${challenge.name.split(" (")[0]} (${challenge.formula})`;
   }
   $("al-skip").addEventListener("click", newChallenge);
 
@@ -977,7 +977,7 @@
       const shortName = match.name.split(" (")[0].toUpperCase();
       fxRing("#4ade80");
       fxFlash();
-      fxPop("💥 BONDED!", "#facc15", 50, 26);
+      fxPop("BONDED!", "#facc15", 50, 26);
       fxPop(shortName + "!", "#4ade80", 50, 50, shortName.length <= 14, 250);
       const isNew = !collected.has(match.id);
       collected.add(match.id);
@@ -986,11 +986,11 @@
         score++;
         save("atomLabScore", score);
         burstConfetti(90);
-        toast(`🎯 Challenge complete! +1 ⭐`);
-        fxPop("⭐ +1", "#facc15", 50, 74, true, 650);
+        toast(`Challenge complete! +1 `);
+        fxPop("+1", "#facc15", 50, 74, true, 650);
         setTimeout(newChallenge, 1800);
       } else {
-        toast(`🎉 You built ${match.name.split(" (")[0]}!${isNew ? " (new!)" : ""}`);
+        toast(`You built ${match.name.split(" (")[0]}!${isNew ? " (new!)" : ""}`);
       }
       popClass($("al-formula"), "pop");
     }
@@ -1007,13 +1007,13 @@
       $("al-mol-text").textContent = match.fact;
     } else {
       $("al-formula").textContent = molAtoms.length ? "?" : "…";
-      $("al-mol-name").textContent = molAtoms.length ? "🤔 Not a molecule yet" : "Start building!";
+      $("al-mol-name").textContent = molAtoms.length ? "Not a molecule yet" : "Start building!";
       $("al-mol-stats").hidden = true;
       $("al-mol-text").textContent = molAtoms.length ? hintFor(c) : "Tap atoms to add them to your workbench. When they make a real molecule, they snap together in 3D!";
     }
 
     $("al-col-text").textContent = `${collected.size} / ${MOLECULES.length}`;
-    $("al-score").textContent = `⭐ ${score}`;
+    $("al-score").textContent = `${score}`;
     $("al-collection").innerHTML = MOLECULES.map(m => `<span class="al-col-chip ${collected.has(m.id) ? "got" : ""}" title="${collected.has(m.id) ? m.name : "Not built yet"}">${collected.has(m.id) ? m.formula : "???"}</span>`).join("");
   }
 
@@ -1159,7 +1159,7 @@
       ctx.fillStyle = "#6f839b";
       ctx.font = "700 15px Arial, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Tap atoms below to start building ⚗", W / 2, H / 2);
+      ctx.fillText("Tap atoms below to start building ", W / 2, H / 2);
     }
   }
 
