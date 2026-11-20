@@ -696,14 +696,7 @@
       <div class="oq-slot" id="oq-slot"></div>
       <div class="oq-try">Try: ${tries.map(t => `<button type="button" data-try="${esc(t)}">${esc(t)}</button>`).join("")}</div>
       <div class="oq-subjects4">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-subj" style="--c:${s.color}" data-subj="${k}"><i>→</i><b>${s.name}</b><span>${s.blurb}</span></button>`).join("")}</div>
-      <div class="oq-extra"><button type="button" id="oq-go-hw">Check my homework</button>·<button type="button" id="oq-go-exam">Exam mode</button>·<button type="button" id="oq-go-cards">Flashcards</button>·<button type="button" id="oq-go-mis">Mistakes</button>·<button type="button" id="oq-go-prog">Progress</button></div>
     </div>`;
-    $("oq-go-hw").addEventListener("click", openHomework);
-    $("oq-go-exam").addEventListener("click", () => openExam());
-    $("oq-go-cards").addEventListener("click", () => openCards());
-    $("oq-go-mis").addEventListener("click", openMistakes);
-    $("oq-go-prog").addEventListener("click", openProgress);
-    try { refreshLinks(); } catch (_) { /* study tools load a moment later */ }
     if (home.classList.contains("active") || !document.querySelector(".page-section.active")) placeSearch(true);
     home.querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => { q.value = b.dataset.try; q.focus(); drawResults(); }));
     home.querySelectorAll("[data-subj]").forEach(b => b.addEventListener("click", () => openSubject(b.dataset.subj)));
@@ -756,10 +749,10 @@
     activate("oq-subject");
     subjPage.style.setProperty("--c", s.color);
     const labs = CATALOG.filter(t => t.s === sk && t.open && g >= t.a && g <= t.b);
-    const head = book => `<div class="oq-subhead"><div><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name}</h1><p>${book}</p></div><div class="oq-row"><button type="button" class="oq-btn" id="oq-subj-exam">Take a test</button><input class="oq-filter" id="oq-filter" type="search" placeholder="Filter chapters and subtopics…"></div></div>
+    const head = book => `<div class="oq-subhead"><div><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name}</h1><p>${book}</p></div><div class="oq-row"><button type="button" class="oq-btn" id="oq-subj-form">${sk === "bio" ? "Key terms" : "Formula sheet"}</button><button type="button" class="oq-btn" id="oq-subj-exam">Take a test</button><input class="oq-filter" id="oq-filter" type="search" placeholder="Filter chapters and subtopics…"></div></div>
       ${labs.length ? `<div class="oq-labs" style="--c:${s.color}"><span class="oq-label">INTERACTIVE</span>${labs.map(t => `<button type="button" class="oq-labbtn" data-lab="${CATALOG.indexOf(t)}">${esc(t.name)}</button>`).join("")}</div>` : ""}`;
     const bindLabs = () => subjPage.querySelectorAll("[data-lab]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); openTopic(CATALOG[b.dataset.lab]); }));
-    const bindExam = () => $("oq-subj-exam").addEventListener("click", () => openExam(sk));
+    const bindExam = () => { $("oq-subj-exam").addEventListener("click", () => openExam(sk)); $("oq-subj-form").addEventListener("click", () => openFormulas(sk)); };
     subjPage.innerHTML = head("Loading your chapters…") + `<div class="oq-loading"><span class="oq-dots"><span></span><span></span><span></span></span>Verity is fetching your ${s.name} chapters…</div>`;
     bindLabs(); bindExam();
     let syl;
@@ -846,9 +839,9 @@
       <div class="oq-actions">
         <button type="button" class="oq-btn primary" id="oq-ask">Ask Verity a question about this</button>
         ${lab && lab.open ? `<button type="button" class="oq-btn" id="oq-lab">Open the interactive lab</button>` : ""}
-        <button type="button" class="oq-btn" id="oq-notes">Download notes (PDF)</button>
-        ${t.s ? `<button type="button" class="oq-btn" id="oq-cards">Make flashcards</button>` : ""}
-        <button type="button" class="oq-btn" id="oq-new">Write it again</button>
+        ${t.s ? `<button type="button" class="oq-btn" id="oq-map">Concept map</button><button type="button" class="oq-btn" id="oq-cards">Flashcards</button>` : ""}
+        <button type="button" class="oq-btn" id="oq-notes">Notes (PDF)</button>
+        <button type="button" class="oq-linkbtn" id="oq-new">Write it again</button>
       </div>
       ${t.s ? `<div class="oq-actions"><button type="button" class="oq-btn" id="oq-allch">See all ${subj.name} chapters</button></div>` : ""}
       ${related.length ? `<div class="oq-block" style="margin-top:22px"><span class="oq-label">INTERACTIVE LABS</span><div class="oq-grid">${related.map(x => `<button type="button" class="oq-card" style="--c:${subj.color}" data-t="${CATALOG.indexOf(x)}">${esc(x.name)}<small><span class="${x.open ? "lab" : ""}">${x.open ? "INTERACTIVE" : "LESSON"}</span></small></button>`).join("")}</div></div>` : ""}
@@ -872,6 +865,7 @@
     if ($("oq-allch")) $("oq-allch").addEventListener("click", () => openSubject(t.s));
     $("oq-new").addEventListener("click", () => openLesson(t, fromLab, true));
     $("oq-notes").addEventListener("click", () => printNotes(data.title || t.name));
+    if ($("oq-map")) $("oq-map").addEventListener("click", () => openMap({ s: t.s, topic: t.inChapter || t.name, auto: true }));
     if ($("oq-cards")) $("oq-cards").addEventListener("click", () => openCards({ s: t.s, topic: t.inChapter ? `${t.name} (${t.inChapter})` : t.name, auto: true }));
     bump("lessonsRead");
     lesson.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => openTopic(CATALOG[b.dataset.t])));
@@ -1629,6 +1623,228 @@
     }
   `;
   document.head.appendChild(studyCss);
+
+  /* ---------- 14. Study tools menu (top bar), formula sheets and concept maps ---------- */
+  const ICON = {
+    hw: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+    exam: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
+    cards: '<rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 2h12a2 2 0 0 1 2 2v12"/>',
+    mis: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M9 8l4 4m0-4l-4 4"/>',
+    prog: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+    form: '<path d="M4 4h16M4 20h16"/><path d="M8 8l8 8M16 8l-8 8"/>',
+    map: '<circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/><path d="M6 7l4 3.5M18 7l-4 3.5M6 17l4-3.5M18 17l-4-3.5"/>'
+  };
+  const svgIcon = k => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
+  const TOOLS = [
+    ["hw", "Check my homework", "Find the step that went wrong", () => openHomework()],
+    ["exam", "Exam mode", "A timed test in your board's style", () => openExam()],
+    ["cards", "Flashcards", "Revise with smart cards", () => openCards()],
+    ["mis", "Mistake notebook", "Practise what you got wrong", () => openMistakes()],
+    ["prog", "My progress", "Your strong and weak topics", () => openProgress()],
+    ["form", "Formula sheet", "Every formula for your class", () => openFormulas()],
+    ["map", "Concept maps", "See how a chapter fits together", () => openMap()]
+  ];
+  const toolsWrap = document.createElement("div");
+  toolsWrap.className = "oq-toolswrap";
+  toolsWrap.innerHTML = `<button type="button" class="oq-pill oq-toolsbtn" id="oq-tools" aria-haspopup="true" aria-expanded="false">${svgIcon("cards").replace('width="18" height="18"', 'width="15" height="15"')}<span>Study tools</span><i class="oq-dot" id="oq-tools-dot" hidden></i></button>
+    <div class="oq-menu" id="oq-menu" role="menu" hidden>${TOOLS.map(([k, name, sub]) => `<button type="button" role="menuitem" class="oq-mi" data-tool="${k}"><span class="ic">${svgIcon(k)}</span><span class="tx"><b>${name}</b><small>${sub}</small></span><span class="oq-count" id="oq-mc-${k}" hidden></span></button>`).join("")}</div>`;
+  top.querySelector(".oq-right")?.insertBefore(toolsWrap, $("oq-xp"));
+  const menu = $("oq-menu"), toolsBtn = $("oq-tools");
+  const closeMenu = () => { menu.hidden = true; toolsBtn.setAttribute("aria-expanded", "false"); };
+  toolsBtn.addEventListener("click", e => { e.stopPropagation(); refreshLinks(); menu.hidden = !menu.hidden; toolsBtn.setAttribute("aria-expanded", String(!menu.hidden)); });
+  menu.querySelectorAll("[data-tool]").forEach(b => b.addEventListener("click", () => { closeMenu(); TOOLS.find(t => t[0] === b.dataset.tool)[3](); }));
+  document.addEventListener("click", e => { if (!menu.hidden && !toolsWrap.contains(e.target)) closeMenu(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { closeMenu(); toolsBtn.focus(); } });
+  // badges: mistakes waiting and flashcards due
+  refreshLinks = function () {
+    const n = getJ(MKEY, []).length, due = dueCount();
+    const set = (k, v) => { const el = $(`oq-mc-${k}`); if (el) { el.hidden = !v; el.textContent = v; } };
+    set("mis", n); set("cards", due);
+    const dot = $("oq-tools-dot"); if (dot) dot.hidden = !(n || due);
+  };
+  refreshLinks();
+
+  /* --- formula sheet --- */
+  const FKEY = "omniQuestFormulas";
+  let formSubj = "phy";
+  async function openFormulas(sk, refresh) {
+    if (sk) formSubj = sk;
+    const s = SUBJECTS[formSubj], d = read(), g = Number(d.grade) || 7, word = d.board === "IGCSE" ? "Grade" : "Class";
+    const isBio = formSubj === "bio", title = isBio ? "Key terms" : "Formula sheet";
+    current = { page: "Formula sheet" };
+    setCrumb({ name: title, s: formSubj });
+    activate("oq-formulas");
+    formPage.style.setProperty("--c", s.color);
+    const head = `<div class="oq-pagehead"><div><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name} ${title.toLowerCase()}</h1><p>${isBio ? "Every key term and definition" : "Every formula and law"} you need for your syllabus, in one place.</p></div>
+      <div class="oq-row"><input class="oq-filter" id="fs-find" type="search" placeholder="Find a formula…"><button type="button" class="oq-btn" id="fs-print">Print</button></div></div>
+      <div class="oq-row oq-noprint" style="margin-bottom:16px">${Object.entries(SUBJECTS).map(([k, x]) => `<button type="button" class="oq-chip ${k === formSubj ? "on" : ""}" style="--c:${x.color}" data-fs="${k}">${x.name}</button>`).join("")}</div>`;
+    formPage.innerHTML = `<div class="oq-page">${head}<div id="fs-body">${loadingHTML(`Verity is putting together your ${s.name} ${title.toLowerCase()}…`)}</div></div>`;
+    formPage.querySelectorAll("[data-fs]").forEach(b => b.addEventListener("click", () => openFormulas(b.dataset.fs)));
+    $("fs-print").addEventListener("click", () => printPage("oq-formulas", `${s.name} ${title}`));
+    const key = `${d.board || "CBSE"}|${g}|${formSubj}|${d.lang || "English"}`, store = getJ(FKEY, {});
+    let groups = refresh ? null : store[key];
+    if (!groups) {
+      try {
+        let chapters = [];
+        try { chapters = (await getSyllabus(formSubj)).chapters.map(c => c.name); } catch (_) { /* go without chapter names */ }
+        groups = (await askAI({ mode: "formulas", subject: s.name, chapters })).groups;
+        const st = getJ(FKEY, {}); st[key] = groups; const keys = Object.keys(st); if (keys.length > 12) delete st[keys[0]]; putJ(FKEY, st);
+      } catch (err) {
+        if (current.page !== "Formula sheet" || formSubj !== (sk || formSubj)) return;
+        $("fs-body").innerHTML = errorHTML(err.message, "fs-retry"); $("fs-retry").addEventListener("click", () => openFormulas(formSubj, true));
+        return;
+      }
+    }
+    if (current.page !== "Formula sheet" || !$("fs-body")) return;
+    $("fs-body").innerHTML = `<div class="oq-fgroups">${groups.map(gr => `<div class="oq-sec oq-fgroup"><span class="oq-label">${esc(gr.chapter).toUpperCase()}</span>
+        ${gr.items.map(it => `<div class="oq-frow" data-find="${esc((gr.chapter + " " + it.name + " " + it.formula + " " + it.meaning).toLowerCase())}"><div class="nm">${esc(it.name)}</div><div class="eqn fx" translate="no">${esc(it.formula)}</div><div class="mn">${esc(it.meaning)}</div></div>`).join("")}</div>`).join("")}</div>
+      <p class="oq-note oq-noprint">Made by Verity for your board and class. Check with your textbook if anything looks different. <button type="button" class="oq-linkbtn" id="fs-new">Make it again</button></p>`;
+    $("fs-new").addEventListener("click", () => openFormulas(formSubj, true));
+    $("fs-find").addEventListener("input", e => {
+      const v = e.target.value.trim().toLowerCase();
+      formPage.querySelectorAll(".oq-frow").forEach(r => { r.style.display = !v || r.dataset.find.includes(v) ? "" : "none"; });
+      formPage.querySelectorAll(".oq-fgroup").forEach(gp => { gp.style.display = [...gp.querySelectorAll(".oq-frow")].some(r => r.style.display !== "none") ? "" : "none"; });
+    });
+  }
+
+  /* --- concept maps --- */
+  const MAPKEY = "omniQuestMaps";
+  let mapSubj = "bio";
+  function openMap(prefill) {
+    if (prefill && prefill.s) mapSubj = prefill.s;
+    current = { page: "Concept maps" };
+    setCrumb({ name: "Concept maps" });
+    activate("oq-map");
+    const saved = getJ(MAPKEY, []), syl = sylCached(mapSubj), chapters = syl ? syl.chapters.map(c => c.name) : [];
+    mapPage.innerHTML = `<div class="oq-page">
+      <div class="oq-pagehead"><div><span class="oq-label">STUDY TOOLS</span><h1>Concept maps</h1><p>See a whole chapter on one page: the big ideas and how they connect. Click any idea to open its lesson.</p></div></div>
+      <div class="oq-sec oq-make">
+        <div class="oq-row" style="margin-bottom:12px">${Object.entries(SUBJECTS).map(([k, s]) => `<button type="button" class="oq-chip ${mapSubj === k ? "on" : ""}" style="--c:${s.color}" data-ms="${k}">${s.name}</button>`).join("")}</div>
+        <div class="oq-makerow"><input id="mp-topic" list="mp-list" type="text" placeholder="Chapter or topic, e.g. ${esc(chapters[0] || "Life Processes")}" value="${esc((prefill && prefill.topic) || "")}" autocomplete="off"><datalist id="mp-list">${chapters.map(c => `<option value="${esc(c)}">`).join("")}</datalist><button type="button" class="oq-btn primary" id="mp-make">Make concept map</button></div>
+        <div id="mp-msg"></div>
+      </div>
+      ${saved.length ? `<span class="oq-label" style="margin-top:20px;display:block">YOUR MAPS</span><div class="oq-row" style="margin-top:8px">${saved.map((m, i) => `<button type="button" class="oq-chip" style="--c:${SUBJECTS[m.s] ? SUBJECTS[m.s].color : "#55cfff"}" data-map="${i}">${esc(m.topic)}</button>`).join("")}</div>` : ""}
+    </div>`;
+    mapPage.querySelectorAll("[data-ms]").forEach(b => b.addEventListener("click", () => { mapSubj = b.dataset.ms; openMap({ topic: $("mp-topic").value }); if (!sylCached(mapSubj)) getSyllabus(mapSubj).then(() => { if (current.page === "Concept maps" && $("mp-topic")) openMap({ topic: $("mp-topic").value }); }).catch(() => {}); }));
+    mapPage.querySelectorAll("[data-map]").forEach(b => b.addEventListener("click", () => showMap(getJ(MAPKEY, [])[b.dataset.map])));
+    const make = async () => {
+      const topic = $("mp-topic").value.trim();
+      if (!topic) { $("mp-topic").focus(); return; }
+      const d = read(), key = `${topic.toLowerCase()}|${mapSubj}|${d.grade}|${d.lang || "English"}`;
+      const hit = getJ(MAPKEY, []).find(m => m.key === key);
+      if (hit) return showMap(hit);
+      $("mp-make").disabled = true;
+      $("mp-msg").innerHTML = `<div class="oq-loading" style="margin-top:12px"><span class="oq-dots"><span></span><span></span><span></span></span>Verity is drawing your concept map…</div>`;
+      try {
+        const j = await askAI({ mode: "conceptmap", topic, subject: SUBJECTS[mapSubj].name });
+        const entry = { key, s: mapSubj, topic, map: j.map };
+        const v = getJ(MAPKEY, []).filter(m => m.key !== key); v.unshift(entry); putJ(MAPKEY, v.slice(0, 12));
+        if (current.page === "Concept maps") showMap(entry);
+      } catch (err) {
+        if ($("mp-make")) { $("mp-make").disabled = false; $("mp-msg").innerHTML = `<p class="oq-err">${esc(err.message)}</p>`; }
+      }
+    };
+    $("mp-make").addEventListener("click", make);
+    $("mp-topic").addEventListener("keydown", e => { if (e.key === "Enter") make(); });
+    if (prefill && prefill.auto && prefill.topic) make();
+  }
+  function mapSVG(m, color) {
+    const PAL = ["#55cfff", "#a78bfa", "#3ddc97", "#ffb347", "#f472b6", "#facc15"];
+    const tw = (t, size) => Math.min(230, Math.max(60, t.length * size * .56 + 28));
+    const LEAF_H = 38, GAP = 18, W = 1180, CX = W / 2;
+    const br = m.branches.map((b, i) => ({ ...b, color: PAL[i % PAL.length], side: i % 2 === 0 ? 1 : -1 }));
+    const sides = { 1: br.filter(b => b.side === 1), "-1": br.filter(b => b.side === -1) };
+    const blockH = b => Math.max(1, b.leaves.length) * LEAF_H;
+    const sideH = k => sides[k].reduce((a, b) => a + blockH(b), 0) + GAP * Math.max(0, sides[k].length - 1);
+    const H = Math.max(sideH(1), sideH(-1), 120) + 60, CY = H / 2;
+    let out = "";
+    const node = (x, y, text, opts) => { const w = tw(text, opts.size); return `<g class="${opts.cls || ""}" ${opts.data || ""}><rect x="${x - w / 2}" y="${y - opts.h / 2}" width="${w}" height="${opts.h}" rx="${opts.h / 2}" fill="${opts.fill}" stroke="${opts.stroke}" stroke-width="1.5"/><text x="${x}" y="${y + opts.size * .36}" text-anchor="middle" font-size="${opts.size}" font-weight="${opts.weight}" fill="${opts.text}">${esc(text)}</text></g>`; };
+    const curve = (x1, y1, x2, y2, c, wdt) => `<path d="M${x1} ${y1} C${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}" fill="none" stroke="${c}" stroke-width="${wdt}" opacity=".7"/>`;
+    [1, -1].forEach(side => {
+      let y = CY - sideH(side) / 2;
+      sides[side].forEach(b => {
+        const h = blockH(b), by = y + h / 2, bx = CX + side * 250, lx = CX + side * 470;
+        const cw = tw(m.center, 17) / 2, bw = tw(b.label, 14) / 2;
+        out += curve(CX + side * cw, CY, bx - side * bw, by, b.color, 2.5);
+        b.leaves.forEach((l, k) => {
+          const ly = y + LEAF_H * k + LEAF_H / 2, lw = tw(l, 12.5) / 2;
+          out += curve(bx + side * bw, by, lx - side * lw, ly, b.color, 1.5);
+          out += node(lx, ly, l, { size: 12.5, h: 28, fill: "#141e30", stroke: b.color + "88", text: "#dbe7f3", weight: 600, cls: "leaf", data: `data-leaf="${esc(l)}"` });
+        });
+        out += node(bx, by, b.label, { size: 14, h: 34, fill: b.color + "26", stroke: b.color, text: "#ffffff", weight: 700, cls: "branch", data: `data-leaf="${esc(b.label)}"` });
+        y += h + GAP;
+      });
+    });
+    out += node(CX, CY, m.center, { size: 17, h: 46, fill: color, stroke: color, text: "#0b1220", weight: 800 });
+    return `<svg class="oq-mapsvg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">${out}</svg>`;
+  }
+  function showMap(entry) {
+    if (!entry || !entry.map) return openMap();
+    const color = SUBJECTS[entry.s] ? SUBJECTS[entry.s].color : "#55cfff";
+    current = { page: "Concept maps" };
+    setCrumb({ name: "Concept maps" });
+    activate("oq-map");
+    mapPage.innerHTML = `<div class="oq-page oq-mappage">
+      <div class="oq-pagehead"><div><span class="oq-label">${SUBJECTS[entry.s] ? SUBJECTS[entry.s].name.toUpperCase() : ""} · CONCEPT MAP</span><h1>${esc(entry.topic)}</h1><p>Click any idea to open its lesson.</p></div>
+        <div class="oq-row oq-noprint"><button type="button" class="oq-btn" id="mp-print">Print</button><button type="button" class="oq-btn" id="mp-back">All maps</button></div></div>
+      <div class="oq-mapbox">${mapSVG(entry.map, color)}</div></div>`;
+    mapPage.querySelectorAll("[data-leaf]").forEach(g => g.addEventListener("click", () => openLesson({ name: g.dataset.leaf, s: entry.s, inChapter: entry.topic })));
+    $("mp-back").addEventListener("click", () => openMap({ s: entry.s }));
+    $("mp-print").addEventListener("click", () => printPage("oq-map", `${entry.topic} concept map`));
+  }
+  // print any one page (formula sheet, concept map) cleanly
+  function printPage(id, title) {
+    const old = document.title;
+    document.title = `${title} - OmniQuest`;
+    document.body.classList.add("oq-printing", "oq-print-" + id);
+    const done = () => { document.body.classList.remove("oq-printing", "oq-print-" + id); document.title = old; window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    window.print();
+    setTimeout(done, 1500);
+  }
+  const formPage = toolPage("oq-formulas"), mapPage = toolPage("oq-map");
+
+  const toolsCss = document.createElement("style");
+  toolsCss.textContent = `
+    .oq-toolswrap { position: relative; }
+    .oq-toolsbtn { position: relative; gap: 7px; }
+    .oq-toolsbtn svg { color: #9fdcff; }
+    .oq-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #f07883; box-shadow: 0 0 0 2px #0f1726; }
+    .oq-dot[hidden] { display: none; }
+    .oq-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 320px; padding: 6px; background: #131d2f; border: 1px solid #334155; border-radius: 14px; box-shadow: 0 24px 60px #000a; z-index: 2000; animation: oqDrop .16s ease-out; }
+    .oq-menu[hidden] { display: none; }
+    .oq-mi { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: transparent; color: #e2ebf6; text-align: left; padding: 9px 10px; border-radius: 10px; cursor: pointer; }
+    .oq-mi:hover, .oq-mi:focus-visible { background: #1f2d45; outline: none; }
+    .oq-mi .ic { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 10px; background: #1b2840; color: #9fdcff; }
+    .oq-mi .tx { flex: 1; min-width: 0; }
+    .oq-mi b { display: block; font-size: 14px; }
+    .oq-mi small { display: block; color: #7d8fa8; font-size: 12px; font-weight: 600; }
+    .oq-mi .oq-count, .oq-count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #f07883; color: #fff; font-size: 11.5px; font-weight: 800; }
+    .oq-mi .oq-count[hidden] { display: none; }
+    .oq-fgroups { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: start; }
+    .oq-fgroup { margin: 0 !important; border-top: 3px solid var(--c); }
+    .oq-frow { display: grid; grid-template-columns: 1fr; gap: 3px; padding: 10px 0; border-top: 1px solid #22324a; }
+    .oq-frow:first-of-type { border-top: 0; }
+    .oq-frow .nm { color: #a9b8cc; font-size: 12.5px; font-weight: 700; }
+    .oq-frow .fx { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: .2px; white-space: normal; }
+    .oq-frow .mn { color: #8195ad; font-size: 13px; line-height: 1.5; }
+    .oq-mappage { max-width: none; }
+    .oq-mapbox { background: linear-gradient(160deg, #141e30, #101828); border: 1px solid #2c3d53; border-radius: 16px; padding: 14px; overflow-x: auto; }
+    .oq-mapsvg { display: block; width: 100%; min-width: 860px; height: auto; }
+    .oq-mapsvg [data-leaf] { cursor: pointer; }
+    .oq-mapsvg [data-leaf]:hover rect { stroke-width: 2.5; filter: brightness(1.25); }
+    @media (max-width: 900px) { .oq-fgroups { grid-template-columns: 1fr; } .oq-menu { position: fixed; left: 12px; right: 12px; width: auto; top: 70px; } .oq-toolsbtn span { display: none; } }
+    @media print {
+      body.oq-print-oq-formulas #oq-formulas, body.oq-print-oq-formulas #oq-formulas *, body.oq-print-oq-map #oq-map, body.oq-print-oq-map #oq-map * { visibility: visible !important; }
+      body.oq-print-oq-formulas #oq-formulas, body.oq-print-oq-map #oq-map { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+      body.oq-print-oq-formulas #oq-formulas * { color: #111 !important; background: transparent !important; box-shadow: none !important; animation: none !important; }
+      body.oq-print-oq-formulas .oq-fgroup { border: 1px solid #ccc !important; break-inside: avoid; }
+      body.oq-print-oq-formulas .oq-noprint, body.oq-print-oq-formulas .oq-row, body.oq-print-oq-map .oq-noprint { display: none !important; }
+      body.oq-print-oq-map .oq-mapbox { border: 0 !important; }
+      body.oq-print-oq-map #oq-map h1, body.oq-print-oq-map #oq-map p, body.oq-print-oq-map #oq-map .oq-label { color: #111 !important; }
+    }
+  `;
+  document.head.appendChild(toolsCss);
 
   /* ---------- 12. start ---------- */
   if (sidebar) sidebar.setAttribute("aria-hidden", "true");
