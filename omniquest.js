@@ -710,7 +710,7 @@
   /* ---------- 8b. syllabus: chapters + subtopics for your board and class ---------- */
   const SKEY = "omniQuestSyllabus";
   const pending = {};
-  const sylKey = sk => { const d = read(); return `${d.board || "CBSE"}|${Number(d.grade) || 7}|${SUBJECTS[sk].name}|${bookFor(sk, d)}`; };
+  const sylKey = sk => { const d = read(); return `v2|${d.board || "CBSE"}|${Number(d.grade) || 7}|${SUBJECTS[sk].name}|${bookFor(sk, d)}`; };
   const sylCached = sk => { try { return (JSON.parse(localStorage.getItem(SKEY)) || {})[sylKey(sk)] || null; } catch (_) { return null; } };
   function getSyllabus(sk) {
     const cached = sylCached(sk);
