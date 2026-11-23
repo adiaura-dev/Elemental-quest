@@ -92,7 +92,8 @@
     T("Simple and Compound Interest", "maths", 7, 9, null, "interest"),
     T("Arithmetic Progressions", "maths", 10, 10, null, "ap sequence nth term"),
 
-    T("Human Organs in 3D", "bio", 6, 10, { lab: "organs" }, "human body organ systems organs heart lungs liver stomach intestines anatomy parts"),
+    T("Human Body Explorer", "bio", 6, 10, { frame: "oq-bio", tool: "body" }, "human body organ systems organs heart lungs liver stomach intestines anatomy parts diagram labelled"),
+    T("Human Organs in 3D", "bio", 6, 10, { lab: "organs" }, "3d model organs anatomy"),
     T("The Human Heart in 3D", "bio", 7, 10, { lab: "heart" }, "heart circulation blood transportation circulatory"),
     T("The Human Brain in 3D", "bio", 8, 10, { lab: "brain" }, "brain nervous system control coordination"),
     T("Animal Cell in 3D", "bio", 6, 10, { lab: "animalcell" }, "cell structure organelles nucleus mitochondria the cell unit of life"),
@@ -493,7 +494,7 @@
   const M = (uid, author, license, about, tasks) => ({ kind: "3d", src: uid, author, license, about, tasks });
   const LABS = {
     // biology (3D)
-    organs: M("fe69d7b1ed6f46a3bd0b6933b796092e", "unlim3d", "Sketchfab Standard", "A 3D model of the main organs in the chest and abdomen. Drag to rotate, scroll or pinch to zoom.", ["Find the heart. Which two organs sit on either side of it?", "Rotate to the back. Which organ is the largest?", "Follow the food pipe down to the stomach and the intestines."]),
+    organs: M("5cfafb312f504815aa3fec55735607a6", "Z-Anatomy", "CC BY-SA 4.0", "An anatomy-atlas model of the body's internal organs inside the skeleton. Drag to rotate, scroll or pinch to zoom, double-click to zoom in on an organ.", ["Zoom in on the chest. Find the heart and the two lungs.", "Below the lungs, find the liver and the stomach.", "Follow the intestines down. Which bones protect the organs in the chest?"]),
     heart: M("3f8072336ce94d18b3d0d055a1ece089", "neshallads", "CC BY 4.0", "A realistic model of the human heart, the muscular pump of the circulatory system.", ["Find the aorta, the biggest artery leaving the top of the heart.", "Find the coronary arteries on the surface. What do they supply blood to?", "Count the large blood vessels joined to the heart."]),
     brain: M("7a27c17fd6c0488bb31ab093236a47fb", "3DRT STUDIOS", "CC BY 4.0", "The human brain, the control centre of the nervous system.", ["Find the cerebrum, the large wrinkled top part.", "Find the cerebellum at the back. It controls balance.", "Why do you think the brain is folded into ridges?"]),
     animalcell: M("0d9f7f4257224975b2ef83a283709b2f", "montanna", "CC BY 4.0", "A labelled 3D animal cell. Click the numbered dots to read about each organelle.", ["Find the nucleus and the nucleolus inside it.", "Find a mitochondrion. What does it do?", "Which structures does a plant cell have that this cell does not?"]),
@@ -730,7 +731,7 @@
   const LAB_RULES = {
     maths: [[/quadratic/, "Graphing Quadratics"], [/(linear equations? in two|coordinate|straight line|graph)/, "Straight-Line Graphs"], [/(linear equation|finding the unknown|simple (linear )?equation|equations? in one variable|algebra play|forming equations|balance)/, "Equation Balance"], [/fraction/, "Fractions"], [/(integer|negative number|number line)/, "Integers on a Number Line"], [/(area|perimeter|mensuration)/, "Area and Perimeter"], [/(ratio|proportion|unit rate|unitary)/, "Ratio and Unit Rates"], [/(trigonometr|sine|cosine)/, "Trigonometry"], [/probabilit/, "Probability"], [/(statistic|data handling|mean|median|mode)/, "Mean, Median and Mode"]],
     chem: [[/periodic/, "Periodic Table"], [/isotope/, "Isotopes and Atomic Mass"], [/(atom|electron configuration|structure of the atom)/, "Build an Atom"], [/(state|solid|liquid|matter)/, "States of Matter"], [/(acid|base|salt|\bph\b)/, "pH Scale: Acids and Bases"], [/(equation|chemical reaction)/, "Balancing Chemical Equations"], [/(bond|molecule|covalent)/, "Molecule Shapes"], [/(solution|concentration|dissolv)/, "Concentration of Solutions"]],
-    bio: [[/(heredity|evolution|natural selection)/, "Natural Selection"], [/(dna|gene|chromosome)/, "DNA in 3D"], [/plant cell/, "Plant Cell in 3D"], [/\bcells?\b|cell structure|unit of life|organelle/, "Animal Cell in 3D"], [/(digest|nutrition in animals|alimentary)/, "Digestive System in 3D"], [/(heart|circulat|transportation|blood)/, "The Human Heart in 3D"], [/(brain|nervous|control and coordination)/, "The Human Brain in 3D"], [/(skeleton|bone|movement)/, "The Skeleton in 3D"], [/(human body|organ system|respirat|excret|organs)/, "Human Organs in 3D"]],
+    bio: [[/(heredity|evolution|natural selection)/, "Natural Selection"], [/(dna|gene|chromosome)/, "DNA in 3D"], [/plant cell/, "Plant Cell in 3D"], [/\bcells?\b|cell structure|unit of life|organelle/, "Animal Cell in 3D"], [/(digest|nutrition in animals|alimentary)/, "Digestive System in 3D"], [/(heart|circulat|transportation|blood)/, "The Human Heart in 3D"], [/(brain|nervous|control and coordination)/, "The Human Brain in 3D"], [/(skeleton|bone|movement)/, "The Skeleton in 3D"], [/(human body|organ system|respirat|excret|organs)/, "Human Body Explorer"]],
     phy: [[/ohm/, "Ohm's Law"], [/(electric|current|circuit)/, "Electric Circuits"], [/(magnetic effect|electromagnet|induction)/, "Electromagnetic Induction"], [/magnet/, "Magnets"], [/friction/, "Friction"], [/(force|motion|newton|speed|velocity)/, "Forces and Motion"], [/(work|energy|power)/, "Energy: Skate Park"], [/(refraction|prism)/, "Refraction of Light"], [/(light|mirror|lens|reflection)/, "Mirrors and Lenses"], [/(gravit|orbit)/, "Gravity and Orbits"], [/sound/, "Sound"], [/wave/, "Waves"], [/pressure/, "Pressure in Liquids"], [/(density|float|sink|buoyan)/, "Density: Float or Sink"], [/(pendulum|oscillat|time period)/, "Pendulum"], [/(solar system|planet|stars)/, "Build a Solar System"]]
   };
   function labFor(text, sk) {
@@ -971,10 +972,20 @@
     $("hw-clear").addEventListener("click", () => { st.image = null; $("hw-prev").innerHTML = ""; $("hw-clear").hidden = true; $("hw-file").value = ""; });
     $("hw-go").addEventListener("click", runCheck);
   }
+  // scrolls so the element sits just below the top bar (works even while the page is still changing)
+  function reveal(el) {
+    if (!el) return;
+    const go = () => { const y = el.getBoundingClientRect().top + window.scrollY - 96; window.scrollTo({ top: Math.max(0, y), behavior: "instant" }); };
+    requestAnimationFrame(go);
+    setTimeout(go, 350);
+  }
   async function runCheck() {
     const st = hwState, out = $("hw-out"), question = $("hw-q").value.trim(), working = $("hw-w").value.trim();
     if (!question && !working && !st.image) { out.innerHTML = `<p class="oq-note">Type your question and working, or add a photo first.</p>`; return; }
     out.innerHTML = loadingHTML("Verity is checking your work…");
+    const btn = $("hw-go"), label = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = `<span class="oq-spin oq-btnspin"></span>${esc(label.replace(/<[^>]+>/g, ""))}`;
+    reveal(out);
     try {
       const { check: c } = await askAI({ mode: "check", subject: SUBJECTS[st.s].name, question, working, image: st.image });
       const label = { correct: "All correct! Great work.", partly: "Nearly there!", incorrect: "Not quite yet.", unclear: "Verity couldn't fully check this." }[c.verdict];
@@ -984,11 +995,15 @@
         <div class="oq-actions">${c.solution ? `<button type="button" class="oq-btn" id="hw-sol">Show full solution</button>` : ""}<button type="button" class="oq-btn" id="hw-again">Check another</button></div>
         <div class="oq-sec" id="hw-solbox" hidden><span class="oq-label">FULL SOLUTION</span><p>${esc(c.solution)}</p></div>`;
       if (c.verdict === "correct") giveXP(10);
+      reveal(out);
       if ($("hw-sol")) $("hw-sol").addEventListener("click", e => { $("hw-solbox").hidden = false; e.target.remove(); });
       $("hw-again").addEventListener("click", () => { st.image = null; openHomework(); });
     } catch (err) {
       out.innerHTML = errorHTML(err.message, "hw-retry");
       $("hw-retry").addEventListener("click", runCheck);
+      reveal(out);
+    } finally {
+      if (btn.isConnected) { btn.disabled = false; btn.innerHTML = label; }
     }
   }
 
@@ -1813,6 +1828,8 @@
     .oq-dot[hidden] { display: none; }
     .oq-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 320px; padding: 6px; background: #131d2f; border: 1px solid #334155; border-radius: 14px; box-shadow: 0 24px 60px #000a; z-index: 2000; animation: oqDrop .16s ease-out; }
     .oq-menu[hidden] { display: none; }
+    .oq-btn:disabled { opacity: .6; cursor: progress; }
+    .oq-btnspin { display: inline-block; width: 13px; height: 13px; border-width: 2px; margin-right: 8px; vertical-align: -2px; border-top-color: currentColor; }
     .oq-mi { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: transparent; color: #e2ebf6; text-align: left; padding: 9px 10px; border-radius: 10px; cursor: pointer; }
     .oq-mi:hover, .oq-mi:focus-visible { background: #1f2d45; outline: none; }
     .oq-mi .ic { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 10px; background: #1b2840; color: #9fdcff; }
