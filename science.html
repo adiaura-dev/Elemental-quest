@@ -343,7 +343,7 @@ const TOOLS = {
     { id: "quiz", icon: "", name: "Biology Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#3ddc97" }
   ],
   physics: [
-    { id: "circuit", icon: "", name: "Circuit Lab", desc: "A simple circuit with a cell, a switch and a bulb. Test which materials are conductors and which are insulators.", g: shared().board === "ICSE" ? 7 : 6, color: "#ffb347" },
+    { id: "circuit", icon: "", name: "Circuit Lab", desc: "Cells, switches and bulbs. Test conductors, join cells, compare series and parallel, see a fuse at work and learn the circuit symbols.", g: shared().board === "ICSE" ? 7 : 6, color: "#ffb347" },
     { id: "motion", icon: "", name: "Motion Lab", desc: "Drive a car, watch the distance–time graph draw itself and predict how far it goes.", g: 7, color: "#55cfff" },
     { id: "quiz", icon: "", name: "Physics Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#7c5cff" }
   ]
@@ -765,12 +765,19 @@ function circuitTool() {
   const g = GRADE();
   let mode = g >= 10 ? "ohm" : "test", raf = null, phase = 0, on = true, current = 0, flowing = false;
   // Ohm's law is a Class 9-10 topic, so younger classes only see the conductor test
-  $("#t-extra").innerHTML = g >= 9 ? `<div class="seg"><button data-m="test">Conductor test</button><button data-m="ohm">Ohm's law</button></div>` : "";
-  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="circ-card">${circuitSVG()}<div class="hint" id="circ-hint"></div></div><div class="card info" id="circ-side"></div></div>`;
-  const wire = $("#wire"), len = wire.getTotalLength(), dots = 18;
-  $("#electrons").innerHTML = [...Array(dots)].map(() => `<circle r="3.6" fill="#7dd3fc" opacity="0"/>`).join("");
-  const e = [...document.querySelectorAll("#electrons circle")];
-  $("#switch-g").addEventListener("click", () => { on = !on; sfx.click(); update(); });
+  // Ohm's law is a Class 9-10 topic, so younger classes do not see it
+  const MODES = [["test", "Conductors"], ["cells", "Cells"], ["sp", "Series & parallel"], ["fuse", "Short circuit & fuse"], ["sym", "Symbols"], ...(g >= 9 ? [["ohm", "Ohm's law"]] : [])];
+  $("#t-extra").innerHTML = `<div class="seg">${MODES.map(([m, n]) => `<button data-m="${m}">${n}</button>`).join("")}</div>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="circ-card"></div><div class="card info" id="circ-side"></div></div>`;
+  let wire, len, e = [], benchStop = null;
+  const dots = 18;
+  function classic() {
+    $("#circ-card").innerHTML = `${circuitSVG()}<div class="hint" id="circ-hint"></div>`;
+    wire = $("#wire"); len = wire.getTotalLength();
+    $("#electrons").innerHTML = [...Array(dots)].map(() => `<path d="M-5 -4.5 L5 0 L-5 4.5 Z" fill="#ffd166" opacity="0"/>`).join("");
+    e = [...document.querySelectorAll("#electrons path")];
+    $("#switch-g").addEventListener("click", () => { on = !on; sfx.click(); update(); });
+  }
   function setBulb(level) {
     const l = Math.min(1, level);
     $("#bulb-glow").setAttribute("opacity", l);
@@ -779,7 +786,13 @@ function circuitTool() {
   }
   function anim() {
     phase = (phase + (flowing ? Math.max(0.6, Math.min(8, current * 2.2)) : 0)) % len;
-    e.forEach((c, k) => { const pt = wire.getPointAtLength((len - ((phase + k * len / dots) % len)) % len); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); c.setAttribute("opacity", flowing ? .95 : .2); });
+    if (wire && e.length && document.body.contains(wire)) e.forEach((c, k) => {
+      const d = (phase + k * len / dots) % len, pt = wire.getPointAtLength(d), nx = wire.getPointAtLength(Math.min(len, d + 1));
+      const ang = Math.atan2(nx.y - pt.y, nx.x - pt.x) * 180 / Math.PI;
+      // hide arrows inside the cell (x 58-102, y 106-217) and the gap part
+      const hidden = pt.x > 50 && pt.x < 110 && pt.y > 100 && pt.y < 222;
+      c.setAttribute("transform", `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) rotate(${ang.toFixed(0)})`); c.setAttribute("opacity", hidden ? 0 : flowing ? .95 : .25);
+    });
     raf = requestAnimationFrame(anim);
   }
   function drawGap(fill, text, resistor) {
@@ -851,7 +864,7 @@ function circuitTool() {
   }
   function ohmSide() {
     state = { V: 6, R: 4 };
-    $("#circ-hint").textContent = "The dots show electrons. They move faster when the current is larger.";
+    $("#circ-hint").textContent = "The arrows show the current, from + round to −. They move faster when the current is larger.";
     $("#circ-side").innerHTML = `<div class="label">OHM'S LAW · V = I × R</div>
       <div class="mission" id="target"></div>
       <div class="slider"><div class="row"><span>Voltage (V)</span><b id="v-out">6 V</b></div><input type="range" id="v-in" min="1.5" max="12" step="1.5" value="6"></div>
@@ -862,11 +875,307 @@ function circuitTool() {
     $("#r-in").addEventListener("input", ev => { state.R = Number(ev.target.value); $("#r-out").textContent = `${state.R} Ω`; update(); });
     newTarget(); update();
   }
-  const setMode = m => { mode = m; on = true; document.querySelectorAll("#t-extra [data-m]").forEach(x => x.classList.toggle("on", x.dataset.m === m)); (m === "test" ? testSide : ohmSide)(); };
+  const setMode = m => {
+    mode = m; on = true; target = null;
+    document.querySelectorAll("#t-extra [data-m]").forEach(x => x.classList.toggle("on", x.dataset.m === m));
+    if (benchStop) { benchStop(); benchStop = null; }
+    wire = null; e = [];
+    if (m === "test" || m === "ohm") { classic(); (m === "test" ? testSide : ohmSide)(); }
+    else benchStop = m === "sym" ? symbolsLab(g) : workbench(m, g);
+  };
   document.querySelectorAll("#t-extra [data-m]").forEach(b => b.addEventListener("click", () => { sfx.click(); setMode(b.dataset.m); }));
   setMode(mode);
   anim();
-  cleanup = () => cancelAnimationFrame(raf);
+  cleanup = () => { cancelAnimationFrame(raf); if (benchStop) benchStop(); };
+}
+
+/* ---------- CIRCUIT WORKBENCH: cells, series & parallel, short circuit & fuse, symbols ----------
+   Current is shown as conventional current: arrows go from the + end of the cell, round the circuit, to the − end. */
+const CW = { real: { wire: "#5d6b86", ww: 5 }, dia: { wire: "#c3cbe6", ww: 2.5 } };
+const plusBadge = (x, y, sign, r = 8) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#e8ecf8"/><path d="M${x - r * .55} ${y} h${r * 1.1}${sign === "+" ? ` M${x} ${y - r * .55} v${r * 1.1}` : ""}" stroke="#151c2f" stroke-width="2.2" stroke-linecap="round"/>`;
+// every part sits on a horizontal wire, centred on (x, y); hw is half its width
+const PART = {
+  cell: { hw: 34, draw(x, y, o, v) {
+    const pr = !o.flip; // + terminal on the right?
+    if (v === "dia") {
+      const lx = pr ? x + 5 : x - 5, sx = pr ? x - 5 : x + 5; // long thin plate = +, short thick plate = −
+      return `<path d="M${x - 34} ${y} H${Math.min(lx, sx)} M${Math.max(lx, sx)} ${y} H${x + 34}" stroke="${CW.dia.wire}" stroke-width="${CW.dia.ww}"/>
+        <line x1="${lx}" y1="${y - 17}" x2="${lx}" y2="${y + 17}" stroke="#e8ecf8" stroke-width="2.5"/><line x1="${sx}" y1="${y - 9}" x2="${sx}" y2="${y + 9}" stroke="#e8ecf8" stroke-width="6"/>
+        <text x="${lx + (pr ? 8 : -8)}" y="${y - 12}" text-anchor="middle" fill="#e8ecf8" font-size="13" font-weight="800">+</text>`;
+    }
+    const capX = pr ? x + 14 : x - 30, nubX = pr ? x + 30 : x - 34;
+    return `<rect x="${nubX}" y="${y - 6}" width="4" height="12" rx="1.5" fill="#c9cfd8"/>
+      <rect x="${x - 30}" y="${y - 14}" width="60" height="28" rx="6" fill="url(#cwBatt)" stroke="#5d6b86" stroke-width="1.2"/>
+      <rect x="${capX}" y="${y - 14}" width="16" height="28" rx="${pr ? "0" : "6"}" fill="url(#cwCap)"/>
+      <rect x="${pr ? x + 24 : x - 30}" y="${y - 14}" width="6" height="28" rx="3" fill="url(#cwCap)"/>
+      <text x="${pr ? x - 7 : x + 7}" y="${y + 4.5}" text-anchor="middle" fill="#e8ecf8" font-weight="800" font-size="11">1.5 V</text>
+      ${plusBadge(pr ? x + 22 : x - 22, y - 25, "+")}${plusBadge(pr ? x - 22 : x + 22, y - 25, "−")}
+      ${o.flip ? `<text x="${x}" y="${y + 30}" text-anchor="middle" fill="#ff9aa8" font-size="10.5" font-weight="800">turned round</text>` : ""}`;
+  } },
+  bulb: { hw: 30, draw(x, y, o, v) {
+    const l = o.removed ? 0 : o.level;
+    if (v === "dia") {
+      return `<path d="M${x - 30} ${y} H${x - 14} M${x + 14} ${y} H${x + 30}" stroke="${CW.dia.wire}" stroke-width="${CW.dia.ww}"/>
+        ${l > .02 ? `<circle cx="${x}" cy="${y}" r="${18 + 16 * l}" fill="url(#cwGlow)" opacity="${Math.min(1, .3 + l)}"/>` : ""}
+        <circle cx="${x}" cy="${y}" r="14" fill="${l > .02 ? "#4a4020" : "#141a2c"}" stroke="#e8ecf8" stroke-width="2.5"/>
+        ${o.removed ? `<text x="${x}" y="${y + 32}" text-anchor="middle" fill="#ff9aa8" font-size="10.5" font-weight="800">removed</text>` : `<path d="M${x - 9.9} ${y - 9.9} L${x + 9.9} ${y + 9.9} M${x + 9.9} ${y - 9.9} L${x - 9.9} ${y + 9.9}" stroke="#e8ecf8" stroke-width="2.2"/>`}`;
+    }
+    const holder = `<rect x="${x - 30}" y="${y - 7}" width="60" height="14" rx="5" fill="#2a3349" stroke="#5d6b86"/><circle cx="${x - 22}" cy="${y}" r="3.5" fill="#c9cfd8"/><circle cx="${x + 22}" cy="${y}" r="3.5" fill="#c9cfd8"/>`;
+    if (o.removed) return `${holder}<rect x="${x - 10}" y="${y - 15}" width="20" height="9" rx="2" fill="#3b4254" stroke="#7c8596"/><text x="${x}" y="${y - 22}" text-anchor="middle" fill="#ff9aa8" font-size="10.5" font-weight="800">bulb removed</text>`;
+    const fill = l > .02 ? `rgb(255,${Math.round(214 + 30 * l)},${Math.round(120 + 90 * l)})` : "#2a3349";
+    return `${l > .02 ? `<circle cx="${x}" cy="${y - 44}" r="${26 + 34 * l}" fill="url(#cwGlow)" opacity="${Math.min(1, .25 + l)}"/>` : ""}
+      ${holder}
+      <rect x="${x - 10}" y="${y - 24}" width="20" height="17" rx="3" fill="url(#cwBase)"/>
+      <path d="M${x - 9} ${y - 24} C${x - 9} ${y - 31} ${x - 20} ${y - 36} ${x - 20} ${y - 48} C${x - 20} ${y - 59} ${x - 11} ${y - 66} ${x} ${y - 66} C${x + 11} ${y - 66} ${x + 20} ${y - 59} ${x + 20} ${y - 48} C${x + 20} ${y - 36} ${x + 9} ${y - 31} ${x + 9} ${y - 24} Z" fill="${fill}" fill-opacity=".9" stroke="#c9d3e4" stroke-width="1.6"/>
+      <path d="M${x - 5} ${y - 25} L${x - 4} ${y - 42} M${x + 5} ${y - 25} L${x + 4} ${y - 42}" stroke="#9aa3b5" stroke-width="1.2"/>
+      <path d="M${x - 4} ${y - 42} q2 -6 4 0 q2 6 4 0" fill="none" stroke="${l > .02 ? "#b45309" : "#9aa3b5"}" stroke-width="1.6"/>`;
+  } },
+  sw: { hw: 30, draw(x, y, o, v) {
+    const ang = o.open ? -28 : 0;
+    if (v === "dia") return `<path d="M${x - 30} ${y} H${x - 16} M${x + 16} ${y} H${x + 30}" stroke="${CW.dia.wire}" stroke-width="${CW.dia.ww}"/>
+      <circle cx="${x - 16}" cy="${y}" r="4" fill="none" stroke="#e8ecf8" stroke-width="2"/><circle cx="${x + 16}" cy="${y}" r="4" fill="none" stroke="#e8ecf8" stroke-width="2"/>
+      <line x1="${x - 13}" y1="${y}" x2="${x + 15}" y2="${y}" stroke="#e8ecf8" stroke-width="2.5" stroke-linecap="round" transform="rotate(${ang} ${x - 13} ${y})"/>`;
+    return `<rect x="${x - 30}" y="${y - 10}" width="60" height="20" rx="6" fill="#151c2f" stroke="#2e3854"/>
+      <circle cx="${x - 18}" cy="${y}" r="5" fill="#c9cfd8"/><rect x="${x + 13}" y="${y - 5}" width="10" height="10" rx="2" fill="#c9cfd8"/>
+      <line x1="${x - 18}" y1="${y}" x2="${x + 19}" y2="${y}" stroke="#e8ecf8" stroke-width="4.5" stroke-linecap="round" transform="rotate(${ang} ${x - 18} ${y})"/>
+      <text x="${x}" y="${y + 27}" text-anchor="middle" fill="#8f9bbd" font-size="10.5" font-weight="800">${o.open ? "switch open" : "switch closed"}</text>`;
+  } },
+  fuse: { hw: 30, draw(x, y, o, v) {
+    if (v === "dia") return `<path d="M${x - 30} ${y} H${x - 18} M${x + 18} ${y} H${x + 30}" stroke="${CW.dia.wire}" stroke-width="${CW.dia.ww}"/>
+      <rect x="${x - 18}" y="${y - 7}" width="36" height="14" fill="none" stroke="#e8ecf8" stroke-width="2.2"/>
+      <path d="${o.blown ? `M${x - 18} ${y} H${x - 5} M${x + 5} ${y} H${x + 18}` : `M${x - 18} ${y} H${x + 18}`}" stroke="#e8ecf8" stroke-width="2"/>`;
+    return `<rect x="${x - 30}" y="${y - 8}" width="10" height="16" rx="2" fill="url(#cwBase)"/><rect x="${x + 20}" y="${y - 8}" width="10" height="16" rx="2" fill="url(#cwBase)"/>
+      <rect x="${x - 20}" y="${y - 7}" width="40" height="14" fill="#9fd8ff" fill-opacity=".18" stroke="#c9d3e4" stroke-width="1.2"/>
+      ${o.blown ? `<path d="M${x - 20} ${y} H${x - 6} M${x + 6} ${y} H${x + 20}" stroke="#d7dce4" stroke-width="1.4"/><circle cx="${x}" cy="${y}" r="5" fill="#3a3028" opacity=".8"/>` : `<path d="M${x - 20} ${y} H${x + 20}" stroke="#d7dce4" stroke-width="1.4"/>`}
+      <text x="${x}" y="${y + 26}" text-anchor="middle" fill="${o.blown ? "#ff9aa8" : "#8f9bbd"}" font-size="10.5" font-weight="800">${o.blown ? "fuse melted" : "fuse"}</text>`;
+  } }
+};
+const CW_DEFS = `<defs>
+  <radialGradient id="cwGlow"><stop offset="0" stop-color="#fff7c2"/><stop offset=".35" stop-color="#ffd84d" stop-opacity=".7"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient>
+  <linearGradient id="cwBatt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2133"/><stop offset=".5" stop-color="#2f3852"/><stop offset="1" stop-color="#1b2133"/></linearGradient>
+  <linearGradient id="cwCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8641f"/><stop offset=".5" stop-color="#f0a95a"/><stop offset="1" stop-color="#a8641f"/></linearGradient>
+  <linearGradient id="cwBase" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c8596"/><stop offset=".5" stop-color="#d7dce4"/><stop offset="1" stop-color="#7c8596"/></linearGradient>
+</defs>`;
+// a straight wire with parts on it: wire segments are drawn only between parts
+function cwLine(x1, y, x2, parts, v, boxes) {
+  const c = CW[v === "dia" ? "dia" : "real"], ps = [...parts].sort((a, b) => a.x - b.x), lo = Math.min(x1, x2), hi = Math.max(x1, x2);
+  let out = "", at = lo;
+  ps.forEach(p => {
+    const hw = PART[p.t].hw;
+    out += `<line x1="${at}" y1="${y}" x2="${p.x - hw}" y2="${y}" stroke="${c.wire}" stroke-width="${c.ww}" stroke-linecap="round"/>`;
+    out += `<g ${p.act ? `data-act="${p.act}" style="cursor:pointer"` : ""}><rect x="${p.x - hw}" y="${y - 30}" width="${hw * 2}" height="60" fill="transparent"/>${PART[p.t].draw(p.x, y, p, v)}</g>`;
+    boxes.push([p.x - hw + 4, y - 16, p.x + hw - 4, y + 16]);
+    at = p.x + hw;
+  });
+  return out + `<line x1="${at}" y1="${y}" x2="${hi}" y2="${y}" stroke="${c.wire}" stroke-width="${c.ww}" stroke-linecap="round"/>`;
+}
+const cwV = (x, y1, y2, v) => `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${CW[v === "dia" ? "dia" : "real"].wire}" stroke-width="${CW[v === "dia" ? "dia" : "real"].ww}" stroke-linecap="round"/>`;
+const cwDot = (x, y, v) => `<circle cx="${x}" cy="${y}" r="${v === "dia" ? 4.5 : 5}" fill="${CW[v === "dia" ? "dia" : "real"].wire}"/>`;
+const cwLevel = P => Math.min(1, .4 * Math.sqrt(P / 2.25)); // P in watts for 1-ohm bulbs; one cell and one bulb gives 0.4
+const cwWord = l => l <= .02 ? "Off" : l < .2 ? "Very dim" : l < .35 ? "Dim" : l < .6 ? "Normal" : l < .95 ? "Bright" : "Very bright";
+const SYMBOLS = [
+  { n: "Cell", g: 6, d: (x, y) => PART.cell.draw(x, y, {}, "dia"), why: "The long thin line is the + terminal. The short thick line is the − terminal." },
+  { n: "Battery (cells joined together)", g: 6, d: (x, y) => `${PART.cell.draw(x - 20, y, {}, "dia")}${PART.cell.draw(x + 20, y, {}, "dia")}`, why: "Two or more cells joined + to −. The + of one cell touches the − of the next." },
+  { n: "Bulb (lamp)", g: 6, d: (x, y) => PART.bulb.draw(x, y, { level: 0 }, "dia"), why: "A circle with a cross inside it." },
+  { n: "Switch (open, OFF)", g: 6, d: (x, y) => PART.sw.draw(x, y, { open: true }, "dia"), why: "There is a gap, so no current can flow." },
+  { n: "Switch (closed, ON)", g: 6, d: (x, y) => PART.sw.draw(x, y, { open: false }, "dia"), why: "The gap is closed, so current can flow." },
+  { n: "Fuse", g: 7, d: (x, y) => PART.fuse.draw(x, y, {}, "dia"), why: "A thin wire inside a holder. It melts if too much current flows." },
+  { n: "Connecting wire", g: 6, d: (x, y) => `<line x1="${x - 34}" y1="${y}" x2="${x + 34}" y2="${y}" stroke="${CW.dia.wire}" stroke-width="2.5"/>`, why: "A plain straight line." },
+  { n: "Wires joined", g: 7, d: (x, y) => `<line x1="${x - 34}" y1="${y}" x2="${x + 34}" y2="${y}" stroke="${CW.dia.wire}" stroke-width="2.5"/><line x1="${x}" y1="${y}" x2="${x}" y2="${y + 24}" stroke="${CW.dia.wire}" stroke-width="2.5"/>${cwDot(x, y, "dia")}`, why: "A dot shows where wires are connected." },
+  { n: "Wires crossing (not joined)", g: 7, d: (x, y) => `<line x1="${x - 34}" y1="${y}" x2="${x + 34}" y2="${y}" stroke="${CW.dia.wire}" stroke-width="2.5"/><line x1="${x}" y1="${y - 22}" x2="${x}" y2="${y + 22}" stroke="${CW.dia.wire}" stroke-width="2.5"/>`, why: "No dot, so the wires only cross. They are not connected." },
+  { n: "Resistor", g: 9, d: (x, y) => `<path d="M${x - 34} ${y} H${x - 18} l3 -8 l6 16 l6 -16 l6 16 l6 -16 l6 16 l3 -8 H${x + 34}" fill="none" stroke="${CW.dia.wire}" stroke-width="2.5" stroke-linejoin="round"/>`, why: "A zig-zag line. It resists the flow of current." },
+  { n: "Ammeter", g: 9, d: (x, y) => `<path d="M${x - 34} ${y} H${x - 14} M${x + 14} ${y} H${x + 34}" stroke="${CW.dia.wire}" stroke-width="2.5"/><circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#e8ecf8" stroke-width="2.2"/><text x="${x}" y="${y + 5}" text-anchor="middle" fill="#e8ecf8" font-size="14" font-weight="800">A</text>`, why: "Measures current. It is joined in series." },
+  { n: "Voltmeter", g: 9, d: (x, y) => `<path d="M${x - 34} ${y} H${x - 14} M${x + 14} ${y} H${x + 34}" stroke="${CW.dia.wire}" stroke-width="2.5"/><circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#e8ecf8" stroke-width="2.2"/><text x="${x}" y="${y + 5}" text-anchor="middle" fill="#e8ecf8" font-size="14" font-weight="800">V</text>`, why: "Measures voltage. It is joined in parallel." }
+];
+const symSVG = (s, w = 150, h = 74) => `<svg viewBox="0 0 ${w} ${h}" class="dia">${s.d(w / 2, h / 2 + 4)}</svg>`;
+
+function workbench(mode, g) {
+  const st = { view: "real", cells: [false, false], swOpen: false, layout: "series", n: 2, removed: [false, false, false], short: false, blown: false, phase: 0, raf: null, blowT: null };
+  if (mode === "cells") st.cells = [false];
+  const card = $("#circ-card"), side = $("#circ-side");
+  let segs = [], boxes = [];
+  const arrowsG = () => $("#cw-arrows");
+
+  function compute() {
+    if (mode === "cells") {
+      const emf = 1.5 * st.cells.reduce((s, f) => s + (f ? -1 : 1), 0);
+      const I = st.swOpen ? 0 : emf; // one 1-ohm bulb
+      return { emf, I, lv: [cwLevel(I * I)] };
+    }
+    if (mode === "sp") {
+      const emf = 3, n = st.n, rm = st.removed.slice(0, n);
+      if (st.swOpen) return { emf, I: 0, branch: rm.map(() => 0), lv: rm.map(() => 0) };
+      if (st.layout === "series") {
+        const I = rm.some(Boolean) ? 0 : emf / n;
+        return { emf, I, branch: rm.map(() => I), lv: rm.map(r => (r ? 0 : cwLevel(I * I))) };
+      }
+      const branch = rm.map(r => (r ? 0 : emf));
+      return { emf, I: branch.reduce((a, b) => a + b, 0), branch, lv: branch.map(b => cwLevel(b * b)) };
+    }
+    // fuse: 2 cells, fuse, bulb, switch; a short wire across the bulb
+    const emf = 3;
+    if (st.swOpen || st.blown) return { emf, I: 0, bulbI: 0, lv: [0] };
+    if (st.short) return { emf, I: 12, bulbI: 0, lv: [0] };
+    return { emf, I: 3, bulbI: 3, lv: [cwLevel(9)] };
+  }
+
+  function draw() {
+    const v = st.view, c = compute();
+    boxes = []; segs = [];
+    let body = "";
+    if (mode === "cells" || mode === "fuse" || (mode === "sp" && st.layout === "series")) {
+      const L = 60, R = 500, T = 120, B = 330;
+      const cellParts = (mode === "cells" ? st.cells : [false, false]).map((f, k, a) => ({ t: "cell", x: 210 + (k - (a.length - 1) / 2) * 72, flip: f, act: mode === "cells" ? `flip${k}` : "" }));
+      const bottom = [...cellParts, { t: "sw", x: 400, open: st.swOpen, act: "sw" }];
+      let top;
+      if (mode === "sp") top = Array.from({ length: st.n }, (_, k) => ({ t: "bulb", x: R - (R - L) * (k + 1) / (st.n + 1), level: c.lv[k], removed: st.removed[k], act: `bulb${k}` }));
+      else if (mode === "fuse") top = [{ t: "bulb", x: 330, level: c.lv[0] }, { t: "fuse", x: 160, blown: st.blown }];
+      else top = [{ t: "bulb", x: 280, level: c.lv[0] }];
+      body += cwLine(L, B, R, bottom, v, boxes) + cwLine(L, T, R, top, v, boxes) + cwV(L, T, B, v) + cwV(R, T, B, v);
+      const I = c.I, dir = Math.sign(I) || 1, a = Math.abs(I);
+      // conventional current: out of + (right end of the cells), right along the bottom, up, left along the top, down
+      const run = (x1, y1, x2, y2, cur) => segs.push(dir > 0 ? [x1, y1, x2, y2, cur] : [x2, y2, x1, y1, cur]);
+      run(L, B, R, B, a); run(R, B, R, T, a);
+      if (mode === "fuse") {
+        const bx = 330, sy = T + 46;
+        if (st.short) body += `<path d="M${bx - 48} ${T} V${sy} H${bx + 48} V${T}" fill="none" stroke="${v === "dia" ? CW.dia.wire : "#d08a4a"}" stroke-width="${v === "dia" ? 2.5 : 4}" stroke-linejoin="round"/>${cwDot(bx - 48, T, v)}${cwDot(bx + 48, T, v)}<text x="${bx}" y="${sy + 20}" text-anchor="middle" fill="#ff9aa8" font-size="11" font-weight="800">short-circuit wire</text>`;
+        run(R, T, bx + 48, T, a);
+        if (st.short) { run(bx + 48, T, bx + 48, sy, a); run(bx + 48, sy, bx - 48, sy, a); run(bx - 48, sy, bx - 48, T, a); run(bx + 48, T, bx - 48, T, 0); }
+        else run(bx + 48, T, bx - 48, T, a);
+        run(bx - 48, T, L, T, a);
+      } else run(R, T, L, T, a);
+      run(L, T, L, B, a);
+    } else {
+      // parallel: cells and switch on the bottom, one bulb on each rung
+      const L = 60, R = 500, B = 345, rungs = [105, 190, 275].slice(0, st.n), top = rungs[0], xs = [200, 300, 400];
+      body += cwLine(L, B, R, [{ t: "cell", x: 170, flip: false }, { t: "cell", x: 242, flip: false }, { t: "sw", x: 400, open: st.swOpen, act: "sw" }], v, boxes);
+      rungs.forEach((y, k) => { body += cwLine(L, y, R, [{ t: "bulb", x: xs[k], level: c.lv[k], removed: st.removed[k], act: `bulb${k}` }], v, boxes); if (k) body += cwDot(L, y, v) + cwDot(R, y, v); });
+      body += cwV(L, top, B, v) + cwV(R, top, B, v);
+      segs.push([L, B, R, B, c.I]);
+      const ys = [B, ...[...rungs].reverse()];
+      for (let k = 0; k < ys.length - 1; k++) {
+        const above = rungs.filter(y => y <= ys[k + 1]).reduce((s, y) => s + c.branch[rungs.indexOf(y)], 0);
+        segs.push([R, ys[k], R, ys[k + 1], above]); segs.push([L, ys[k + 1], L, ys[k], above]);
+      }
+      rungs.forEach((y, k) => segs.push([R, y, L, y, c.branch[k]]));
+    }
+    card.querySelector("#cw-svg").innerHTML = `${CW_DEFS}${body}<g id="cw-arrows"></g>`;
+    sideUpdate(c);
+  }
+
+  function arrows() {
+    st.phase += 1;
+    const g = arrowsG();
+    if (g) {
+      let h = "";
+      segs.forEach(([x1, y1, x2, y2, cur]) => {
+        if (cur <= 0.001) return;
+        const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len, ang = Math.atan2(uy, ux) * 180 / Math.PI;
+        const speed = Math.min(6, .5 + cur * .45), gap = 46;
+        for (let d = (st.phase * speed) % gap; d < len; d += gap) {
+          const x = x1 + ux * d, y = y1 + uy * d;
+          if (boxes.some(([a, b, c2, e]) => x > a && x < c2 && y > b && y < e)) continue;
+          h += `<path d="M-5 -4.5 L5 0 L-5 4.5 Z" fill="#ffd166" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${ang})"/>`;
+        }
+      });
+      g.innerHTML = h;
+    }
+    st.raf = requestAnimationFrame(arrows);
+  }
+
+  function sideUpdate(c) {
+    const out = $("#cw-out"), why = $("#cw-why");
+    if (!out) return;
+    if (mode === "cells") {
+      const fl = st.cells.filter(Boolean).length;
+      out.innerHTML = `<div class="meter"><span>CELLS</span><b>${st.cells.length}</b></div><div class="meter"><span>TOTAL VOLTAGE</span><b>${Math.abs(c.emf).toFixed(1)} V</b></div><div class="meter"><span>BULB</span><b style="font-size:16px">${cwWord(c.lv[0])}</b></div>`;
+      why.innerHTML = st.swOpen ? "The switch is open, so the circuit is broken and no current flows."
+        : fl && c.emf === 0 ? "One cell is turned round. Its push cancels the other cell's push, so the total voltage is 0 V and the bulb stays off."
+        : fl ? "A cell turned round works against the others. Only the extra cells push current, so the bulb is dimmer than it could be."
+        : st.cells.length === 1 ? "One cell gives 1.5 V. Add another cell, joined + to −, to push more current."
+        : st.cells.length === 2 ? "Two cells joined + to − add up: 1.5 V + 1.5 V = 3 V. More push, so the bulb is brighter."
+        : "Three cells give 4.5 V. Very bright, but too many cells can blow a bulb.";
+    } else if (mode === "sp") {
+      out.innerHTML = c.lv.map((l, k) => `<div class="meter"><span>BULB ${k + 1}</span><b style="font-size:16px">${st.removed[k] ? "Removed" : cwWord(l)}</b></div>`).join("");
+      out.style.gridTemplateColumns = `repeat(${st.n}, 1fr)`;
+      const anyRm = st.removed.slice(0, st.n).some(Boolean);
+      why.innerHTML = st.swOpen ? "The switch is open, so no current flows anywhere."
+        : st.layout === "series"
+          ? (anyRm ? "<b>Series:</b> there is only one path. Removing one bulb breaks it, so every bulb goes off." : `<b>Series:</b> one path, so the same current goes through every bulb. The bulbs share the cells' push${st.n > 1 ? ", so each one is dimmer than a single bulb" : ""}.`)
+          : (anyRm ? "<b>Parallel:</b> each bulb has its own path. Removing one bulb does not affect the others. This is how the lights in your home are wired." : "<b>Parallel:</b> each bulb has its own path to the cells, so each one glows as brightly as a single bulb.");
+    } else {
+      out.innerHTML = `<div class="meter"><span>FUSE</span><b style="font-size:16px">${st.blown ? "Melted" : "OK"}</b></div><div class="meter"><span>CURRENT</span><b style="font-size:16px">${c.I > 5 ? "Very high" : c.I > 0 ? "Normal" : "None"}</b></div><div class="meter"><span>BULB</span><b style="font-size:16px">${cwWord(c.lv[0])}</b></div>`;
+      why.innerHTML = st.blown ? "The fuse wire melted and broke the circuit. This stopped the huge current before the wires could get hot and start a fire. Find the fault, then replace the fuse."
+        : st.short && !st.swOpen ? "<b>Short circuit!</b> The current takes the easy path through the wire and skips the bulb. With almost nothing to slow it down, the current becomes very large."
+        : "The fuse is a thin wire. It lets normal current through. Try joining a wire across the bulb to make a short circuit.";
+      $("#cw-short").textContent = st.short ? "Remove the short-circuit wire" : "Join a wire across the bulb";
+      $("#cw-fix").disabled = !st.blown;
+    }
+  }
+
+  function checkFuse() {
+    clearTimeout(st.blowT);
+    if (mode === "fuse" && st.short && !st.swOpen && !st.blown) st.blowT = setTimeout(() => { st.blown = true; sfx.bad(); draw(); }, 1300);
+  }
+
+  // build the screen
+  card.innerHTML = `<div class="row" style="justify-content:flex-end;margin-bottom:6px"><div class="seg" id="cw-view"><button data-v="real" class="on">Picture</button><button data-v="dia">Circuit diagram</button></div></div><svg class="dia" id="cw-svg" viewBox="0 24 560 354" style="overflow:visible"></svg><div class="hint">Arrows show the current: out of the + end of the cells, round the circuit, back to the − end.</div>`;
+  const tip = mode === "cells" ? "Tap a cell to turn it round. Tap the switch to open or close it."
+    : mode === "sp" ? "Tap a bulb to unscrew it. Tap the switch to open or close it." : "Tap the switch to open or close it.";
+  side.innerHTML = mode === "cells"
+    ? `<div class="label">CELLS IN A CIRCUIT</div><p>${tip}</p><div class="seg" id="cw-n"><button data-n="1">1 cell</button><button data-n="2">2 cells</button><button data-n="3">3 cells</button></div><div class="meters" id="cw-out"></div><div class="box" id="cw-why"></div>`
+    : mode === "sp"
+      ? `<div class="label">SERIES AND PARALLEL</div><p>${tip}</p><div class="seg" id="cw-lay" style="margin-bottom:8px"><button data-l="series">Series</button><button data-l="parallel">Parallel</button></div><div class="seg" id="cw-n"><button data-n="1">1 bulb</button><button data-n="2">2 bulbs</button><button data-n="3">3 bulbs</button></div><div class="meters" id="cw-out"></div><div class="box" id="cw-why"></div>`
+      : `<div class="label">SHORT CIRCUIT AND FUSE</div><p>${tip}</p><div class="row" style="margin-bottom:10px"><button class="btn alt" id="cw-short"></button><button class="btn ghost" id="cw-fix">Replace the fuse</button></div><div class="meters" id="cw-out"></div><div class="box" id="cw-why"></div>`;
+  const mark = (sel, attr, val) => document.querySelectorAll(`${sel} button`).forEach(b => b.classList.toggle("on", b.dataset[attr] === String(val)));
+  if (mode === "cells") { st.cells = [false, false]; mark("#cw-n", "n", 2); }
+  if (mode === "sp") { mark("#cw-lay", "l", st.layout); mark("#cw-n", "n", st.n); }
+  $("#cw-view").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; sfx.click(); st.view = b.dataset.v; mark("#cw-view", "v", st.view); draw(); });
+  $("#cw-n")?.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return; sfx.click(); const n = Number(b.dataset.n);
+    if (mode === "cells") st.cells = Array.from({ length: n }, (_, k) => st.cells[k] || false); else { st.n = n; st.removed = [false, false, false]; }
+    mark("#cw-n", "n", n); draw();
+  });
+  $("#cw-lay")?.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; sfx.click(); st.layout = b.dataset.l; st.removed = [false, false, false]; mark("#cw-lay", "l", st.layout); draw(); });
+  $("#cw-short")?.addEventListener("click", () => { sfx.click(); st.short = !st.short; draw(); checkFuse(); });
+  $("#cw-fix")?.addEventListener("click", () => { sfx.click(); st.blown = false; draw(); checkFuse(); });
+  $("#cw-svg").addEventListener("click", e => {
+    const a = e.target.closest("[data-act]")?.dataset.act; if (!a) return; sfx.click();
+    if (a === "sw") st.swOpen = !st.swOpen;
+    else if (a.startsWith("flip")) st.cells[Number(a.slice(4))] = !st.cells[Number(a.slice(4))];
+    else if (a.startsWith("bulb")) st.removed[Number(a.slice(4))] = !st.removed[Number(a.slice(4))];
+    draw(); checkFuse();
+  });
+  draw(); arrows();
+  return () => { cancelAnimationFrame(st.raf); clearTimeout(st.blowT); };
+}
+
+function symbolsLab(g) {
+  const card = $("#circ-card"), side = $("#circ-side"), list = SYMBOLS.filter(s => s.g <= Math.max(g, 6));
+  card.innerHTML = `<div class="label">CIRCUIT SYMBOLS</div><p style="color:#c3cbe6;margin:0 0 12px">Scientists draw circuits with simple symbols instead of pictures, so anyone in the world can read them.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${list.map(s => `<div class="box" style="margin:0;text-align:center">${symSVG(s)}<div style="font-weight:800;color:#e8ecf8;font-size:13.5px;margin-top:4px">${s.n}</div><div style="font-size:12px;color:var(--muted);line-height:1.4;margin-top:3px">${s.why}</div></div>`).join("")}</div>`;
+  let qs = [], i = 0, score = 0;
+  const start = () => { qs = shuffle(list).slice(0, Math.min(6, list.length)); i = 0; score = 0; ask(); };
+  function ask() {
+    if (i >= qs.length) {
+      side.innerHTML = `<div class="label">TEST YOURSELF</div><h3>${score} / ${qs.length}</h3><p>${score === qs.length ? "Perfect. You know your symbols." : "Look at the symbols again, then try once more."}</p><button class="btn" id="sy-again">Try again</button>`;
+      if (score === qs.length) { burst(80); sfx.win(); }
+      $("#sy-again").addEventListener("click", () => { sfx.click(); start(); });
+      return;
+    }
+    const q = qs[i], opts = shuffle([q.n, ...shuffle(list.filter(s => s.n !== q.n)).slice(0, 3).map(s => s.n)]);
+    side.innerHTML = `<div class="label">TEST YOURSELF · ${i + 1} / ${qs.length}</div><p>What does this symbol stand for?</p><div class="box" style="background:#0f1426">${symSVG(q, 180, 80)}</div>
+      <div style="display:grid;gap:8px">${opts.map(o => `<button class="btn ghost" data-o="${o}" style="text-align:left;font-size:14px">${o}</button>`).join("")}</div><div class="fb" id="sy-fb"></div>`;
+    side.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
+      const ok = b.dataset.o === q.n, fb = $("#sy-fb");
+      side.querySelectorAll("[data-o]").forEach(x => { x.disabled = true; if (x.dataset.o === q.n) x.style.outline = "2px solid var(--green)"; });
+      if (ok) { score++; right(b, 5); fb.className = "fb show good"; } else { wrong($("#circ-card")); fb.className = "fb show bad"; }
+      fb.innerHTML = `${ok ? "Correct." : `It is: <b>${q.n}</b>.`} ${q.why}`;
+      setTimeout(() => { i++; ask(); }, 1700);
+    }));
+  }
+  start();
+  return () => {};
 }
 
 /* ---------- MOTION LAB ---------- */
