@@ -493,7 +493,7 @@
   /* ---------- REAL LABS: PhET simulations + 3D models ---------- */
   // PhET Interactive Simulations, University of Colorado Boulder (CC BY 4.0) and 3D models on Sketchfab
   const PHET_CREDIT = 'Simulation by <a href="https://phet.colorado.edu" target="_blank" rel="noopener">PhET Interactive Simulations</a>, University of Colorado Boulder, licensed under CC BY 4.0.';
-  const P = (slug, about, tasks) => ({ kind: "phet", src: slug, about, tasks });
+  const P = (slug, about, tasks, q = "") => ({ kind: "phet", src: slug, about, tasks, q });
   const M = (uid, author, license, about, tasks) => ({ kind: "3d", src: uid, author, license, about, tasks });
   const LABS = {
     // biology (3D)
@@ -507,7 +507,7 @@
     dna: M("60e95170b37549e3b45ee490b74bb112", "Holoxica", "CC BY 4.0", "A model of DNA, the double helix that carries genetic information.", ["Count how many strands twist around each other.", "The rungs of the ladder are base pairs. Which bases pair together?", "Where in a cell is DNA found?"]),
     selection: P("natural-selection", "Watch a population of bunnies change over generations as their environment changes.", ["Add wolves. Which fur colour survives best in the snow?", "Add a mutation and watch how it spreads.", "What happens when you change the environment to an equator?"]),
     // physics
-    circuits: P("circuit-construction-kit-dc", "Build real circuits with batteries, bulbs, switches and wires, and measure current and voltage.", ["Make a bulb light with one battery.", "Put two bulbs in series, then in parallel. Which is brighter?", "Test a coin, an eraser and a paper clip. Which ones conduct?"]),
+    circuits: P("circuit-construction-kit-dc", "Build real circuits with cells, bulbs, switches and wires. The arrows show the current flowing from the + end of the cell, round the circuit, back to the − end. The gold end of each cell is +, the black end is −.", ["Make a bulb light with one battery.", "Put two bulbs in series, then in parallel. Which is brighter?", "Test a coin, an eraser and a paper clip. Which ones conduct?"], "currentType=conventional"),
     ohm: P("ohms-law", "See how voltage, current and resistance are linked by V = I × R.", ["Raise the voltage. What happens to the current?", "Raise the resistance. What happens to the current?", "Find a voltage and resistance that give exactly 0.5 A."]),
     forces: P("forces-and-motion-basics", "Push objects, add friction and watch forces change motion.", ["In the Net Force screen, make the cart stay still with people pulling on both sides.", "In the Motion screen, push a box and watch the speed change.", "Turn on friction. How much harder do you have to push?"]),
     friction: P("friction", "Rub two surfaces together and see what friction does to atoms and temperature.", ["Rub the book on the surface. What happens to the thermometer?", "Keep rubbing. What happens to the atoms at the top?", "Why do your hands get warm when you rub them together?"]),
@@ -547,7 +547,7 @@
   };
   const LANG_LOCALE = { English: "en", Hindi: "hi", Bengali: "bn", Marathi: "mr", Telugu: "te", Tamil: "ta", Gujarati: "gu", Urdu: "ur", Kannada: "kn", Odia: "or", Malayalam: "ml", Punjabi: "pa", French: "fr", German: "de", Spanish: "es", Arabic: "ar", Chinese: "zh_CN", Japanese: "ja" };
   function labURL(L) {
-    if (L.kind === "phet") return `https://phet.colorado.edu/sims/html/${L.src}/latest/${L.src}_all.html?locale=${LANG_LOCALE[read().lang] || "en"}`;
+    if (L.kind === "phet") return `https://phet.colorado.edu/sims/html/${L.src}/latest/${L.src}_all.html?locale=${LANG_LOCALE[read().lang] || "en"}${L.q ? "&" + L.q : ""}`;
     return `https://sketchfab.com/models/${L.src}/embed?autostart=1&ui_theme=dark&ui_infos=0&dnt=1`;
   }
   const labPage = document.createElement("section");
