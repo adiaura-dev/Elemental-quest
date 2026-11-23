@@ -150,6 +150,14 @@ h1, h2, h3 { font-family: "Inter", system-ui, sans-serif !important; font-weight
 .hot.bad * { fill: rgba(240,120,131,.38); stroke: #f07883; stroke-width: 2.5; }
 .body-photo .lbl text { font-size: 12px; }
 .credit { text-align: center; color: #6f7d99; font-size: 11px; font-weight: 700; margin-top: 4px; }
+.body3d { position: relative; padding: 0 !important; overflow: hidden; height: min(72vh, 640px); min-height: 440px; }
+.body3d iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.b3-load { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: #121a2c; color: #e2ebf6; text-align: center; padding: 20px; transition: opacity .4s; }
+.b3-load small { color: #7d8fa8; }
+.b3-load.done { opacity: 0; pointer-events: none; }
+.b3-spin { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #22324a; border-top-color: #3ddc97; animation: b3spin .8s linear infinite; }
+@keyframes b3spin { to { transform: rotate(360deg); } }
+.info .box a { color: #9fdcff; }
 </style>
 </head>
 <body>
@@ -559,9 +567,21 @@ function bodySVG() {
     <g class="lbl">${lbl}</g></svg>
     <div class="credit">Illustration: DBCLS TogoTV, CC BY 4.0</div>`;
 }
+// clean, atlas-style 3D model of the organs (Z-Anatomy, CC BY-SA 4.0)
+const BODY_3D = "https://sketchfab.com/models/5cfafb312f504815aa3fec55735607a6/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark_link=0&dnt=1";
+function body3D() {
+  $("#t-extra").innerHTML = `<div class="seg"><button data-v="2d">Diagram</button><button data-v="3d" class="on">3D model</button></div>`;
+  $("#t-body").innerHTML = `<div class="grid2"><div class="card body3d"><div class="b3-load" id="b3-load"><span class="b3-spin"></span><b>Loading 3D model…</b><small>This can take a few seconds the first time.</small></div><iframe id="b3-frame" title="3D model of the human organs" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div>
+    <div class="card info"><div class="label">3D MODEL</div><h3>The organs in 3D</h3><p>Drag to rotate, scroll or pinch to zoom, and double-click an organ to zoom in on it. Switch back to <b>Diagram</b> to tap organs, read about them and try the organ challenge.</p>
+      <div class="box">3D model: Splanchnology by <a href="https://sketchfab.com/3d-models/5cfafb312f504815aa3fec55735607a6" target="_blank" rel="noopener">Z-Anatomy</a> on Sketchfab, licensed under CC BY-SA 4.0.</div></div></div>`;
+  if (!navigator.onLine) $("#b3-load").innerHTML = "<b>You're offline</b><small>The 3D model needs the internet. The diagram works offline.</small>";
+  else { $("#b3-frame").addEventListener("load", () => setTimeout(() => $("#b3-load") && $("#b3-load").classList.add("done"), 1500), { once: true }); $("#b3-frame").src = BODY_3D; }
+  document.querySelectorAll("#t-extra [data-v]").forEach(b => b.addEventListener("click", () => { if (b.dataset.v === "2d") { sfx.click(); bodyTool(); } }));
+}
 function bodyTool() {
   let sys = "all", ch = null, labels = true;
-  $("#t-extra").innerHTML = `<button class="chip on" id="body-lbl">Labels</button>`;
+  $("#t-extra").innerHTML = `<div class="row"><div class="seg"><button data-v="2d" class="on">Diagram</button><button data-v="3d">3D model</button></div><button class="chip on" id="body-lbl">Labels</button></div>`;
+  document.querySelectorAll("#t-extra [data-v]").forEach(b => b.addEventListener("click", () => { if (b.dataset.v === "3d") { sfx.click(); body3D(); } }));
   $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="body-card"><div class="mission" id="body-mission" hidden></div><div class="seg" id="sys" style="margin-bottom:12px">${Object.entries(SYSTEMS).map(([k, v]) => `<button data-s="${k}" class="${k === "all" ? "on" : ""}">${v}</button>`).join("")}</div><div id="body-svg">${bodySVG()}</div><div class="hint" id="body-hint">Tap any organ, or choose a system to highlight it.</div></div>
     <div class="card info" id="body-info"></div></div>`;
   const inChallenge = () => ch && !ch.done;
