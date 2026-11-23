@@ -379,15 +379,6 @@
     .oq-numin input::-webkit-outer-spin-button, .oq-numin input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .oq-numin span { color: #8195ad; font: 700 13px "Inter", system-ui, sans-serif; }
     .oq-hint { color: #5f7290; font: 600 12px "Inter", system-ui, sans-serif; }
-    .oq-schfind { width: 100%; background: #0f1726; border: 1px solid #334155; border-radius: 11px; padding: 11px 14px; color: #fff; font: 600 15px "Inter", system-ui, sans-serif; outline: none; margin-bottom: 10px; }
-    .oq-schfind:focus { border-color: #55cfff; box-shadow: 0 0 0 4px #55cfff22; }
-    .oq-schools { display: grid; gap: 8px; margin-bottom: 12px; max-height: 260px; overflow-y: auto; }
-    .oq-school { display: block; width: 100%; text-align: left; border: 1.5px solid #334155; background: #111a2b; color: #fff; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color .2s, background .2s; }
-    .oq-school b { display: block; font-size: 15px; }
-    .oq-school small { display: block; color: #8195ad; font-weight: 600; font-size: 12.5px; margin-top: 2px; }
-    .oq-school:hover { border-color: #55cfff88; }
-    .oq-school.on { border-color: #55cfff; background: #15283d; box-shadow: 0 0 0 3px #55cfff22; }
-    .oq-schnone { color: #8195ad; font-weight: 600; margin: 4px 2px; }
     .oq-bookrow { display: flex; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
     .oq-bookrow input { flex: 1; min-width: 220px; background: #0f1726; border: 1px solid #334155; border-radius: 10px; padding: 9px 12px; color: #fff; font: 600 14px "Inter", system-ui, sans-serif; outline: none; }
     .oq-bookrow input:focus { border-color: #55cfff; }
@@ -670,9 +661,7 @@
   function refreshTop() {
     const d = read(), xp = d.xp || 0;
     $("oq-xp").innerHTML = `<span>Lv ${Math.floor(xp / 100) + 1}</span><span class="oq-xpbar"><div style="width:${xp % 100}%"></div></span><span>${xp} XP</span>`;
-    const sch = schoolOf(d);
-    $("oq-prof").textContent = `${sch ? sch.name.split(" ")[0] + " · " : ""}${d.board === "IGCSE" && sch ? "Cambridge" : (d.board || "Board")} · ${d.board === "IGCSE" ? "Grade" : "Class"} ${d.grade || "?"}`;
-    $("oq-prof").title = sch ? `${sch.name} · change school, board or class` : "Change school, board or class";
+    $("oq-prof").textContent = `${d.board || "Board"} · ${d.board === "IGCSE" ? "Grade" : "Class"} ${d.grade || "?"}`;
     if (lastXP !== null && xp > lastXP) { const p = $("oq-xp"); p.classList.remove("bump"); void p.offsetWidth; p.classList.add("bump"); }
     lastXP = xp;
     if ($("oq-stats")) renderStats();
@@ -706,7 +695,7 @@
     const shuffle = a => a.slice().sort(() => Math.random() - .5);
     const tries = Object.keys(SUBJECTS).map(sk => shuffle(CATALOG.filter(t => t.s === sk && g >= t.a && g <= t.b && !/quiz|boss|practice/i.test(t.name)))[0]).filter(Boolean).map(t => t.name.replace(/ in 3D$/, ""));
     home.innerHTML = `<div class="oq-center">
-      <span class="oq-label">${schoolLabel(d) ? esc(schoolLabel(d).toUpperCase()) + " · " : ""}${d.board === "IGCSE" && schoolOf(d) ? "CAMBRIDGE" : esc(d.board || "")} · ${word.toUpperCase()} ${g}${d.lang && d.lang !== "English" ? ` · ${esc(LANG_NATIVE[d.lang] || d.lang).toUpperCase()}` : ""}</span>
+      <span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}${d.lang && d.lang !== "English" ? ` · ${esc(LANG_NATIVE[d.lang] || d.lang).toUpperCase()}` : ""}</span>
       <h1>What do you want to <span>learn</span> today?</h1>
       <div class="oq-slot" id="oq-slot"></div>
       <div class="oq-try">Try: ${tries.map(t => `<button type="button" data-try="${esc(t)}">${esc(t)}</button>`).join("")}</div>
@@ -728,7 +717,7 @@
     if (cached) return Promise.resolve(cached);
     const key = sylKey(sk);
     if (pending[key]) return pending[key];
-    pending[key] = fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "syllabus", subject: SUBJECTS[sk].name, message: "syllabus", book: bookFor(sk), school: schoolLabel(read()) }) })
+    pending[key] = fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "syllabus", subject: SUBJECTS[sk].name, message: "syllabus", book: bookFor(sk) }) })
       .then(r => r.json().then(j => ({ ok: r.ok, j })).catch(() => ({ ok: false, j: {} })))
       .then(({ ok, j }) => {
         delete pending[key];
@@ -764,8 +753,7 @@
     activate("oq-subject");
     subjPage.style.setProperty("--c", s.color);
     const labs = CATALOG.filter(t => t.s === sk && t.open && g >= t.a && g <= t.b);
-    const sl = schoolLabel(d);
-    const head = book => `<div class="oq-subhead"><div><span class="oq-label">${sl ? esc(sl.toUpperCase()) + " · " : ""}${d.board === "IGCSE" && schoolOf(d) ? "CAMBRIDGE" : esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name}</h1><p>${book} <button type="button" class="oq-linkbtn" id="oq-bookbtn">${bookFor(sk, d) ? "Change book" : "Set your textbook"}</button></p><div id="oq-bookedit"></div></div><div class="oq-row"><button type="button" class="oq-btn" id="oq-subj-form">${sk === "bio" ? "Key terms" : "Formula sheet"}</button><button type="button" class="oq-btn" id="oq-subj-exam">Take a test</button><input class="oq-filter" id="oq-filter" type="search" placeholder="Filter chapters and subtopics…"></div></div>
+    const head = book => `<div class="oq-subhead"><div><span class="oq-label">${esc(d.board || "")} · ${word.toUpperCase()} ${g}</span><h1>${s.name}</h1><p>${book} <button type="button" class="oq-linkbtn" id="oq-bookbtn">${bookFor(sk, d) ? "Change book" : "Set your textbook"}</button></p><div id="oq-bookedit"></div></div><div class="oq-row"><button type="button" class="oq-btn" id="oq-subj-form">${sk === "bio" ? "Key terms" : "Formula sheet"}</button><button type="button" class="oq-btn" id="oq-subj-exam">Take a test</button><input class="oq-filter" id="oq-filter" type="search" placeholder="Filter chapters and subtopics…"></div></div>
       ${labs.length ? `<div class="oq-labs" style="--c:${s.color}"><span class="oq-label">INTERACTIVE</span>${labs.map(t => `<button type="button" class="oq-labbtn" data-lab="${CATALOG.indexOf(t)}">${esc(t.name)}</button>`).join("")}</div>` : ""}`;
     const bindLabs = () => subjPage.querySelectorAll("[data-lab]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); openTopic(CATALOG[b.dataset.lab]); }));
     const bindExam = () => {
@@ -904,11 +892,7 @@
     ["Gujarati", "ગુજરાતી"], ["Urdu", "اردو"], ["Kannada", "ಕನ್ನಡ"], ["Odia", "ଓଡ଼ିଆ"], ["Malayalam", "മലയാളം"], ["Punjabi", "ਪੰਜਾਬੀ"],
     ["French", "Français"], ["German", "Deutsch"], ["Spanish", "Español"], ["Arabic", "العربية"], ["Chinese", "中文"], ["Japanese", "日本語"]
   ];
-  /* --- schools: choose your school and your chapters follow its books --- */
-  const SCHOOLS = [
-    { id: "vidyashilp", name: "Vidyashilp Academy", place: "Yelahanka, Bengaluru", boards: ["ICSE", "IGCSE"] }
-  ];
-  const schoolOf = d => SCHOOLS.find(x => x.id === d.school) || null;
+  /* --- textbooks: chapters follow the Vidyashilp syllabus (Selina Concise for ICSE, Cambridge for IGCSE) --- */
   function defaultBook(board, grade, subject) {
     if (board === "ICSE") return `Selina Concise ${subject === "Maths" ? "Mathematics" : subject}`;
     if (board === "IGCSE") {
@@ -917,64 +901,37 @@
     }
     return "";
   }
-  // the textbook used for a subject: one the student set, else the school's usual book
+  // the textbook for a subject: one the student set, else the usual book for their board
   function bookFor(sk, d = read()) {
     const name = SUBJECTS[sk].name, own = d.books && d.books[`${d.board}|${d.grade}|${name}`];
-    if (own) return own;
-    return schoolOf(d) ? defaultBook(d.board, Number(d.grade) || 7, name) : "";
+    return own || defaultBook(d.board, Number(d.grade) || 7, name);
   }
-  const schoolLabel = d => (schoolOf(d) ? schoolOf(d).name : (d.schoolName || ""));
 
   function openProfile() {
     const d = read();
-    let school = d.school || (d.schoolName ? "other" : (d.board ? "other" : null)), schoolName = d.schoolName || "";
-    let board = d.board || null, grade = Number(d.grade) || null, lang = d.lang || "English", step = 0, find = "";
+    let board = d.board || null, grade = Number(d.grade) || null, lang = d.lang || "English", step = 0;
     const m = document.createElement("div");
     m.className = "oq-modal";
-    const preset = () => SCHOOLS.find(x => x.id === school) || null;
-    const BOARDS = [["CBSE", "NCERT"], ["ICSE", "CISCE"], ["IGCSE", "Cambridge"], ["State", "State board"], ["Other", "Any"]];
     const draw = () => {
-      const word = board === "IGCSE" ? "Grade" : "Class", p = preset();
-      const ready = [school, board, grade, lang][step];
-      let body;
-      if (step === 0) {
-        const list = SCHOOLS.filter(x => !find || (x.name + " " + x.place).toLowerCase().includes(find.toLowerCase()));
-        body = `<h2>Which school are you in?</h2><p>Your chapters and subtopics will follow your school's own textbooks.</p>
-          <input class="oq-schfind" id="oq-sch-find" type="search" placeholder="Search for your school" value="${esc(find)}" autocomplete="off">
-          <div class="oq-schools">${list.map(x => `<button type="button" class="oq-school ${school === x.id ? "on" : ""}" data-v="${x.id}"><b>${esc(x.name)}</b><small>${esc(x.place)} · ${x.boards.map(bd => bd === "IGCSE" ? "Cambridge" : bd).join(" and ")}</small></button>`).join("")}
-            ${!list.length ? `<p class="oq-schnone">No school found with that name.</p>` : ""}
-            <button type="button" class="oq-school ${school === "other" ? "on" : ""}" data-v="other"><b>My school isn't listed</b><small>Choose your board instead</small></button></div>
-          ${school === "other" ? `<input class="oq-schfind" id="oq-sch-name" type="text" placeholder="Your school's name (optional)" value="${esc(schoolName)}" maxlength="80" autocomplete="off">` : ""}`;
-      } else if (step === 1) {
-        const opts = p ? BOARDS.filter(([bd]) => p.boards.includes(bd)) : BOARDS;
-        body = `<h2>${p ? `Which track are you on at ${esc(p.name)}?` : "Which board are you in?"}</h2><p>${p ? "Your school offers more than one. Pick the one you study." : "We'll match chapters and questions to your syllabus."}</p>
-          <div class="oq-choices">${opts.map(([bd, sub]) => `<button type="button" class="oq-choice ${board === bd ? "on" : ""}" data-v="${bd}">${bd === "IGCSE" && p ? "Cambridge" : bd}<small>${bd === "IGCSE" && p ? "IGCSE" : sub}</small></button>`).join("")}</div>`;
-      } else if (step === 2) {
-        body = `<h2>Which ${word.toLowerCase()} are you in?</h2><p>Topics and difficulty will fit your ${word.toLowerCase()}.</p><div class="oq-choices">${[6, 7, 8, 9, 10].map(g => `<button type="button" class="oq-choice ${grade === g ? "on" : ""}" data-v="${g}">${word} ${g}</button>`).join("")}</div>`;
-      } else {
-        body = `<h2>Which language?</h2><p>The website, lessons, tests and Verity will all use this language.</p><div class="oq-choices oq-langs">${LANGUAGES.map(([en, nat]) => `<button type="button" class="oq-choice ${lang === en ? "on" : ""}" data-v="${en}">${nat}${nat !== en ? `<small>${en}</small>` : ""}</button>`).join("")}</div>`;
-      }
-      m.innerHTML = `<div class="oq-dialog"><div class="oq-steps">${[0, 1, 2, 3].map(i => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>
-        <span class="oq-label">STEP ${step + 1} OF 4</span>${body}
-        <div class="oq-foot">${step ? `<button type="button" class="oq-backbtn" id="oq-prev">Back</button>` : "<span></span>"}<button type="button" class="oq-go" id="oq-next" ${ready ? "" : "disabled"}>${step === 3 ? "Start learning" : "Next"}</button></div></div>`;
+      const word = board === "IGCSE" ? "Grade" : "Class";
+      const ready = [board, grade, lang][step];
+      const body = step === 0
+        ? `<h2>Which board are you in?</h2><p>We'll match chapters and questions to your syllabus.</p><div class="oq-choices">${[["CBSE", "NCERT"], ["ICSE", "CISCE"], ["IGCSE", "Cambridge"], ["State", "State board"], ["Other", "Any"]].map(([b, s]) => `<button type="button" class="oq-choice ${board === b ? "on" : ""}" data-v="${b}">${b}<small>${s}</small></button>`).join("")}</div>`
+        : step === 1
+        ? `<h2>Which ${word.toLowerCase()} are you in?</h2><p>Topics and difficulty will fit your ${word.toLowerCase()}.</p><div class="oq-choices">${[6, 7, 8, 9, 10].map(g => `<button type="button" class="oq-choice ${grade === g ? "on" : ""}" data-v="${g}">${word} ${g}</button>`).join("")}</div>`
+        : `<h2>Which language?</h2><p>The website, lessons, tests and Verity will all use this language.</p><div class="oq-choices oq-langs">${LANGUAGES.map(([en, nat]) => `<button type="button" class="oq-choice ${lang === en ? "on" : ""}" data-v="${en}">${nat}${nat !== en ? `<small>${en}</small>` : ""}</button>`).join("")}</div>`;
+      m.innerHTML = `<div class="oq-dialog"><div class="oq-steps">${[0, 1, 2].map(i => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>
+        <span class="oq-label">STEP ${step + 1} OF 3</span>${body}
+        <div class="oq-foot">${step ? `<button type="button" class="oq-backbtn" id="oq-prev">Back</button>` : "<span></span>"}<button type="button" class="oq-go" id="oq-next" ${ready ? "" : "disabled"}>${step === 2 ? "Start learning" : "Next"}</button></div></div>`;
       m.querySelectorAll("[data-v]").forEach(b => b.addEventListener("click", () => {
-        const v = b.dataset.v;
-        if (step === 0) { school = v; const ps = SCHOOLS.find(x => x.id === v); if (ps && board && !ps.boards.includes(board)) board = null; if (ps && !board) board = ps.boards[0]; }
-        else if (step === 1) board = v; else if (step === 2) grade = Number(v); else lang = v;
+        if (step === 0) board = b.dataset.v; else if (step === 1) grade = Number(b.dataset.v); else lang = b.dataset.v;
         draw();
-        if (step === 0 && v === "other") setTimeout(() => m.querySelector("#oq-sch-name")?.focus(), 30);
       }));
-      const fi = m.querySelector("#oq-sch-find");
-      if (fi) fi.addEventListener("input", e => { find = e.target.value; const pos = e.target.selectionStart; draw(); const n = m.querySelector("#oq-sch-find"); n.focus(); n.setSelectionRange(pos, pos); });
-      const ni = m.querySelector("#oq-sch-name");
-      if (ni) ni.addEventListener("input", e => { schoolName = e.target.value; });
       if (m.querySelector("#oq-prev")) m.querySelector("#oq-prev").addEventListener("click", () => { step--; draw(); });
       m.querySelector("#oq-next").addEventListener("click", () => {
-        if (step < 3) { step++; draw(); return; }
-        const ps = preset();
-        const newSchool = ps ? ps.id : "", newName = ps ? "" : schoolName.trim().slice(0, 80);
-        const changed = board !== d.board || grade !== Number(d.grade) || newSchool !== (d.school || "");
-        write({ board, grade, lang, school: newSchool, schoolName: newName }); trSoon();
+        if (step < 2) { step++; draw(); return; }
+        const changed = board !== d.board || grade !== Number(d.grade);
+        write({ board, grade, lang }); trSoon();
         m.remove();
         if (changed) Object.keys(FRAMES).forEach(id => { const f = $(id).querySelector("iframe"); if (f.getAttribute("src")) { try { f.contentWindow.location.reload(); } catch (_) { f.removeAttribute("src"); } } });
         refreshTop();
@@ -982,7 +939,7 @@
         if ($("oq-home").classList.contains("active")) renderHome();
         else if ($("oq-subject").classList.contains("active")) { const sk = Object.keys(SUBJECTS).find(k => current.page.startsWith(SUBJECTS[k].name)); if (sk) openSubject(sk); }
       });
-      setTimeout(() => { const nx = m.querySelector("#oq-next"); if (nx && !m.querySelector("#oq-sch-find:focus")) nx.focus(); }, 30);
+      setTimeout(() => { const nx = m.querySelector("#oq-next"); if (nx) nx.focus(); }, 30);
     };
     draw();
     document.body.appendChild(m);
