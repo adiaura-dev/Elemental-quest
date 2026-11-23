@@ -238,6 +238,36 @@ const VERIFIED = {
   "ICSE|6|Maths": { book: "Selina Concise Mathematics", chapters: ["Number System", "Estimation", "Numbers in India and International System", "Place Value", "Natural Numbers and Whole Numbers", "Negative Numbers and Integers", "Number Line", "HCF and LCM", "Playing with Numbers", "Sets", "Ratio", "Proportion", "Unitary Method", "Fractions", "Decimal Fractions", "Percent (Percentage)", "Idea of Speed, Distance and Time", "Fundamental Concepts (Algebra)", "Fundamental Operations", "Substitution", "Framing Algebraic Expressions", "Simple (Linear) Equations", "Fundamental Concepts (Geometry)", "Angles", "Properties of Angles and Lines", "Triangles", "Quadrilateral", "Polygons", "The Circle", "Symmetry", "Recognition of Solids", "Perimeter and Area of Plane Figures", "Data Handling", "Mean and Median"] },
   "ICSE|7|Maths": { book: "Selina Concise Mathematics", chapters: ["Integers", "Rational Numbers", "Fractions", "Decimal Fractions", "Exponents", "Ratio and Proportion", "Unitary Method (Including Time and Work)", "Percent and Percentage", "Profit, Loss and Discount", "Simple Interest", "Fundamental Concepts (Algebra)", "Simple Linear Equations", "Set Concepts", "Lines and Angles", "Triangles", "Pythagoras Theorem", "Symmetry", "Recognition of Solids", "Congruency: Congruent Triangles", "Mensuration", "Data Handling", "Probability"] },
   "ICSE|8|Maths": { book: "Selina Concise Mathematics", chapters: ["Rational Numbers", "Exponents (Powers)", "Squares and Square Roots", "Cubes and Cube Roots", "Playing with Numbers", "Sets", "Percent and Percentage", "Profit, Loss and Discount", "Simple and Compound Interest", "Direct and Inverse Variations", "Algebraic Expressions", "Algebraic Identities", "Factorisation", "Linear Equations in One Variable", "Linear Inequations", "Understanding Shapes", "Special Types of Quadrilaterals", "Constructions", "Representing 3-D in 2-D", "Area of Trapezium and a Polygon", "Surface Area, Volume and Capacity", "Data Handling", "Probability"] },
+  // Selina Concise Physics (ICSE, Middle School). Chapter lists checked against published indexes (November 2026).
+  // Subtopics are written to match what the book teaches in that class, so nothing from a later class sneaks in.
+  // Note: in ICSE, electric circuits start in Class 7, not Class 6.
+  "ICSE|6|Physics": { book: "Selina Concise Physics", chapters: [
+    ["Matter", ["What matter is", "Solids, liquids and gases", "Properties of each state", "Change of state", "Matter is made of particles"]],
+    ["Physical Quantities and Measurement", ["Need for measurement", "Units and SI units", "Measuring length", "Measuring area and volume", "Mass and weight", "Measuring time and temperature"]],
+    ["Force", ["What a force is", "Effects of a force", "Contact and non-contact forces", "Muscular force and friction", "Gravity and magnetic force"]],
+    ["Simple Machines", ["What a simple machine is", "Load, effort and fulcrum", "Three kinds of levers", "Inclined plane, wedge and screw", "Pulley and wheel and axle", "Looking after machines"]],
+    ["Light", ["Sources of light", "Luminous and non-luminous objects", "Light travels in straight lines", "Transparent, translucent and opaque", "Shadows", "Pinhole camera", "Eclipses of the sun and moon"]],
+    ["Magnetism", ["Natural and man-made magnets", "Magnetic and non-magnetic materials", "Poles of a magnet", "Like poles repel, unlike attract", "Finding direction with a compass", "Making and storing magnets"]]
+  ] },
+  "ICSE|7|Physics": { book: "Selina Concise Physics", chapters: [
+    ["Physical Quantities and Measurement", ["SI units", "Measuring area", "Measuring volume", "Volume of irregular solids", "Density", "Speed"]],
+    ["Motion", ["Rest and motion", "Types of motion", "Uniform and non-uniform motion", "Speed and its units", "Distance-time graphs", "Simple pendulum"]],
+    ["Energy", ["Work and energy", "Forms of energy", "Changing energy from one form to another", "Renewable and non-renewable sources", "Saving energy"]],
+    ["Light Energy", ["Reflection of light", "Image in a plane mirror", "Lateral inversion", "Real and virtual images", "Concave and convex mirrors", "Colours of white light"]],
+    ["Heat", ["Heat and temperature", "Thermometers", "Celsius and Fahrenheit scales", "Expansion on heating", "Uses of expansion in daily life"]],
+    ["Sound", ["Sound is made by vibrations", "Sound needs a medium", "Loudness and pitch", "How we hear", "Noise and music", "Noise pollution"]],
+    ["Electricity and Magnetism", ["Electric cell and its terminals", "Simple electric circuit", "Open and closed circuits", "Switches", "Conductors and insulators", "Circuit symbols", "Electromagnet"]]
+  ] },
+  "ICSE|8|Physics": { book: "Selina Concise Physics", chapters: [
+    ["Matter", ["Particle nature of matter", "Spaces and forces between particles", "Three states of matter", "Change of state", "Melting and boiling points"]],
+    ["Physical Quantities and Measurement", ["Density and its units", "Relative density", "Floating and sinking", "Measuring density"]],
+    ["Force and Pressure", ["Turning effect of a force", "Moment of a force", "Pressure and its unit", "Pressure in liquids", "Atmospheric pressure"]],
+    ["Energy", ["Work, energy and power", "Kinetic energy", "Potential energy", "Energy changes", "Conservation of energy"]],
+    ["Light Energy", ["Laws of reflection", "Regular and irregular reflection", "Plane and spherical mirrors", "Uses of mirrors", "Dispersion and the spectrum"]],
+    ["Heat Transfer", ["Conduction", "Convection", "Radiation", "Good and poor conductors of heat", "Land and sea breezes"]],
+    ["Sound", ["Vibrations and waves", "Amplitude and frequency", "Pitch and loudness", "Range of hearing", "Ultrasound and its uses"]],
+    ["Electricity", ["Electric charges", "Conductors and insulators", "Electroscope", "Lightning and safety", "Electric current", "Household wiring and fuse"]]
+  ] },
   "CBSE|6|Maths": { book: "NCERT Ganita Prakash", chapters: ["Patterns in Mathematics", "Lines and Angles", "Number Play", "Data Handling and Presentation", "Prime Time", "Perimeter and Area", "Fractions", "Playing with Constructions", "Symmetry", "The Other Side of Zero"] },
   "CBSE|7|Maths": { book: "NCERT Ganita Prakash Part I and Part II", chapters: ["Large Numbers Around Us", "Arithmetic Expressions", "A Peek Beyond the Point", "Expressions using Letter-Numbers", "Parallel and Intersecting Lines", "Number Play", "A Tale of Three Intersecting Lines", "Working with Fractions", "Geometric Twins", "Operations with Integers", "Finding Common Ground", "Another Peek Beyond the Point", "Connecting the Dots...", "Constructions and Tilings", "Finding the Unknown"] },
   "CBSE|8|Maths": { book: "NCERT Ganita Prakash Part I and Part II", chapters: ["A Square and A Cube", "Power Play", "A Story of Numbers", "Quadrilaterals", "Number Play", "We Distribute, Yet Things Multiply", "Proportional Reasoning-1", "Fractions in Disguise", "The Baudhayana-Pythagoras Theorem", "Proportional Reasoning-2", "Exploring Some Geometric Themes", "Tales by Dots and Lines", "Algebra Play", "Area"] },
@@ -263,6 +293,8 @@ async function writeSyllabus(body, apiKey, res) {
   const state = typeof body.state === "string" ? body.state.trim().slice(0, 40) : "";
   const book = typeof body.book === "string" ? body.book.trim().slice(0, 140) : "";
   let verified = VERIFIED[`${board === "State" || board === "Other" ? "CBSE" : board}|${grade}|${subject}`];
+  const fixed = verified && verified.chapters.every(c => Array.isArray(c)) ? verified.chapters.map(([name, subtopics]) => ({ name, subtopics })) : null;
+  if (verified) verified = { book: verified.book, chapters: verified.chapters.map(c => (Array.isArray(c) ? c[0] : c)) };
   // a verified list only applies if the school uses that same book
   if (verified && book && !book.toLowerCase().includes(verified.book.toLowerCase().split(" ")[0])) verified = null;
   const syllabus = board === "Other" ? "a typical Indian school (follow CBSE/NCERT)"
@@ -278,7 +310,11 @@ async function writeSyllabus(body, apiKey, res) {
         : `List the chapters of ${subject} for ${board === "IGCSE" ? "Grade" : "Class"} ${grade} following ${syllabus}, in the usual teaching order. `) +
     "Reply with ONLY a JSON object, no markdown or extra text, in exactly this shape: " +
     '{"book": string (the textbook or syllabus name), "chapters": [{"name": string, "subtopics": [string]}]}. ' +
-    "Give 3 to 7 short subtopics per chapter (each 2 to 6 words). Use at most 30 chapters.";
+    `Give 3 to 7 short subtopics per chapter (each 2 to 6 words). Use at most 30 chapters. ` +
+    `Subtopics must match exactly what this book teaches in ${board === "IGCSE" ? "Grade" : "Class"} ${grade}: never add topics, formulas or laws that are only taught in a later class.`;
+  // chapters and subtopics already checked: no AI needed
+  if (verified && fixed && (!book || book.toLowerCase().includes(verified.book.toLowerCase().split(" ")[0])))
+    return res.status(200).json({ syllabus: { book: verified.book, verified: true, chapters: fixed } });
 
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
   const request = { model, messages: [{ role: "system", content: system }, { role: "user", content: `${board} ${grade} ${subject}` }], max_completion_tokens: 4500 };
