@@ -116,7 +116,9 @@
     T("Diseases and Health", "bio", 8, 9, null, "immunity vaccines"),
     T("Ecosystems and Food Chains", "bio", 6, 10, null, "environment food web"),
 
-    T("Electric Circuits", "phy", 6, 10, { lab: "circuits" }, "electricity current circuit conductors insulators bulb battery series parallel"),
+    T("Electric Circuits", "phy", 6, 10, { frame: "oq-phy", tool: "circuit" }, "circuit lab electricity current circuit cell battery bulb switch conductors insulators"),
+    T("Circuit Construction Kit", "phy", 7, 10, { lab: "circuits" }, "build your own electric circuits electricity current series parallel simulation"),
+    T("Motion Lab", "phy", 7, 10, { frame: "oq-phy", tool: "motion" }, "motion speed distance time graph car"),
     T("Ohm's Law", "phy", 9, 10, { lab: "ohm" }, "ohms law voltage current resistance electricity"),
     T("Forces and Motion", "phy", 7, 9, { lab: "forces" }, "force motion speed laws of motion newton push pull"),
     T("Friction", "phy", 8, 8, { lab: "friction" }, "friction heat"),
