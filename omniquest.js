@@ -1271,7 +1271,7 @@
     const batch = [...trWait].slice(0, 60);
     batch.forEach(k => trWait.delete(k));
     trBusy++;
-    $("oq-trpill")?.classList.add("show");
+    trProgress(lang, batch.length);
     try {
       const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "translate", lang, texts: batch }) });
       const j = await r.json().catch(() => ({}));
@@ -1285,18 +1285,55 @@
       setTimeout(trSoon, 31000);
     } finally {
       trBusy--;
-      if (!trBusy) $("oq-trpill")?.classList.remove("show");
+      trDoneN += batch.length;
       if (siteLang() === lang) trScan();
+      trProgress(lang, 0);
     }
   }
-  // a small "Translating…" pill in the top bar while new text is being translated
-  const trPill = document.createElement("span");
-  trPill.id = "oq-trpill"; trPill.className = "oq-trpill"; trPill.setAttribute("translate", "no");
-  trPill.innerHTML = '<span class="oq-spin" style="width:12px;height:12px;border-width:2px"></span>';
-  top.querySelector(".oq-right")?.prepend(trPill);
+  // Shows that the language is loading, so nobody thinks it is broken:
+  // a big card with a spinner when a whole page is being translated (after choosing a language),
+  // and a small "Translating…" bar at the bottom for a few new words.
+  let trAllN = 0, trDoneN = 0, trBigOn = false, trHideT = null, trBigT = null;
+  const trUI = document.createElement("div");
+  trUI.setAttribute("translate", "no");
+  trUI.innerHTML = `<div class="oq-trbig" id="oq-trbig" hidden><div class="oq-trcard"><span class="oq-trring"></span><b id="oq-trbig-t"></b><small id="oq-trbig-s"></small><div class="oq-trbar"><i id="oq-trbig-bar"></i></div><button type="button" id="oq-trbig-x">Keep browsing while it loads</button></div></div>
+    <div class="oq-trsmall" id="oq-trsmall" hidden><span class="oq-trring sm"></span><span id="oq-trsmall-t"></span></div>`;
+  document.body.appendChild(trUI);
+  function trProgress(lang, adding) {
+    const nat = LANG_NATIVE[lang] || lang, left = trWait.size;
+    if (adding) {
+      if (!trBusy || trAllN === 0 || trDoneN >= trAllN) { trAllN = 0; trDoneN = 0; }
+      trAllN += adding;
+      // a lot of text at once means a new language or a new page: show the big card
+      if (!trBigOn && trAllN + left >= 15 && !$("oq-trbig").dataset.closed && !document.querySelector(".oq-modal")) { trBigOn = true; $("oq-trbig").hidden = false; clearTimeout(trBigT); trBigT = setTimeout(() => { trBigOn = false; $("oq-trbig").hidden = true; }, 25000); }
+    }
+    const total = Math.max(trAllN, trDoneN) + left, pc = total ? Math.min(100, Math.round(trDoneN / total * 100)) : 100;
+    const busy = trBusy > 0 || left > 0;
+    $("oq-trbig-t").textContent = `Changing the language to ${nat}`;
+    $("oq-trbig-s").textContent = `Translating the page… ${pc}%`;
+    $("oq-trbig-bar").style.width = `${Math.max(6, pc)}%`;
+    $("oq-trsmall-t").textContent = `Translating into ${nat}…`;
+    clearTimeout(trHideT);
+    if (busy) { $("oq-trsmall").hidden = trBigOn; return; }
+    // finished: let the bar reach 100%, then hide everything
+    trHideT = setTimeout(() => { trBigOn = false; clearTimeout(trBigT); $("oq-trbig").hidden = true; $("oq-trsmall").hidden = true; trAllN = trDoneN = 0; }, 400);
+  }
   const trCss = document.createElement("style");
-  trCss.textContent = `.oq-trpill { display: none; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #334155; border-radius: 12px; background: #111a2b; } .oq-trpill.show { display: inline-flex; }`;
+  trCss.textContent = `
+    .oq-trbig { position: fixed; inset: 0; z-index: 2147483000; display: grid; place-items: center; background: rgba(7, 11, 22, .72); backdrop-filter: blur(6px); }
+    .oq-trbig[hidden], .oq-trsmall[hidden] { display: none; }
+    .oq-trcard { width: min(360px, 88vw); padding: 30px 26px 22px; border: 1px solid #2a3650; border-radius: 20px; background: #111a2b; box-shadow: 0 24px 60px rgba(0,0,0,.45); text-align: center; display: grid; justify-items: center; gap: 8px; font-family: "Inter", system-ui, sans-serif; }
+    .oq-trcard b { color: #fff; font-size: 18px; margin-top: 8px; }
+    .oq-trcard small { color: #9fb0c8; font-size: 13.5px; }
+    .oq-trbar { width: 100%; height: 6px; border-radius: 6px; background: #22324a; overflow: hidden; margin-top: 8px; }
+    .oq-trbar i { display: block; height: 100%; width: 6%; border-radius: 6px; background: linear-gradient(90deg, #55cfff, #8b7dff); transition: width .4s ease; }
+    .oq-trcard button { margin-top: 10px; border: 0; background: none; color: #7f93b2; font: 600 12.5px "Inter", system-ui, sans-serif; cursor: pointer; text-decoration: underline; }
+    .oq-trring { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #22324a; border-top-color: #55cfff; border-right-color: #8b7dff; animation: oqSpin .8s linear infinite; }
+    .oq-trring.sm { width: 16px; height: 16px; border-width: 2.5px; }
+    .oq-trsmall { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 2147483000; display: flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid #2a3650; border-radius: 999px; background: #111a2b; color: #e8ecf8; font: 600 13.5px "Inter", system-ui, sans-serif; box-shadow: 0 12px 30px rgba(0,0,0,.4); }
+    @keyframes oqSpin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(trCss);
+  $("oq-trbig-x").addEventListener("click", () => { trBigOn = false; $("oq-trbig").hidden = true; $("oq-trbig").dataset.closed = "1"; trProgress(siteLang(), 0); setTimeout(() => { delete $("oq-trbig").dataset.closed; }, 20000); });
   document.addEventListener("load", e => { if (e.target && e.target.tagName === "IFRAME") trSoon(); }, true);
   window.addEventListener("storage", trSoon);
   trSoon();
