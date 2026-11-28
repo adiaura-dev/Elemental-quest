@@ -424,7 +424,7 @@
     const sec = document.createElement("section");
     sec.id = id;
     sec.className = "page-section";
-    sec.innerHTML = `<iframe class="oq-frame" title="${id}"></iframe>`;
+    sec.innerHTML = `<iframe class="oq-frame" title="${{ "oq-phy": "Physics", "oq-bio": "Biology", "oq-maths": "Maths" }[id] || "Lab"}"></iframe>`;
     main.appendChild(sec);
   });
   const subjPage = document.createElement("section");
@@ -606,7 +606,8 @@
       const name = t.name.toLowerCase(), all = `${name} ${t.kw} ${SUBJECTS[t.s].name.toLowerCase()}`.replace(/['’]/g, "");
       const found = words.filter(w => all.includes(w)).length;
       if (found < words.length && !(words.length >= 3 && found >= words.length - 1)) return null;
-      let score = name.startsWith(words[0]) ? 3 : name.includes(words.join(" ")) ? 2 : words.some(w => name.includes(w)) ? 1 : 0;
+      // a word in the title that starts with what was typed counts as a strong match ("circuit" -> "Electric Circuits")
+      let score = name.startsWith(words[0]) || name.split(/[\s(),\-–]+/).some(nw => nw.startsWith(words[0])) ? 3 : name.includes(words.join(" ")) ? 2 : words.some(w => name.includes(w)) ? 1 : 0;
       if (t.syl) score += .6;
       if (t.cat && t.cat.open) score += 1;
       if (found < words.length) score -= 1;
@@ -845,14 +846,14 @@
     const related = CATALOG.filter(x => x.s === t.s && x.open && x.name !== t.name && g >= x.a && g <= x.b).slice(0, 4);
     lesson.innerHTML = `<div class="oq-lesson">
       <span class="oq-label">${subj.name.toUpperCase()} · ${esc(d.board || "")} ${word.toUpperCase()} ${g}</span>
-      <h1>${esc(data.title || t.name)}</h1>
+      <h1 translate="no">${esc(data.title || t.name)}</h1>
       ${t.inChapter ? `<span class="oq-label">CHAPTER: ${esc(t.inChapter).toUpperCase()}</span>` : ""}
-      ${data.hook ? `<p class="oq-hook">${esc(data.hook)}</p>` : ""}
-      <p class="lead">${esc(data.summary || "")}</p>
-      ${(data.sections || []).map((s, i) => `<div class="oq-sec" style="animation-delay:${i * .08}s"><h3>${esc(s.heading)}</h3><p>${esc(s.text)}</p></div>`).join("")}
-      ${data.keyPoints && data.keyPoints.length ? `<div class="oq-sec"><span class="oq-label">KEY POINTS</span><ul class="oq-keys">${data.keyPoints.map(k => `<li>${esc(k)}</li>`).join("")}</ul></div>` : ""}
-      ${data.funFact ? `<div class="oq-sec oq-funfact"><span class="oq-label">FUN FACT</span><p>${esc(data.funFact)}</p></div>` : ""}
-      ${data.quiz && data.quiz.length ? `<div class="oq-sec oq-quizsec"><span class="oq-label">QUICK CHECK · +10 XP EACH</span>${data.quiz.map((qq, i) => `<div class="oq-q" data-q="${i}"><p>${i + 1}. ${esc(qq.q)}</p><div class="oq-opts">${qq.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(qq.explain || "")}</div></div>`).join("")}</div>` : ""}
+      ${data.hook ? `<p class="oq-hook" translate="no">${esc(data.hook)}</p>` : ""}
+      <p class="lead" translate="no">${esc(data.summary || "")}</p>
+      ${(data.sections || []).map((s, i) => `<div class="oq-sec" translate="no" style="animation-delay:${i * .08}s"><h3>${esc(s.heading)}</h3><p>${esc(s.text)}</p></div>`).join("")}
+      ${data.keyPoints && data.keyPoints.length ? `<div class="oq-sec"><span class="oq-label">KEY POINTS</span><ul class="oq-keys" translate="no">${data.keyPoints.map(k => `<li>${esc(k)}</li>`).join("")}</ul></div>` : ""}
+      ${data.funFact ? `<div class="oq-sec oq-funfact"><span class="oq-label">FUN FACT</span><p translate="no">${esc(data.funFact)}</p></div>` : ""}
+      ${data.quiz && data.quiz.length ? `<div class="oq-sec oq-quizsec"><span class="oq-label">QUICK CHECK · +10 XP EACH</span>${data.quiz.map((qq, i) => `<div class="oq-q" translate="no" data-q="${i}"><p>${i + 1}. ${esc(qq.q)}</p><div class="oq-opts">${qq.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div><div class="oq-exp">${esc(qq.explain || "")}</div></div>`).join("")}</div>` : ""}
       <div class="oq-actions">
         <button type="button" class="oq-btn primary" id="oq-ask">Ask Verity a question about this</button>
         ${lab && lab.open ? `<button type="button" class="oq-btn" id="oq-lab">Open the interactive lab</button>` : ""}
@@ -1086,7 +1087,7 @@
     let left = mins * 60;
     examPage.innerHTML = `<div class="oq-page">
       <div class="oq-timer"><span>${s.name} test · <span id="ex-done">0</span> / ${qs.length} answered</span>${mins ? `<b id="ex-clock"></b>` : ""}</div>
-      ${qs.map((q, i) => `<div class="oq-sec oq-q" data-q="${i}"><p>${i + 1}. ${esc(q.q)}</p><div class="oq-opts">${q.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div></div>`).join("")}
+      ${qs.map((q, i) => `<div class="oq-sec oq-q" translate="no" data-q="${i}"><p>${i + 1}. ${esc(q.q)}</p><div class="oq-opts">${q.options.map((o, k) => `<button type="button" class="oq-opt" data-k="${k}">${esc(o)}</button>`).join("")}</div></div>`).join("")}
       <div class="oq-actions"><button type="button" class="oq-btn primary" id="ex-submit">Submit test</button></div></div>`;
     examPage.querySelectorAll(".oq-q").forEach(box => box.querySelectorAll(".oq-opt").forEach(b => b.addEventListener("click", () => {
       picks[box.dataset.q] = Number(b.dataset.k);
@@ -1130,7 +1131,7 @@
       <div class="oq-sec oq-score"><span class="oq-label">${s.name.toUpperCase()} TEST RESULT</span><b>${right} / ${qs.length}</b><p>${pct}% · ${pct >= 85 ? "Excellent! " : pct >= 60 ? "Good work! " : "Keep practising, you'll get there! "} · +${right * 5} XP</p></div>
       <div class="oq-sec"><span class="oq-label">BY CHAPTER</span><div class="oq-bars">${Object.entries(by).map(([k, v]) => { const p = v.r / v.n; return `<div class="oq-bar"><span>${esc(k)}</span><span class="t"><div style="width:${p * 100}%;background:${p >= .6 ? "#25c58a" : "#f07883"}"></div></span><span>${v.r}/${v.n}</span></div>`; }).join("")}</div></div>
       ${weak.length ? `<div class="oq-sec oq-funfact"><span class="oq-label">REVISE THESE</span><div class="oq-row">${weak.map(w => `<button type="button" class="oq-chip" data-rev="${esc(w)}">${esc(w)}</button>`).join("")}</div></div>` : ""}
-      <div class="oq-sec"><span class="oq-label">REVIEW YOUR ANSWERS</span>${qs.map((q, i) => `<div class="oq-q"><p>${i + 1}. ${esc(q.q)}</p><div class="oq-opts">${q.options.map((o, k) => `<button type="button" class="oq-opt ${k === q.answer ? "right" : k === picks[i] ? "wrong" : ""}" disabled>${esc(o)}</button>`).join("")}</div><div class="oq-exp show">${picks[i] === null ? "Not answered. " : ""}${esc(q.explain)}</div></div>`).join("")}</div>
+      <div class="oq-sec"><span class="oq-label">REVIEW YOUR ANSWERS</span>${qs.map((q, i) => `<div class="oq-q"><p translate="no">${i + 1}. ${esc(q.q)}</p><div class="oq-opts" translate="no">${q.options.map((o, k) => `<button type="button" class="oq-opt ${k === q.answer ? "right" : k === picks[i] ? "wrong" : ""}" disabled>${esc(o)}</button>`).join("")}</div><div class="oq-exp show">${picks[i] === null ? "Not answered. " : ""}<span translate="no">${esc(q.explain)}</span></div></div>`).join("")}</div>
       <div class="oq-actions"><button type="button" class="oq-btn primary" id="ex-new">New test</button><button type="button" class="oq-btn" id="ex-ch2">${s.name} chapters</button></div></div>`;
     examPage.querySelectorAll("[data-rev]").forEach(b => b.addEventListener("click", () => openLesson({ name: b.dataset.rev, s: sk, chapter: true })));
     $("ex-new").addEventListener("click", () => openExam(sk));
@@ -1168,7 +1169,7 @@
   const TKEY = "omniQuestTr";
   const trStore = (() => { try { return JSON.parse(localStorage.getItem(TKEY)) || {}; } catch (_) { return {}; } })();
   const trSave = () => { try { localStorage.setItem(TKEY, JSON.stringify(trStore)); } catch (_) { /* storage full */ } };
-  const TR_SKIP = '[translate="no"], .eqn, .ans, .chatbot-messages, .oq-langs, .oq-brand, .oq-credit, .al-symbol, textarea, script, style, code, pre, svg';
+  const TR_SKIP = '[translate="no"], .eqn, .ans, .chatbot-messages > :not(:first-child), .oq-langs, .oq-brand, .oq-credit, .al-symbol, textarea, script, style, code, pre, svg:not(.oq-tr)';
   const TR_UNIT_TAGS = new Set(["B", "STRONG", "I", "EM", "SPAN", "SMALL", "SUP", "SUB", "BR", "MARK", "U"]);
   const unitRec = new WeakMap();
   // a sentence with <b>highlighted</b> words is translated as one piece, so the word order stays right
@@ -1251,9 +1252,11 @@
   function trWatch(doc) {
     if (trDocs.has(doc) || !doc.body) return;
     trDocs.add(doc);
-    new MutationObserver(trSoon).observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["placeholder", "title", "class", "hidden", "style"] });
+    // ignore changes inside drawings (labs animate their SVGs many times a second)
+    new MutationObserver(list => { if (list.some(m => !(m.target.closest ? m.target.closest("svg, canvas") : m.target.parentElement && m.target.parentElement.closest("svg")))) trSoon(); }).observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["placeholder", "title", "class", "hidden", "style"] });
   }
-  function trSoon() { clearTimeout(trTimer); trTimer = setTimeout(trScan, 150); }
+  // runs at most every 150 ms, even while a page keeps changing
+  function trSoon() { if (trTimer) return; trTimer = setTimeout(() => { trTimer = null; trScan(); }, 150); }
   function trScan() {
     const lang = siteLang(), want = new Set();
     document.documentElement.lang = ({ English: "en", Hindi: "hi", Bengali: "bn", Marathi: "mr", Telugu: "te", Tamil: "ta", Gujarati: "gu", Urdu: "ur", Kannada: "kn", Odia: "or", Malayalam: "ml", Punjabi: "pa", French: "fr", German: "de", Spanish: "es", Arabic: "ar", Chinese: "zh", Japanese: "ja" })[lang] || "en";
