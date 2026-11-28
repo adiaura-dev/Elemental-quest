@@ -1297,7 +1297,7 @@
   const trUI = document.createElement("div");
   trUI.setAttribute("translate", "no");
   trUI.innerHTML = `<div class="oq-trbig" id="oq-trbig" hidden><div class="oq-trcard"><span class="oq-trring"></span><b id="oq-trbig-t"></b><small id="oq-trbig-s"></small><div class="oq-trbar"><i id="oq-trbig-bar"></i></div><button type="button" id="oq-trbig-x">Keep browsing while it loads</button></div></div>
-    <div class="oq-trsmall" id="oq-trsmall" hidden><span class="oq-trring sm"></span><span id="oq-trsmall-t"></span></div>`;
+    <div class="oq-trsmall" id="oq-trsmall" hidden><span class="oq-trring sm"></span><span class="tx"><b id="oq-trsmall-t"></b><small id="oq-trsmall-p"></small></span><div class="oq-trbar sm"><i id="oq-trsmall-bar"></i></div></div>`;
   document.body.appendChild(trUI);
   function trProgress(lang, adding) {
     const nat = LANG_NATIVE[lang] || lang, left = trWait.size;
@@ -1313,6 +1313,8 @@
     $("oq-trbig-s").textContent = `Translating the page… ${pc}%`;
     $("oq-trbig-bar").style.width = `${Math.max(6, pc)}%`;
     $("oq-trsmall-t").textContent = `Translating into ${nat}…`;
+    $("oq-trsmall-p").textContent = `${pc}% done`;
+    $("oq-trsmall-bar").style.width = `${Math.max(6, pc)}%`;
     clearTimeout(trHideT);
     if (busy) { $("oq-trsmall").hidden = trBigOn; return; }
     // finished: let the bar reach 100%, then hide everything
@@ -1329,8 +1331,14 @@
     .oq-trbar i { display: block; height: 100%; width: 6%; border-radius: 6px; background: linear-gradient(90deg, #55cfff, #8b7dff); transition: width .4s ease; }
     .oq-trcard button { margin-top: 10px; border: 0; background: none; color: #7f93b2; font: 600 12.5px "Inter", system-ui, sans-serif; cursor: pointer; text-decoration: underline; }
     .oq-trring { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #22324a; border-top-color: #55cfff; border-right-color: #8b7dff; animation: oqSpin .8s linear infinite; }
-    .oq-trring.sm { width: 16px; height: 16px; border-width: 2.5px; }
-    .oq-trsmall { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 2147483000; display: flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid #2a3650; border-radius: 999px; background: #111a2b; color: #e8ecf8; font: 600 13.5px "Inter", system-ui, sans-serif; box-shadow: 0 12px 30px rgba(0,0,0,.4); }
+    .oq-trring.sm { width: 30px; height: 30px; border-width: 3.5px; flex: none; }
+    .oq-trsmall { position: fixed; left: 50%; top: 86px; transform: translateX(-50%); z-index: 2147483000; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 14px; min-width: min(380px, 90vw); padding: 16px 22px 14px; border: 2px solid #55cfff; border-radius: 18px; background: #111a2b; color: #fff; font-family: "Inter", system-ui, sans-serif; box-shadow: 0 0 0 6px rgba(85, 207, 255, .12), 0 18px 44px rgba(0,0,0,.55); animation: oqTrIn .25s ease-out, oqTrGlow 1.6s ease-in-out infinite; }
+    .oq-trsmall .tx { display: grid; gap: 2px; }
+    .oq-trsmall b { font-size: 17px; font-weight: 800; }
+    .oq-trsmall small { font-size: 13.5px; color: #9fb0c8; }
+    .oq-trbar.sm { grid-column: 1 / -1; margin-top: 4px; }
+    @keyframes oqTrIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes oqTrGlow { 50% { box-shadow: 0 0 0 10px rgba(85, 207, 255, .06), 0 18px 44px rgba(0,0,0,.55); } }
     @keyframes oqSpin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(trCss);
   $("oq-trbig-x").addEventListener("click", () => { trBigOn = false; $("oq-trbig").hidden = true; $("oq-trbig").dataset.closed = "1"; trProgress(siteLang(), 0); setTimeout(() => { delete $("oq-trbig").dataset.closed; }, 20000); });
