@@ -343,7 +343,7 @@ const TOOLS = {
     { id: "quiz", icon: "", name: "Biology Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#3ddc97" }
   ],
   physics: [
-    { id: "circuit", icon: "", name: "Circuit Lab", desc: "Cells, switches and bulbs. Test conductors, join cells, compare series and parallel, see a fuse at work and learn the circuit symbols.", g: shared().board === "ICSE" ? 7 : 6, color: "#ffb347" },
+    { id: "circuit", icon: "", name: "Circuit Lab", desc: GRADE() < 7 ? "A simple circuit with a cell, a switch and a bulb. Learn what each part does and test conductors and insulators." : "Cells, switches and bulbs. Test conductors, join cells, compare series and parallel, see a fuse at work and learn the circuit symbols.", g: 6, color: "#ffb347" },
     { id: "motion", icon: "", name: "Motion Lab", desc: "Drive a car, watch the distance–time graph draw itself and predict how far it goes.", g: 7, color: "#55cfff" },
     { id: "quiz", icon: "", name: "Physics Quiz", desc: "10 questions picked for your class, with an explanation for every answer.", g: 6, color: "#7c5cff" }
   ]
@@ -714,7 +714,7 @@ const MATERIALS = [
   { n: "Glass rod", sw: "linear-gradient(90deg,#8fc7d6,#e3f6fb,#8fc7d6)", fill: "#bfe3ee", c: false, why: "Glass is an insulator. It is used on electric poles to hold wires safely." }
 ];
 function circuitSVG() {
-  return `<svg class="dia" id="circ" viewBox="0 0 520 330">
+  return `<svg class="dia oq-tr" id="circ" viewBox="0 0 520 330">
     <defs>
       <radialGradient id="glow"><stop offset="0" stop-color="#fff7c2"/><stop offset=".35" stop-color="#ffd84d" stop-opacity=".75"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient>
       <linearGradient id="gBatt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b2133"/><stop offset=".5" stop-color="#2f3852"/><stop offset="1" stop-color="#1b2133"/></linearGradient>
@@ -766,14 +766,17 @@ function circuitTool() {
   let mode = g >= 10 ? "ohm" : "test", raf = null, phase = 0, on = true, current = 0, flowing = false;
   // Ohm's law is a Class 9-10 topic, so younger classes only see the conductor test
   // Ohm's law is a Class 9-10 topic, so younger classes do not see it
-  const MODES = [["test", "Conductors"], ["cells", "Cells"], ["sp", "Series & parallel"], ["fuse", "Short circuit & fuse"], ["sym", "Symbols"], ...(g >= 9 ? [["ohm", "Ohm's law"]] : [])];
+  // Class 6: the basics only. Class 7 and up: the full workbench. Class 9 and up: Ohm's law too.
+  const MODES = g < 7 ? [["parts", "Parts of a circuit"], ["test", "Conductors"]]
+    : [["test", "Conductors"], ["cells", "Cells"], ["sp", "Series & parallel"], ["fuse", "Short circuit & fuse"], ["sym", "Symbols"], ...(g >= 9 ? [["ohm", "Ohm's law"]] : [])];
+  if (g < 7) mode = "parts";
   $("#t-extra").innerHTML = `<div class="seg">${MODES.map(([m, n]) => `<button data-m="${m}">${n}</button>`).join("")}</div>`;
   $("#t-body").innerHTML = `<div class="grid2"><div class="card" id="circ-card"></div><div class="card info" id="circ-side"></div></div>`;
   let wire, len, e = [], benchStop = null;
   const dots = 18;
   function classic() {
     $("#circ-card").innerHTML = `${circuitSVG()}<div class="hint" id="circ-hint"></div>`;
-    wire = $("#wire"); len = wire.getTotalLength();
+    wire = $("#wire"); len = wire.getTotalLength(); phase = 0;
     $("#electrons").innerHTML = [...Array(dots)].map(() => `<path d="M-5 -4.5 L5 0 L-5 4.5 Z" fill="#ffd166" opacity="0"/>`).join("");
     e = [...document.querySelectorAll("#electrons path")];
     $("#switch-g").addEventListener("click", () => { on = !on; sfx.click(); update(); });
@@ -785,7 +788,7 @@ function circuitTool() {
     $("#filament").setAttribute("stroke", l > 0.02 ? "#b45309" : "#9aa3b5");
   }
   function anim() {
-    phase = (phase + (flowing ? Math.max(0.6, Math.min(8, current * 2.2)) : 0)) % len;
+    if (len) phase = ((phase || 0) + (flowing ? Math.max(0.6, Math.min(8, current * 2.2)) : 0)) % len;
     if (wire && e.length && document.body.contains(wire)) e.forEach((c, k) => {
       const d = (phase + k * len / dots) % len, pt = wire.getPointAtLength(d), nx = wire.getPointAtLength(Math.min(len, d + 1));
       const ang = Math.atan2(nx.y - pt.y, nx.x - pt.x) * 180 / Math.PI;
@@ -991,15 +994,16 @@ const symSVG = (s, w = 150, h = 74) => `<svg viewBox="0 0 ${w} ${h}" class="dia"
 
 function workbench(mode, g) {
   const st = { view: "real", cells: [false, false], swOpen: false, layout: "series", n: 2, removed: [false, false, false], short: false, blown: false, phase: 0, raf: null, blowT: null };
-  if (mode === "cells") st.cells = [false];
+  if (mode === "cells" || mode === "parts") st.cells = [false];
+  st.loose = false; st.info = "cell";
   const card = $("#circ-card"), side = $("#circ-side");
   let segs = [], boxes = [];
   const arrowsG = () => $("#cw-arrows");
 
   function compute() {
-    if (mode === "cells") {
+    if (mode === "cells" || mode === "parts") {
       const emf = 1.5 * st.cells.reduce((s, f) => s + (f ? -1 : 1), 0);
-      const I = st.swOpen ? 0 : emf; // one 1-ohm bulb
+      const I = st.swOpen || st.loose ? 0 : emf; // one 1-ohm bulb
       return { emf, I, lv: [cwLevel(I * I)] };
     }
     if (mode === "sp") {
@@ -1023,15 +1027,17 @@ function workbench(mode, g) {
     const v = st.view, c = compute();
     boxes = []; segs = [];
     let body = "";
-    if (mode === "cells" || mode === "fuse" || (mode === "sp" && st.layout === "series")) {
+    if (mode === "cells" || mode === "parts" || mode === "fuse" || (mode === "sp" && st.layout === "series")) {
       const L = 60, R = 500, T = 120, B = 330;
-      const cellParts = (mode === "cells" ? st.cells : [false, false]).map((f, k, a) => ({ t: "cell", x: 210 + (k - (a.length - 1) / 2) * 72, flip: f, act: mode === "cells" ? `flip${k}` : "" }));
+      const cellParts = (mode === "cells" || mode === "parts" ? st.cells : [false, false]).map((f, k, a) => ({ t: "cell", x: 210 + (k - (a.length - 1) / 2) * 72, flip: f, act: mode === "cells" ? `flip${k}` : mode === "parts" ? "info-cell" : "" }));
       const bottom = [...cellParts, { t: "sw", x: 400, open: st.swOpen, act: "sw" }];
       let top;
       if (mode === "sp") top = Array.from({ length: st.n }, (_, k) => ({ t: "bulb", x: R - (R - L) * (k + 1) / (st.n + 1), level: c.lv[k], removed: st.removed[k], act: `bulb${k}` }));
       else if (mode === "fuse") top = [{ t: "bulb", x: 330, level: c.lv[0] }, { t: "fuse", x: 160, blown: st.blown }];
-      else top = [{ t: "bulb", x: 280, level: c.lv[0] }];
-      body += cwLine(L, B, R, bottom, v, boxes) + cwLine(L, T, R, top, v, boxes) + cwV(L, T, B, v) + cwV(R, T, B, v);
+      else top = [{ t: "bulb", x: 280, level: c.lv[0], act: mode === "parts" ? "info-bulb" : "" }];
+      body += cwLine(L, B, R, bottom, v, boxes) + cwLine(L, T, R, top, v, boxes) + cwV(R, T, B, v);
+      // a loose wire leaves a gap in the left-hand wire
+      body += st.loose ? cwV(L, T, 205, v) + cwV(L, 245, B, v) + `<text x="${L + 12}" y="229" fill="#ff9aa8" font-size="11" font-weight="800">loose wire: gap</text>` : cwV(L, T, B, v);
       const I = c.I, dir = Math.sign(I) || 1, a = Math.abs(I);
       // conventional current: out of + (right end of the cells), right along the bottom, up, left along the top, down
       const run = (x1, y1, x2, y2, cur) => segs.push(dir > 0 ? [x1, y1, x2, y2, cur] : [x2, y2, x1, y1, cur]);
@@ -1086,7 +1092,23 @@ function workbench(mode, g) {
   function sideUpdate(c) {
     const out = $("#cw-out"), why = $("#cw-why");
     if (!out) return;
-    if (mode === "cells") {
+    if (mode === "parts") {
+      const INFO = {
+        cell: "<b>Electric cell.</b> It has two ends called terminals. The end with the metal cap is the <b>+ (positive) terminal</b>, and the flat end is the <b>− (negative) terminal</b>. Chemicals inside the cell give the push that makes current flow. Never use the electricity from wall sockets for experiments: it is very dangerous.",
+        bulb: "<b>Electric bulb.</b> Inside the glass is a very thin wire called the <b>filament</b>. When current flows through it, it gets hot and glows. A bulb has two terminals, and the current must go in through one and out through the other.",
+        sw: "<b>Switch.</b> It opens or closes the circuit. When the switch is <b>closed (ON)</b>, the path is complete and the bulb lights. When it is <b>open (OFF)</b>, there is a gap and no current flows.",
+        wire: "<b>Connecting wires.</b> The metal inside (usually copper) lets current flow. The plastic covering stops it from flowing into your hands. A complete path from one terminal of the cell, through the bulb, back to the other terminal is called a <b>closed circuit</b>."
+      };
+      out.innerHTML = `<div class="meter"><span>CIRCUIT</span><b style="font-size:16px">${c.I ? "Closed" : "Open"}</b></div><div class="meter"><span>BULB</span><b style="font-size:16px">${c.lv[0] > .02 ? "Glowing" : "Off"}</b></div>`;
+      out.style.gridTemplateColumns = "repeat(2, 1fr)";
+      why.innerHTML = INFO[st.info];
+      $("#cw-status").innerHTML = st.loose ? "A wire is loose, so the path is broken. This is an <b>open circuit</b>, and the bulb cannot glow."
+        : st.swOpen ? "The switch is open, so there is a gap in the path. This is an <b>open circuit</b>."
+        : st.cells[0] ? "The cell is turned round, and the bulb <b>still glows</b>. The current now goes round the other way, but the path is still complete."
+        : "The path is complete, so this is a <b>closed circuit</b> and the bulb glows.";
+      document.querySelectorAll("#cw-parts button").forEach(b => b.classList.toggle("on", b.dataset.p === st.info));
+      $("#cw-loose").textContent = st.loose ? "Connect the wire again" : "Loosen a wire";
+    } else if (mode === "cells") {
       const fl = st.cells.filter(Boolean).length;
       out.innerHTML = `<div class="meter"><span>CELLS</span><b>${st.cells.length}</b></div><div class="meter"><span>TOTAL VOLTAGE</span><b>${Math.abs(c.emf).toFixed(1)} V</b></div><div class="meter"><span>BULB</span><b style="font-size:16px">${cwWord(c.lv[0])}</b></div>`;
       why.innerHTML = st.swOpen ? "The switch is open, so the circuit is broken and no current flows."
@@ -1096,7 +1118,9 @@ function workbench(mode, g) {
         : st.cells.length === 2 ? "Two cells joined + to − add up: 1.5 V + 1.5 V = 3 V. More push, so the bulb is brighter."
         : "Three cells give 4.5 V. Very bright, but too many cells can blow a bulb.";
     } else if (mode === "sp") {
-      out.innerHTML = c.lv.map((l, k) => `<div class="meter"><span>BULB ${k + 1}</span><b style="font-size:16px">${st.removed[k] ? "Removed" : cwWord(l)}</b></div>`).join("");
+      // compared with one bulb on its own (brightness 0.8 with these two cells)
+      const spWord = l => l <= .02 ? "Off" : l >= .76 ? "Bright" : l >= .32 ? "Dim" : "Very dim";
+      out.innerHTML = c.lv.map((l, k) => `<div class="meter"><span>BULB ${k + 1}</span><b style="font-size:16px">${st.removed[k] ? "Removed" : spWord(l)}</b></div>`).join("");
       out.style.gridTemplateColumns = `repeat(${st.n}, 1fr)`;
       const anyRm = st.removed.slice(0, st.n).some(Boolean);
       why.innerHTML = st.swOpen ? "The switch is open, so no current flows anywhere."
@@ -1119,10 +1143,12 @@ function workbench(mode, g) {
   }
 
   // build the screen
-  card.innerHTML = `<div class="row" style="justify-content:flex-end;margin-bottom:6px"><div class="seg" id="cw-view"><button data-v="real" class="on">Picture</button><button data-v="dia">Circuit diagram</button></div></div><svg class="dia" id="cw-svg" viewBox="0 24 560 354" style="overflow:visible"></svg><div class="hint">Arrows show the current: out of the + end of the cells, round the circuit, back to the − end.</div>`;
-  const tip = mode === "cells" ? "Tap a cell to turn it round. Tap the switch to open or close it."
+  card.innerHTML = `<div class="row" style="justify-content:flex-end;margin-bottom:6px"><div class="seg" id="cw-view"><button data-v="real" class="on">Picture</button><button data-v="dia">Circuit diagram</button></div></div><svg class="dia oq-tr" id="cw-svg" viewBox="0 24 560 354" style="overflow:visible"></svg><div class="hint">Arrows show the current: out of the + end of the cells, round the circuit, back to the − end.</div>`;
+  const tip = mode === "parts" ? "Tap a part to learn what it does. Tap the switch to turn the bulb on and off." : mode === "cells" ? "Tap a cell to turn it round. Tap the switch to open or close it."
     : mode === "sp" ? "Tap a bulb to unscrew it. Tap the switch to open or close it." : "Tap the switch to open or close it.";
-  side.innerHTML = mode === "cells"
+  side.innerHTML = mode === "parts"
+    ? `<div class="label">PARTS OF A CIRCUIT</div><p>${tip}</p><div class="seg" id="cw-parts" style="margin-bottom:10px"><button data-p="cell">Cell</button><button data-p="bulb">Bulb</button><button data-p="sw">Switch</button><button data-p="wire">Wires</button></div><div class="box" id="cw-why"></div><div class="meters" id="cw-out"></div><div class="box" id="cw-status"></div><div class="row"><button class="btn ghost" id="cw-flip">Turn the cell round</button><button class="btn ghost" id="cw-loose"></button></div>`
+    : mode === "cells"
     ? `<div class="label">CELLS IN A CIRCUIT</div><p>${tip}</p><div class="seg" id="cw-n"><button data-n="1">1 cell</button><button data-n="2">2 cells</button><button data-n="3">3 cells</button></div><div class="meters" id="cw-out"></div><div class="box" id="cw-why"></div>`
     : mode === "sp"
       ? `<div class="label">SERIES AND PARALLEL</div><p>${tip}</p><div class="seg" id="cw-lay" style="margin-bottom:8px"><button data-l="series">Series</button><button data-l="parallel">Parallel</button></div><div class="seg" id="cw-n"><button data-n="1">1 bulb</button><button data-n="2">2 bulbs</button><button data-n="3">3 bulbs</button></div><div class="meters" id="cw-out"></div><div class="box" id="cw-why"></div>`
@@ -1137,11 +1163,15 @@ function workbench(mode, g) {
     mark("#cw-n", "n", n); draw();
   });
   $("#cw-lay")?.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; sfx.click(); st.layout = b.dataset.l; st.removed = [false, false, false]; mark("#cw-lay", "l", st.layout); draw(); });
+  $("#cw-parts")?.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; sfx.click(); st.info = b.dataset.p; draw(); });
+  $("#cw-flip")?.addEventListener("click", () => { sfx.click(); st.cells[0] = !st.cells[0]; draw(); });
+  $("#cw-loose")?.addEventListener("click", () => { sfx.click(); st.loose = !st.loose; draw(); });
   $("#cw-short")?.addEventListener("click", () => { sfx.click(); st.short = !st.short; draw(); checkFuse(); });
   $("#cw-fix")?.addEventListener("click", () => { sfx.click(); st.blown = false; draw(); checkFuse(); });
   $("#cw-svg").addEventListener("click", e => {
     const a = e.target.closest("[data-act]")?.dataset.act; if (!a) return; sfx.click();
-    if (a === "sw") st.swOpen = !st.swOpen;
+    if (a === "sw") { st.swOpen = !st.swOpen; if (mode === "parts") st.info = "sw"; }
+    else if (a.startsWith("info-")) st.info = a.slice(5);
     else if (a.startsWith("flip")) st.cells[Number(a.slice(4))] = !st.cells[Number(a.slice(4))];
     else if (a.startsWith("bulb")) st.removed[Number(a.slice(4))] = !st.removed[Number(a.slice(4))];
     draw(); checkFuse();
